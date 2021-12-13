@@ -1,0 +1,67 @@
+\documentclass[10pt]{article}
+\input{../Report/header}
+\input{../Report/defs}
+
+\bibliography{../Report/refs.bib}
+
+\begin{document}
+
+\section{Identification and Estimation of Treatment and Interference Effects in Observational Studies on Networks}
+
+Based on \parencite{Forastiere:2021}.
+
+\subsection{Background and motivation}
+
+\begin{itemize}
+
+\item
+Interference: in experimental and observational studies, when a treatment assigned to one unit has an effect on others.
+
+\item
+Spillover effects: the effects of interference.
+
+\item
+Problem and goal: given a known network where the assignment mechanism of the treatment is unknown, estimate (1) the causal effect of individual treatment and (2) the spillover effect from treatments of others.
+
+\item
+Contributions of paper:
+\begin{enumerate}
+\item
+A general formulization for the problem of interference in networks under the potential outcome framework.
+\item
+Derivation of the bias for estimators of the treatment effect when SUTVA is wrongly assumed.
+\item
+A joint propensity score (probability of assignment to particular individual and neighborhood treatment given observed covariates) with balancing properties, and a joint propensity score-based estimator.
+\end{enumerate}
+
+\end{itemize}
+
+\subsection{Interference based on exposure to neighbourhood treatment}
+
+Notation:
+\begin{itemize}
+
+\item
+Undirected network $G=(\calN,\E)$ where $\calN$ is a set of $N$ nodes and $\E$ is a set of edges $(i,j)=(j,i)$.
+
+\item
+Define partition $(i,\Ni,\Nmi)$ around node $i$ where $\calN_i$ is set of $N_i$ nodes (neighbourhood) that contains all nodes $j$ connected to $i$ and $\calN_{-i}$ is set of all other nodes not $i$ and not in $\calN_i$.
+
+\item
+$Z_i\in\{0,1\}$ treatment assignment to unit $i$, $\bfZ$ treatment vector for population $\calN$, and $(Z_i,\ZNi,\ZNmi)$ partitions for $(i,\Ni,\Nmi)$.
+
+\item
+$Y_i\in\calY$ observed outcome of unit $i$, $\bfY$ outcome vector for population $\calN$, and $(Y_i,\YNi,\YNmi)$ partitions for $(i,\Ni,\Nmi)$.
+
+\item
+$\bfX_i\in\calX$ vector of covariates for unit $i$ and decomposes into $\Xind_i\in\calX^\text{ind}$ (individual-level characteristics) and $\Xneigh_i\in\calX^\text{neigh}$ (neighbourhood-level characteristics and aggregates of individual-level covariates).
+
+\end{itemize}
+
+
+
+\newpage
+
+\printbibliography
+
+\end{document}

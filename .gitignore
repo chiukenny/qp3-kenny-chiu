@@ -12,6 +12,11 @@
 *.cb2
 .*.lb
 
+## anything other than the bib file in /ref
+ref/*
+!ref/*.bib
+!ref/*.md
+
 ## Intermediate documents:
 *.dvi
 *.xdv
@@ -253,14 +258,8 @@ TSWLatexianTemp*
 # Kile
 *.backup
 
-# gummi
-.*.swp
-
 # KBibTeX
 *~[0-9]*
-
-# TeXnicCenter
-*.tps
 
 # auto folder when using emacs and auctex
 ./auto/*
@@ -274,3 +273,6 @@ TSWLatexianTemp*
 
 # Makeindex log files
 *.lpz
+
+# DS_store
+.DS_store
