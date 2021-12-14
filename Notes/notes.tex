@@ -58,6 +58,184 @@ $\bfX_i\in\calX$ vector of covariates for unit $i$ and decomposes into $\Xind_i\
 
 \end{itemize}
 
+Potential outcomes and neighbourhood interference:
+
+\begin{itemize}
+
+\item
+Under presence of interference, the observable outcome at node $i$ is a function of the treatment assignment vector and can be written as $Y_i(\bfZ)$. This is well-defined only if Assumption~1 holds.
+
+\item
+Assumption~1: if $\bfZ=\bfz$ then $Y_i=Y_i(\bfz)$. (The outcome only depends on the treatment assignments and not the mechanism used to assign treatments.)
+
+\item
+Stable unit treatment value assumption (SUTVA): Assumption~1 and no interference between individuals (i.e., $Y_i(Z_i,\ZNi,\ZNmi)=Y_i(Z_i,\ZNi',\ZNmi')$ for all $\ZNi,\ZNi',\ZNmi,\ZNmi'$).
+
+\item
+(Relaxing SUTVA Assumption~2 to allow neighbourhood interference)
+
+Assumption~2: for a $g_i:\{0,1\}^{N_i}\rightarrow \calG_i$ s.t. $g_i(\ZNi)=g_i(\ZNi')$ for all $\ZNi,\ZNi'$, for all $\ZNmi,\ZNmi'$ we have
+\[
+Y_i(Z_i,\ZNi,\ZNmi) = Y_i(Z_i,\ZNi',\ZNmi')
+\]
+(The outcome of node $i$ only depends on its treatment assignment and some summary of the treatment assignments of its neighbours, e.g., proportion.)
+
+Define $G_i=g_i(\ZNi)$ and assume $g_i$ known and well-specified.
+
+\item
+Stable unit treatment on neighbourhood value assumption (SUTNVA): Assumption~1 and Assumption~2.
+
+\end{itemize}
+
+Individual and neighbourhood treatments:
+
+\begin{itemize}
+
+\item
+Node $i$ is assigned to treatment if $Z_i=1$ (control otherwise) and is exposed to neighbourhood treatment $G_i=g$ if $g_i(\ZNi)=g$.
+
+\item
+Let $\bfG$ be the vector of neighbourhood treatments to which units are exposed to, $\bfX$ the covariate matrix collecting all vectors $\bfX_i$, and $\bfY(z,g)$ the collection of potential outcomes $Y_i(z,g)$ for all units.
+
+\item
+The assignment mechanism can be written as
+\[
+\P(\bfZ,\bfG|\bfX,\{\bfY(z,g),z\in\{0,1\},g\in\calG\}) =
+\begin{cases}
+\P(\bfZ|\bfX,\{\bfY(z,g),z\in\{0,1\},g\in\calG\}) & \text{if } \bfG=\bfg(\bfZ) \\
+0 & \text{otherwise}
+\end{cases}
+\]
+where $\bfg(\bfZ)=[g_1(\bfZ_{\calN_1},\ldots,g_N(\bfZ_{\calN_N}))]$.
+
+\end{itemize}
+
+Estimating main and spillover effects:
+
+\begin{itemize}
+
+\item
+A potential outcome $Y_i(z,g)=Y_i(Z_i=z,G_i=g)$ is defined only for a subset of nodes $V_g=\{i:g\in\calG_i\}$ with cardinality $v_g$. For units with degree zero, denote $V_{\emptyset}=\{i:N_i=0\}$ the set of units without neighbours.
+
+\item
+Super-population perspective: potential outcomes of graph $G$ are fixed and expectations are simple averages of these outcomes, i.e., $\E[\bullet|i\in U]=\frac{1}{|U|}\sum_{i\in U}(\bullet)$ and $\P(\bullet|i\in U)=\frac{1}{|U|}\sum_{i\in U}I(\bullet)$ for some subset $U$ of the super-population.
+
+\item
+Denote the marginal mean of the potential outcome $Y_i(z,g)$ in $V\subseteq V_g$ by
+\[
+\mu(z,g;V) = \E[Y_i(z,g)|i\in V]
+\]
+which can be viewed as an average dose-response function (ADRF) for subset $V$ depending on the individual and neighbourhood treatments.
+
+\item
+Causal effects are defined as comparisons between the marginal mean of different potential outcomes. The treatment effect (main effect) is defined as
+\[
+\tau(g) = \mu(1,g;V_g) - \mu(0,g;V_g)
+\]
+The overall main effect is defined as the average effect of individual treatments over the distribution of the neighbourhood treatment, i.e.,
+\[
+\tau = \sum_{g\in\calG}\tau(g)\P(G_i=g) \qquad\left( = \E_\calG[\tau(g)]\right)
+\]
+where $\calG=\bigcup_i\calG_i$ and $i$ is a unit sampled from the population.
+
+\item
+The (causal) spillover effect of having the neighbourhood treatment set to level $g$ versus 0 when the unit is under treatment $z$ is
+\[
+\delta(g;z) = \mu(z,g;V_g) - \mu(z,0;V_g)
+\]
+The overall spillover effect is the average spillover effect over the distribution of the neighbourhood treatment, i.e.,
+\[
+\Delta(z) = \sum_{g\in\calG} \delta(g;z)\P(G_i=g) \qquad (=\E_\calG[\delta(g;z)])
+\]
+
+\item
+The total effect is defined as
+\begin{align*}
+\text{TE} &= \sum_{g\in\calG}\E\left[Y_i(1,g)-Y_i(0,0)|i\in V_g\right]\P(G_i=g) \\
+&= \sum_{g\in\calG}\E\left[Y_i(1,g)-Y_i(0,g)+Y_i(0,g)-Y_i(0,0)|i\in V_g\right]\P(G_i=g) \\
+&= \tau + \Delta(0)
+\end{align*}
+i.e., the sum of overal main and spillover effects.
+
+\end{itemize}
+
+Unconfoundedness of the joint treatment:
+
+\begin{itemize}
+
+\item
+(Re-defined unconfoundedness assumption from SUTVA for SUTNVA)
+
+Assumption~3: for all $z\in\{0,1\}$, $g\in\calG_i$ and all $i$, $Y_i(z,g)\condind Z_i, G_i|X_i$. (Given covariates for unit $i$, the potential outcome of unit $i$ given the treatment assignments for the graph is independent of the treatment assignment for unit $i$. Significance: units are not assigned to the treatment depending on the potential outcomes.)
+
+\item
+Theorem~1 (identification of ADRF): under Assumptions~1, 2, and 3,
+\begin{align*}
+\E\left[Y_i(z,g)|i\in V_g\right] &= \sum_{\bfx\in\calX}\E\left[Y_i|Z_i=z,G_i=g,\bfX_i=\bfx,i\in V_g\right]\P(\bfX_i=\bfx|i\in V_g) \\
+& := \Yobs \\
+&\left(= \E_\calX\left[\left.\E\left[Y_i|Z_i=z,G_i=g,\bfX_i=\bfx,i\in V_g\right]\right|i\in V_g\right]\right)
+\end{align*}
+(Average potential outcome for subset $V_g$ is given by the weighted averaged of observed outcomes of units with $Z_i=z$ and $G_i=g$ and with same values of covariates. Significance: this allows estimation of the ADRF and therefore the causal effects of interest. If we only have a sample rather than the population, an unbiased estimator of the ADRF can be obtained from an unbiased estimator of conditional outcome mean $\Yobs$.)
+
+\end{itemize}
+
+\subsection{Bias when SUTVA is wrongly assumed}
+
+Naive estimator:
+
+\begin{itemize}
+
+\item
+Under SUTVA, the potential outcome is only indexed by the individual treatment assignment. The average treatment effect is then defined as
+\[
+\tausutva = \E\left[Y_i(Z_i=1) - Y_i(Z_i=0)\right]
+\]
+
+\item
+Covariance-adjusted estimators estimate the quantity
+\[
+\tau_{X^*}^\text{obs} = \sum_{\bfx\in\calX^*}\E\left[Y_i|Z_i=1,\bfX_i^*\bfx\right] - \E\left[Y_i|Z_i=0,\bfX_i^*=\bfx\right]\P(\bfX_i^*=\bfx)
+\]
+where $\bfX_i^*\in\calX^*$ is a subset of covariates (under SUTVA, neighbourhood covariates would not be considered and so $\bfX_i=\Xind_i$). (If the SUTVA unconfoundedness assumption holds, then $\tausutva=\tau_{X^*}^\text{obs}$ and so an unbiased estimator of $\tau_{X^*}^\text{obs}$ is also an unbiased estimator of $\tausutva$.)
+
+\end{itemize}
+
+Bias of naive estimator when unconfoundedness holds:
+
+\begin{itemize}
+
+\item
+Theorem~2A: if Assumption~1 holds, Assumption~2 holds given $g_i$ for each unit $i$, Assumption~3 holds conditional on $\bfX_i^*$, then
+\begin{align*}
+\tau_{X^*}^\text{obs} &= \sum_{\bfx\in\calX^*}\left(\sum_{g\in\calG}\E\left[Y_i(1,g)|\bfX_i^*=\bfx,i\in V_g\right]\P(G_i=g|Z_i=1,\bfX_i^*=\bfx) \right. \\
+&\quad -\E\left[Y_i(0,g)|\bfX_i^*=\bfx,i\in V_g\right)\P(G_i=g|Z_i=0,\bfX_i^*=x)\Bigg)\P(\bfX_i^*=\bfx)
+\end{align*}
+
+\item
+Corollary~1: under the three assumptions of Theorem~2A and the assumption $Z_i\condind G_i|\bfX_i^*$, then $\tau_{X^*}^\text{obs} = \tau$. (If the individual and neighbourhood treatments are conditionally independent on the covariates, then covariate-adjusted estimates that assume SUTVA yield unbiased estimates even if SUTVA does not hold.)
+
+\item
+Corollary~2: under the three assumptions of Theorem~2A, if $Z_i\not\condind G_i|\bfX_i^*$, an unbiased estimator of $\tau_{X^*}^\text{obs}$ would be biased for $\tau$. The bias depends on if the spillover effect at level $g$ versus $g'$ is dependent on the individual treatment assignment. (If there is residual correlation between the individual and neighbourhood treatments after conditioning on the covariates, covariate-adjusted estimates that assume SUTVA are biased.)
+
+\end{itemize}
+
+Bias of naive estimator when unconfoundedness does not hold:
+
+\begin{itemize}
+
+\item
+Theorem~2B: under Assumptions~1 and 2, if $Y_i(z,g)\not\condind Z_i,G_i|\bfX_i^*$ but $Y_i(z,G)\condind Z_i,G_i|\bfX_i^*,\bfU_i$ for some additional vector of covariates $\bfU_i\in\calU$, then an unbiased estimator of $\tau_{X^*}^\text{obs}$ is biased for the $\tau$. The bias depends on if the spillover effect at level $g$ and $g'$ and if the unmeasured confounder $\bfU_i$ at level $u$ and $u'$ are dependent on the individual treatment.
+
+\item
+Corollary~3: under the three assumptions in Theorem~2B and if $Z_i\condind G_i|X_i^*$, then an unbiased estimator of $\tau_{X^*}^\text{obs}$ is biased for the $\tau$ with the bias depending only on the unmeasured confounder $\bfU_i$.
+
+\item
+Corollary~4: if SUTVA holds and $Y_i(z,G)\condind Z_i,G_i|\bfX_i^*,\bfU_i$, then an unbiased estimator of $\tau_{X^*}^\text{obs}$ is biased for the $\tau$ with the bias as in Corollary~3.
+
+\item
+Theorem~2B says that if SUTVA is wrongly assumed and adjusting for $\bfX_i^*$ is insufficient for unconfoundedness, then the bias is due to both interference and due to unmeasured confounders. If the individual and neighbourhood treatments are conditionally independent given the covariates, then the bias is only due to the unmeasured confounders.
+
+\end{itemize}
 
 
 \newpage
