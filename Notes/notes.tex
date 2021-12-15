@@ -237,6 +237,115 @@ Theorem~2B says that if SUTVA is wrongly assumed and adjusting for $\bfX_i^*$ is
 
 \end{itemize}
 
+\subsection{Generalized propensity scores under neighbourhood interference}
+
+Joint propensity score:
+
+\begin{itemize}
+
+\item
+The joint propensity score is defined as the probability for unit $i$ being exposed to individual treatment $z$ and neighbourhood treatment $g$ given observed covariates $\bfx$ and denoted
+\[
+\psi(z;g;x) = \P(Z_i=z,G_i=g|\bfX_i=\bfx)
+\]
+Note that this differs from the unit-level treatment assignment probability $\P(Z_i=z,G_i=g|\bfX,\{\bfY(z,g),z\in\{0,1\};g\in\calG\})$ unless the assignment mechanism only depends on the unit-level variables $\bfX_i$ (instead of $\bfX$) and the unconfoundedness assumption (Assumption~3) holds given $\bfX_i$.
+
+\item
+Proposition~1 (Balancing property): The joint propensity score is a balancing score, i.e.,
+\[
+\P(Z_i=z,G_i=g|\bfX_i,\psi(z;g;\bfX_i)) = \P(Z_i=z,G_i=g|\psi(z;g;\bfX_i))
+\]
+(Distribution of covariates $\bfX$ is the same for units with the same $\psi(z;g;\bfx)$.)
+
+\item
+Proposition~2 (Conditional unconfoundedness): If Assumption~3 holds given $\bfX_i$, then for all $z\in\{0,1\}$, $g\in\calG_i$,
+\[
+Y_i(z,g) \condind Z_i,G_i|\psi(z;g;\bfX_i)
+\]
+(If unconfoundedness holds, the potential outcome is independent of individual and neighbourhood treatment of units with the same joint propensity score.)
+
+\end{itemize}
+
+Individual and neighbourhood propensity score:
+
+\begin{itemize}
+
+\item
+The joint propensity score can be factorized as
+\begin{align*}
+\psi(z;g;\bfx) &= \P(G_i=g|Z_i=z,\bfX_i^g=\bfx^g)\P(Z_i=z|\bfX_i^z=\bfx^x) \\
+&= \lambda(g;z;\bfx^g)\phi(z;\bfx^z)
+\end{align*}
+where $\bfX_i^g\in\calX^g\subset\calX$ is the subset of covariates affecting the neighbourhood treatment and $\bfX_i^z\in\calX^z\subset\calX$ is the subset of covariates affecting the individual treatment. These subsets may not be mutually exclusive. $\lambda(g;z;\bfx^g)$ is the neighbourhood (generalized) propensity score and $\phi(z;\bfx^z)$ is the individual (binary) propensity score.
+
+\item
+Proposition~3 (Conditional unconfoundedness given individual and neighbourhood propensities): if Assumption~3 holds, then for all $z\in\{0,1\}$, $g\in\calG_i$,
+\[
+Y_i(z,g) \condind Z_i, G_i|\lambda(g;z;\bfX_i^g),\phi(1;\bfX_i^z)
+\]
+(\todo: is there a typo?)
+
+\end{itemize}
+
+\subsection{Propensity score-based estimator for main and spillover effects}
+
+Individual and neighbourhood propensity score estimator:
+
+\begin{itemize}
+
+\item
+Theorem~1 says that an unbiased estimator of the conditional mean $\Yobs$ is unbiased for $\mu(z,g;V)$. If there are many covariates or if the covariates are continuous, then estimation of $\Yobs$ is challenging.
+
+\item
+If Assumption~3 holds, by Proposition~2, adjusting for the joint propensity score can also lead to an unbiased estimator for $\mu(z,g;V)$, i.e.,
+\[
+\E\left[\E\left[Y_i|Z_i=z,G_i=g,\psi(z;g;\bfX_i)\right]|Z_i=z,G_i=g\right]
+\]
+where the outer expectation is over the empirical distribution of the joint propensity score in the population. By Proposition~3, the propensity score adjustment can be done separately for individual and neighbourhood, leading to the unbiased estimator
+\[
+\E\left[\E\left[Y_i|Z_i=z,G_i=g,\phi(1;\bfX_i^z),\lambda(g;z;\bfX_i^g)\right]|Z_i=z,G_i=g\right]
+\]
+
+\end{itemize}
+
+Estimation procedure:
+
+\begin{enumerate}
+
+\item
+Subclassification based on individual propensity score:
+\begin{enumerate}
+\item
+Predict $\phi(1;\bfX_i^z)$ using a logistic regression for $Z_i$ fitted on covariates $\bfX_i^z$.
+\item
+Identify $J$ subclasses $B_j$ based on similar values of $\phi(1;\bfX_i^z)$ and where there is sufficient balanced between individual treatment groups, i.e., $\bfX_i^z\condind Z_i|i\in B_j$ (given a unit in a subclass, covariates are independent of treatment).
+\end{enumerate}
+
+\item
+For each subclass $B_j$, estimate $\mu_j(z,g;V_g) = \E\left[Y_i(z,g)|i\in B_j^g\right]$ where $B_j^g= V_g\cap B_j$:
+\begin{enumerate}
+\item
+Estimate parameters of a model for $\lambda(g,z;\bfx^g)$ where $\lambda(g;z;\bfX_i^g) = \P(G_i=g|Z_i=z,\bfX_i^g) = f^G(g,z,\bfX_i^g)$.
+\item
+Use observed data $(Y_i,Z_i,G_i,\bfX_i^g)$ and $\hat{\Lambda}=\lambda(G_i;Z_i;\bfX_i^g)$ to estimate parameters of a model $Y_i(z,g)|\lambda(g;z;\bfX_i^g) \sim f^Y(z,g,\lambda(g;z;\bfX_i^g))$.
+\item
+For a particular level of the joint treatment $(Z_i=z,G_i=g)$, for each unit $i\in B_j^g$, predict $\lambda(g;z;\bfX_i^g)$ and use it to predict $Y_i(z,g)$.
+\item
+Estimate the dose-response function $\mu_j(z,g;V_g)$ by
+\[
+\hat{\mu}_j(z,g;V_g) = \frac{\sum_{i\in B_j^g}\hat{Y}_i(z,g)}{|B_j^g|}
+\]
+\end{enumerate}
+
+\item
+Estimate the ADRF by
+\[
+\hat{\mu}(z,g,V_g) = \sum_{j=1}^J\hat{\mu}_j(z,g;V_g)\pi_j^g
+\]
+where $\pi_j^g=\frac{|B_j^g|}{v_g}$ are weights proportional to the subclass size.
+
+\end{enumerate}
+
 
 \newpage
 
