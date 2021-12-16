@@ -68,6 +68,8 @@ Under presence of interference, the observable outcome at node $i$ is a function
 \item
 Assumption~1: if $\bfZ=\bfz$ then $Y_i=Y_i(\bfz)$. (The outcome only depends on the treatment assignments and not the mechanism used to assign treatments.)
 
+\url{https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4219328/}
+
 \item
 Stable unit treatment value assumption (SUTVA): Assumption~1 and no interference between individuals (i.e., $Y_i(Z_i,\ZNi,\ZNmi)=Y_i(Z_i,\ZNi',\ZNmi')$ for all $\ZNi,\ZNi',\ZNmi,\ZNmi'$).
 
@@ -345,6 +347,95 @@ Estimate the ADRF by
 where $\pi_j^g=\frac{|B_j^g|}{v_g}$ are weights proportional to the subclass size.
 
 \end{enumerate}
+
+
+\newpage
+
+
+\subsection{Key ideas}
+
+\begin{itemize}
+
+\item
+Want to estimate main and spillover effects from observational network data. Assumed that network structure is fully known and fixed.
+
+\item
+Estimators that assume SUTVA may be biased.
+\begin{enumerate}
+\item
+If the three assumptions hold and if individual and neighbourhood treatment assignments are conditionally independent given a set of covariates, covariate-adjusted estimates of the main effect that assume SUTVA are unbiased.
+\item
+If the three assumptions hold, covariate-adjusted estimates are biased with the bias depending on the interference effect and the association between individual and neighbourhood treatments.
+\item
+If unconfoundedness does not hold, covariate-adjusted estimates are biased with the bias due to both interference and the unmeasured confounders.
+\item
+If unconfoundedness holds given the covariates and unmeasured confounders, and the individual and neighbourhood treatment are conditionally independent given the covariates or there is no interference, then the covariate-adjusted estimates are biased due to only the unmeasured confounders.
+\end{enumerate}
+In summary: conditional independence of individual and neighbourhood treatment given covariates determines bias from interference; covariates alone satisfying unconfoundedness determines bias from unmeasured confounders.
+
+\item
+Relaxing SUTVA to SUTNVA may allow for unbiased estimates if it is assumed that
+\begin{enumerate}
+\item
+outcomes only depend on treatment assignment of the population and not the assignment mechanism (Assumption~1---consistency; also made in SUTVA);
+\item
+outcome for a unit only depends on individu-al treatment and some summary of neighbourhood treatments (Assumption~2--neighbourhood interference);
+\item
+given some set of covariates (individual and neighbourhood characteristics), the outcomes are conditionally independent of the assignment mechanism (Assumption~3---unconfoundedness).
+\end{enumerate}
+
+\item
+The joint propensity score
+\begin{enumerate}
+\item
+is a balancing score (units with the same propensity and treatments have the same distribution of covariates);
+\item
+also satisfies conditional unconfoundedness if the covariates do;
+\item
+can be factorized into individual and neighbourhood propensity scores.
+\end{enumerate}
+
+\item
+To estimate main and spillover effects, use the propensity scores to reduce the space of covariates:
+\begin{enumerate}
+\item
+Classify (match) units into subclasses based on individual propensity scores.
+\item
+Within each class, obtain estimates of outcomes based on neighbourhood propensities.
+\end{enumerate}
+
+\end{itemize}
+
+\subsection{Other literature}
+
+\begin{itemize}
+
+\item
+Evaluation of propensity score methods under treatment entanglement in observational studies: \url{https://arxiv.org/pdf/1801.07310.pdf}
+
+\item
+Effect estimation under heterogeneous partial inferference in observational studies: \url{https://arxiv.org/pdf/2107.12420.pdf}
+
+\item
+Questions justification of unconfounded with respect to a constructed statistic: \url{https://economics.sas.upenn.edu/system/files/2021-03/AlejandroSanchez_JMP_March2021_0.pdf}
+
+\item
+Interference in randomized experiments: \url{https://arxiv.org/pdf/1711.06399.pdf}
+
+\item
+Testing SUTVA in randomized experiments: \url{https://dl.acm.org/doi/abs/10.1145/3097983.3098192}
+
+\item
+Accounting for homophily?: \url{https://arxiv.org/pdf/1705.08527.pdf}
+
+\item
+Randomized experiment design for networks with interference (quasi-colouring): \url{https://projecteuclid.org/journals/annals-of-statistics/volume-48/issue-2/Designs-for-estimating-the-treatment-effect-in-networks-with-interference/10.1214/18-AOS1807.short}
+
+\item
+Sensitivity analysis in networks with interference (looking at graph structure?) in experiments: \url{https://arxiv.org/pdf/1708.08171.pdf}
+
+
+\end{itemize}
 
 
 \newpage
