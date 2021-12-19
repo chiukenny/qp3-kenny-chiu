@@ -196,7 +196,7 @@ Under SUTVA, the potential outcome is only indexed by the individual treatment a
 \item
 Covariance-adjusted estimators estimate the quantity
 \[
-\tau_{X^*}^\text{obs} = \sum_{\bfx\in\calX^*}\E\left[Y_i|Z_i=1,\bfX_i^*\bfx\right] - \E\left[Y_i|Z_i=0,\bfX_i^*=\bfx\right]\P(\bfX_i^*=\bfx)
+\tau_{X^*}^\text{obs} = \sum_{\bfx\in\calX^*}\left(\E\left[Y_i|Z_i=1,\bfX_i^*=\bfx\right] - \E\left[Y_i|Z_i=0,\bfX_i^*=\bfx\right]\right)\P(\bfX_i^*=\bfx)
 \]
 where $\bfX_i^*\in\calX^*$ is a subset of covariates (under SUTVA, neighbourhood covariates would not be considered and so $\bfX_i=\Xind_i$). (If the SUTVA unconfoundedness assumption holds, then $\tausutva=\tau_{X^*}^\text{obs}$ and so an unbiased estimator of $\tau_{X^*}^\text{obs}$ is also an unbiased estimator of $\tausutva$.)
 
@@ -418,6 +418,9 @@ Effect estimation under heterogeneous partial inferference in observational stud
 
 \item
 Questions justification of unconfounded with respect to a constructed statistic: \url{https://economics.sas.upenn.edu/system/files/2021-03/AlejandroSanchez_JMP_March2021_0.pdf}
+
+\item
+Estimating treatment effects in observational networked data (no interference?) using neural networks: \url{https://arxiv.org/pdf/1906.03485.pdf}
 
 \item
 Interference in randomized experiments: \url{https://arxiv.org/pdf/1711.06399.pdf}
