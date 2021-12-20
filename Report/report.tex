@@ -24,6 +24,29 @@
 \section{Introduction}
 
 
+\section{Place in the literature}
+
+The work by \textcite{Forastiere:2021} fits into the niche literature that looks at performing causal inference on observational network data in the presence of interference. \textcite{Forastiere:2021} formulate the network interference problem under the potential outcome framework (\todo cite), and propose a procedure to estimate causal treatment and spillover effects (as defined in their formulation) based on a joint propensity score that they define for network data. Their proposed propensity-adjusted estimators are unbiased under three assumptions, two of which form the Stable Unit Treatment on Neighbourhood Value Assumption (SUTNVA, a generalization of SUTVA that relaxes the no interference assumption to allow interference from directly connected nodes) and the third being an unconfoundedness assumption that says the treatment assignment mechanism is conditionally independent of the outcomes for some set of covariates. In addition to the above, \textcite{Forastiere:2021} also derive the bias of SUTVA-assuming estimators when SUTVA does not hold or when the unconfoundedness assumption does not hold for the given set of covariates. The problem formulation, the proposed estimation procedure (based on a defined joint propensity score), and the derived bias of the naive estimator are the main contributions of \citeauthor{Forastiere:2021}.
+\\
+
+\todo: limitations here or conclusion?
+\\
+
+There appears to be a limited number of works in the literature that examine the similar problem of causal inference in observational data with interference. As noted by \citeauthor{Forastiere:2021}, \textcite{Liu:2016} proposed inverse probability-weighted and H\'{a}jek-type estimators for the causal treatment effect, and \textcite{VanDerLaan:2014} proposed a novel targeted maximum likelihood estimator for the effect that was later further developed by \textcite{Sofrygin:2017} and \textcite{Ogburn:2017}. As in the work by \citeauthor{Forastiere:2021}, \textcite{Jackson:2020} use propensity-based estimators but take homophily into account by modeling correlated treatment assignments as an incomplete information game. The recent work by \textcite{Sanchez:2021} questioned the justification of the unconfoundedness assumption with respect to a constructed statistic (e.g., the joint propensity score) and proposed a model-based estimator that is obtained by optimizing a loss function. \todo
+\\
+
+\todo related literature
+
+
+\section{Questions about the theory}
+
+
+\section{Empirical study}
+
+
+\section{Concluding remarks}
+
+
 \newpage
 
 
