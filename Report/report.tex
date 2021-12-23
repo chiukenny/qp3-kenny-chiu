@@ -24,7 +24,12 @@
 \section{Introduction}
 
 
-\section{Place in the literature}
+\section{Proposed methodology in context of the literature}
+
+\todo In this section, we explain the method proposed by \textcite{Forastiere:2021} and discuss its relevance in the context of the related literature. We also discuss its advantages over other methods used in similar contexts.
+\\
+
+\todo add context (challenges of observational)
 
 The work by \textcite{Forastiere:2021} fits into the niche literature that looks at performing causal inference on observational network data in the presence of interference. \textcite{Forastiere:2021} formulate the network interference problem under the potential outcome framework (\todo cite), and propose a procedure to estimate causal treatment and spillover effects (as defined under their formulation) based on a joint propensity score that they define for network data. Their proposed propensity-adjusted estimators are unbiased under three assumptions, two of which form the Stable Unit Treatment on Neighbourhood Value Assumption (SUTNVA, a generalization of SUTVA that relaxes the no interference assumption to allow interference from directly connected nodes) and the third being an unconfoundedness assumption that says the treatment assignment mechanism is conditionally independent of the outcomes for some set of covariates. In addition, \textcite{Forastiere:2021} also derive the bias of SUTVA-assuming estimators when SUTVA does not hold or when the unconfoundedness assumption does not hold for the given set of covariates. The problem formulation, the proposed estimation procedure (based on a defined joint propensity score), and the derived bias of the naive estimator are the main contributions of \citeauthor{Forastiere:2021}.
 \\
@@ -41,13 +46,29 @@ More commonly, related works in the literature examine the inference problem und
 Several other works in the literature consider inference in observational studies with interference under specific contexts. For example, \textcite{Toulis:2018} explore the problem of treatment entanglement where treatment assignments are assumed to satisfy certain restrictions. \textcite{Zigler:2021} focus on the problem of bipartite causal inference with interference where treatments are applied to one unit and the outcome is measured on another. Outside of the observational setting, there are many works that study causal inference in randomized studies with potential interference. These works generally examine study designs that allow for treatment effect estimation in the presence of interference under varying contexts \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}
 
 
-\section{Questions about the theory}
+\section{Potential bias of naive estimator when unconfoundedness holds}
+
+\todo In this section, we provide an example that illustrates the relevance of Theorem~2.A, Corollary~2 and Corollary~3 in the paper by \textcite{Forastiere:2021}.
+\\
 
 
-\section{Empirical study}
+\section{Reproducing results of simulation study}
+
+\todo In this section, we aim to (partially) reproduce the results of the simulation study conducted by \textcite{Forastiere:2021}. Note that we work with only the subset of the data that they use that is publicly accessible. The subset contains data for 6504 students (\todo: schools?) as opposed to the 16,410 students from 29 schools considered in their study.
+\\
 
 
-\section{Concluding remarks}
+\section{Extending the simulation study}
+
+\todo In this section, we consider a small extension to the simulation study.
+\\
+
+
+\section{Critical appraisal and concluding remarks}
+
+\todo We conclude this report with a critical appraisal of the method proposed by \textcite{Forastiere:2021}.
+
+\todo unconfoundedness assumption? \textcite{Sanchez:2021}
 
 
 \newpage
@@ -58,11 +79,10 @@ Several other works in the literature consider inference in observational studie
 \end{refcontext}
 
 
-\newpage
+%\newpage
 
+%\appendix
 
-\appendix
-
-\section{}
+%\section{}
 
 \end{document}
