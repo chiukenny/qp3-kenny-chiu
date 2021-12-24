@@ -24,26 +24,86 @@
 \section{Introduction}
 
 
+\section{Notation}
+
+Throughout this report, we closely follow the notation used by \textcite{Forastiere:2021}. Let $G=(\calN,\calE)$ be an undirected network where $\calN$ is a set of $N$ units (nodes) and $\calE$ is a set of edges $(i,j)$. A partition~$(i,\Ni,\Nmi)$ of $\calN$ describes unit~$i$'s neighbourhood~$\calN_i$ (the set of $N_i$ units connected to unit $i$) and the set~$\calN_{-i}$ of all other units that are not $i$ and are not in $\calN_i$. Let $Z_i\in\{0,1\}$ be the treatment assigned to unit $i$ and $Y_i\in\calY$ the observed outcome of unit $i$. Denote the treatment and outcome vector for the population~$\calN$ as $\bfZ$ and $\bfY$, respectively, and the corresponding vectors for partition~$(i,\Ni,\Nmi)$ as $(Z_i,\ZNi,\ZNmi)$ and $(Y_i,\YNi,\YNmi)$. Let $G_i=g_i(\ZNi)\in\calG_i$ be some known and well-specified summary~$g_i$ of the treatments in unit~$i$'s neighbourhood, and denote the vector of neighbourhood treatments for the population as $\bfG$. Let $\bfX_i\in\calX$ be a vector of covariates for unit~$i$ that partitions into individual-level characteristics $\Xind_i\in\calX^\text{ind}$ and neighbourhood-level/aggregated individidual-level characteristics $\Xneigh_i\in\calX^\text{neigh}$. \todo $V_g,v_g$
+
+
 \section{Proposed methodology in context of the literature}
 
 \todo In this section, we explain the method proposed by \textcite{Forastiere:2021} and discuss its relevance in the context of the related literature. We also discuss its advantages over other methods used in similar contexts.
+
+\subsection{Setting, objective and method}
+
+\textcite{Forastiere:2021} examine the problem of performing causal inference of treatment effects from observational network data under interference. The setting is challenging for causal inference because
+\begin{enumerate}
+\item
+the assignment mechanism of treatments is unknown with observational data and so estimated effects may be non-causal in the presence of unmeasured confounders, and
+\item
+naive inference methods that ignore interference may produce biased estimates.
+\end{enumerate}
+In the randomized study literature, these issues can generally be dealt with by designing the study in such a way that the influence of confounders is minimized and that inference methods that account for interference can be used \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}. In the observational setting, these considerations need to be addressed by the inference method in the analysis phase. \citeauthor{Forastiere:2021} consider a setting involving a binary treatment (e.g., intervention and control) and where the interference on a unit is limited to that of its immediate neighbouring units. They propose a method to estimate the causal treatment and spillover (interference) effects that yield unbiased estimates under certain assumptions.
 \\
 
-\todo add context (challenges of observational)
+Under the potential outcome framework, the general procedure for estimating effects is to match units into sets based on covariate values, compute the effect contrast within each matched set, and estimate the effect by the (weighted) average of the contrasts across sets. However, matching may be difficult when the space of possible covariate values is large or if there are many covariates. \textcite{Forastiere:2021} address this problem in their proposed method by instead matching on a defined joint propensity score~$\psi(z;g;x)$ that factorizes into a neighbourhood propensity score~$\lambda(g;z;\bfx^g)$ (probability of being exposed to neighbourhood treatment $g$ given individual treatment $z$ and relevant covariates $\bfx^g$) and an individual propensity score~$\phi(z;\bfx^z)$ (probability of being assigned treatment $z$ given relevant covariates $\bfx^z$). Note that $\bfX^g$ and $\bfX^z$ do not necessarily correspond to $\Xneigh$ and $\Xind$, respectively, and as they may not be disjoint. The steps for their propensity-based method are as follows:
+\begin{enumerate}
 
+\item
+\textbf{Subclassify units}.
+\begin{enumerate}
+\item
+Fit a logistic regression model on the individual treatments~$Z_i$ given covariates~$\bfX_i^z$, and use the model to predict the individual propensity scores~$\phi(1;\bfX_i^z)$.
+\item
+Partition the units into $J$ subclasses $B_j$, $j\in\{1,\ldots,J\}$, based on similar estimated individual propensity scores~$\hat{\phi}(1;\bfX_i^z)$ and such that each subclass is approximately balanced in the number of treated and untreated units.
+\end{enumerate}
+
+\item
+\textbf{Estimate potential outcomes}. Let $B_j^g=	V_g\cap B_j$. For each subclass~$B_j$:
+\begin{enumerate}
+\item
+Fit some regression model on the neighbourhood treatments $G_i$ given the individual treatments~$Z_i$ and covariates~$\bfX_i^g$, and use the model to predict the neighbourhood propensity scores~$\lambda(g;z;\bfX_i^g)$.
+\item
+Fit some regression model on the potential outcomes~$Y_i(z,g)$ given the estimated neighbourhood propensity scores~$\hat{\lambda}(g;z;\bfX_i^g)$.
+\item
+Estimate the dose-response function by averaging over the estimated potential outcomes for a particular level of the joint treatment, i.e.,
+\[
+\hat{\mu}_j(z,g;V_g) = \frac{\sum_{i\in B_j^g}\hat{Y}_i(z,g)}{\left|B_j^g\right|}\;.
+\]
+\end{enumerate}
+
+\item
+\textbf{Estimate the average dose-response function} (ADRF) for a particular level of the joint treatment by taking the weighted average of the estimated dose-response functions over the subclasses, i.e.,
+\[
+\hat{\mu}(z,g;V_g) = \sum_{j=1}^J\hat{\mu}_j(z,g;V_g)\left(\frac{\left|B_j^g\right|}{v_g}\right) \;.
+\]
+
+\item
+\textbf{Estimate} the treatment effects $\tau(g)$, overall treatment effect $\tau$, spillover effects $\delta(g;z)$, and overall spillover effects $\Delta(z)$ by
+\begin{align*}
+\hat{\tau}(g) &= \hat{\mu}(1,g;V_g) - \hat{\mu}(0,g;V_g) \;, & \hat{\tau}&=\sum_{g\in\calG}\hat{\tau}(g)\P(G_i=g) \;, \\
+\hat{\delta}(g;z) &= \hat{\mu}(z,g;V_g) - \hat{\mu}(z,0;V_g) \;, & \hat{\Delta}(z) &= \sum_{g\in\calG}\hat{\delta}(g;z)\P(G_i=g)\;.
+\end{align*}
+
+\end{enumerate}
+\textcite{Forastiere:2021} show that their estimators for the treatment and spillover effects are unbiased under three assumptions, the first two of which form the Stable Unit Treatment on Neighbourhood Value Assumption (SUTNVA, a generalization of SUTVA that relaxes the no interference assumption to allow interference of immediate neighbours) and the third being an unconfoundedness assumption that says the treatment assignment mechanism is conditionally independent of the outcomes for the given set of covariates.
+
+\subsection{Comparison to the literature}
+
+\iffalse
 The work by \textcite{Forastiere:2021} fits into the niche literature that looks at performing causal inference on observational network data in the presence of interference. \textcite{Forastiere:2021} formulate the network interference problem under the potential outcome framework (\todo cite), and propose a procedure to estimate causal treatment and spillover effects (as defined under their formulation) based on a joint propensity score that they define for network data. Their proposed propensity-adjusted estimators are unbiased under three assumptions, two of which form the Stable Unit Treatment on Neighbourhood Value Assumption (SUTNVA, a generalization of SUTVA that relaxes the no interference assumption to allow interference from directly connected nodes) and the third being an unconfoundedness assumption that says the treatment assignment mechanism is conditionally independent of the outcomes for some set of covariates. In addition, \textcite{Forastiere:2021} also derive the bias of SUTVA-assuming estimators when SUTVA does not hold or when the unconfoundedness assumption does not hold for the given set of covariates. The problem formulation, the proposed estimation procedure (based on a defined joint propensity score), and the derived bias of the naive estimator are the main contributions of \citeauthor{Forastiere:2021}.
+\fi
+
+There appears to be a limited number of works in the literature that examine the similar problem of causal inference in observational data under general forms of interference. As noted by \citeauthor{Forastiere:2021}, \textcite{Liu:2016} proposed inverse probability-weighted (IPW) and H\'{a}jek-type estimators for the causal treatment effect, and \textcite{VanDerLaan:2014} proposed a novel targeted maximum likelihood estimator for the effect that was later further developed by \textcite{Sofrygin:2017} and \textcite{Ogburn:2017}. In IPW, effects are estimated by weighted averages of observed outcomes where one component of the weight is defined with respect to a hypothetical allocation strategy (an assumed distribution over the neighbouring treatments). The Bernoulli allocation strategy \parencite{Tchetgen:2012} is generally used, which assumes that each unit in the neighbourhood is assigned the treatment independently with probability $\alpha$ and that the unit assignment is independent of its neighbours' assignment. Homophily---the tendency for units with similar characteristics to form ties---is disregarded when the Bernoulli allocation strategy is used. As noted by \textcite{Forastiere:2021}, one strength of their proposed method is that it does not rule out potential homophily and is able to do so by directly defining its estimators in terms of the observed neighbourhood treatments. \todo: TMLE? \todo: strengths--observed neighbourhood treatment vs hypothetical; weaker unconfoundedness assumption? 
 \\
 
-\todo: limitations here or conclusion?
-\\
-
-There appears to be a limited number of works in the literature that examine the similar problem of causal inference in observational data with general forms of interference. As noted by \citeauthor{Forastiere:2021}, \textcite{Liu:2016} proposed inverse probability-weighted (IPW) and H\'{a}jek-type estimators for the causal treatment effect, and \textcite{VanDerLaan:2014} proposed a novel targeted maximum likelihood estimator for the effect that was later further developed by \textcite{Sofrygin:2017} and \textcite{Ogburn:2017}. \textcite{Jackson:2020} use propensity-based estimators similar to \textcite{Forastiere:2021} but take homophily into account by modeling correlated treatment assignments as an incomplete information game. The recent work by \textcite{Sanchez:2021} questioned the justification of the unconfoundedness assumption with respect to a constructed statistic (e.g., the joint propensity score) and proposed a model-based estimator that is obtained by optimizing a loss function. \todo
+\textcite{Jackson:2020} use propensity-based estimators similar to \textcite{Forastiere:2021} but take homophily into account by modeling correlated treatment assignments as an incomplete information game. The recent work by \textcite{Sanchez:2021} questioned the justification of the unconfoundedness assumption with respect to a constructed statistic (e.g., the joint propensity score) and proposed a model-based estimator that is obtained by optimizing a loss function. \todo
 \\
 
 More commonly, related works in the literature examine the inference problem under the assumption of partial interference. Under this assumption, individuals can be partitioned into groups where it is assumed that there are no spillover effects between groups. The focus on partial interference settings seems to be primarily due to momentum of earlier works \parencite[e.g.,][]{Sobel:2006,Hudgens:2008} that looked at causal inference in randomized studies with interference, in which group-randomization tends to be more practical. Examples of recent work that assume partial interference include the work by \textcite{Liu:2019}, \textcite{Barkley:2020}, and \textcite{Qu:2021}. It is notable that these works all propose IPW estimators despite exploring slightly difference contexts of the interference problem. Estimators based on IPW appear to be another idea in the literature that persisted since its original introduction by \textcite{Tchetgen:2012} for grouped observational data.
 \\
 
-Several other works in the literature consider inference in observational studies with interference under specific contexts. For example, \textcite{Toulis:2018} explore the problem of treatment entanglement where treatment assignments are assumed to satisfy certain restrictions. \textcite{Zigler:2021} focus on the problem of bipartite causal inference with interference where treatments are applied to one unit and the outcome is measured on another. Outside of the observational setting, there are many works that study causal inference in randomized studies with potential interference. These works generally examine study designs that allow for treatment effect estimation in the presence of interference under varying contexts \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}
+Several other works in the literature consider inference in observational studies with interference under specific contexts. For example, \textcite{Toulis:2018} explore the problem of treatment entanglement where treatment assignments are assumed to satisfy certain restrictions. \textcite{Zigler:2021} focus on the problem of bipartite causal inference with interference where treatments are applied to one unit and the outcome is measured on another.
+%Outside of the observational setting, there are many works that study causal inference in randomized studies with potential interference. These works generally examine study designs that allow for treatment effect estimation in the presence of interference under varying contexts \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}
 
 
 \section{Potential bias of naive estimator when unconfoundedness holds}
@@ -67,6 +127,8 @@ Several other works in the literature consider inference in observational studie
 \section{Critical appraisal and concluding remarks}
 
 \todo We conclude this report with a critical appraisal of the method proposed by \textcite{Forastiere:2021}.
+
+\todo contributions, limitations
 
 \todo unconfoundedness assumption? \textcite{Sanchez:2021}
 
