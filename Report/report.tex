@@ -26,7 +26,7 @@
 
 \section{Notation}
 
-Throughout this report, we closely follow the notation used by \textcite{Forastiere:2021}. Let $G=(\calN,\calE)$ be an undirected network where $\calN$ is a set of $N$ units (nodes) and $\calE$ is a set of edges $(i,j)$. A partition~$(i,\Ni,\Nmi)$ of $\calN$ describes unit~$i$'s neighbourhood~$\calN_i$ (the set of $N_i$ units connected to unit $i$) and the set~$\calN_{-i}$ of all other units that are not $i$ and are not in $\calN_i$. Let $Z_i\in\{0,1\}$ be the treatment assigned to unit $i$ and $Y_i\in\calY$ the observed outcome of unit $i$. Denote the treatment and outcome vector for the population~$\calN$ as $\bfZ$ and $\bfY$, respectively, and the corresponding vectors for partition~$(i,\Ni,\Nmi)$ as $(Z_i,\ZNi,\ZNmi)$ and $(Y_i,\YNi,\YNmi)$. Let $G_i=g_i(\ZNi)\in\calG_i$ be some known and well-specified summary~$g_i$ of the treatments in unit~$i$'s neighbourhood, and denote the vector of neighbourhood treatments for the population as $\bfG$. Let $\bfX_i\in\calX$ be a vector of covariates for unit~$i$ that partitions into individual-level characteristics $\Xind_i\in\calX^\text{ind}$ and neighbourhood-level/aggregated individidual-level characteristics $\Xneigh_i\in\calX^\text{neigh}$. \todo $V_g,v_g$
+Throughout this report, we closely follow the notation used by \textcite{Forastiere:2021}. Let $G=(\calN,\calE)$ be an undirected network where $\calN$ is a set of $N$ units (nodes) and $\calE$ is a set of edges $(i,j)$. A partition~$(i,\Ni,\Nmi)$ of $\calN$ describes unit~$i$'s neighbourhood~$\calN_i$ (the set of $N_i$ units connected to unit $i$) and the set~$\calN_{-i}$ of all other units that are not $i$ and are not in $\calN_i$. Let $Z_i\in\{0,1\}$ be the treatment assigned to unit $i$ and $Y_i\in\calY$ the observed outcome of unit $i$. Denote the treatment and outcome vector for the population~$\calN$ as $\bfZ$ and $\bfY$, respectively, and the corresponding vectors for partition~$(i,\Ni,\Nmi)$ as $(Z_i,\ZNi,\ZNmi)$ and $(Y_i,\YNi,\YNmi)$. Let $G_i=g_i(\ZNi)\in\calG_i$ be some known and well-specified summary~$g_i$ of the treatments in unit~$i$'s neighbourhood, and denote the vector of neighbourhood treatments for the population as $\bfG$. Depending on the size of a unit's neighbourhood, the space $\calG_i$ may differ between units. Let $V_g=\{i\in\calN:g\in\calG_i\}$ denote the subset containing $v_g$ units that have $g$ as a possible value for the neighbourhood treatment. Let $\bfX_i\in\calX$ be a vector of covariates for unit~$i$ that partitions into individual-level characteristics $\Xind_i\in\calX^\text{ind}$ and neighbourhood-level/aggregated individidual-level characteristics $\Xneigh_i\in\calX^\text{neigh}$.
 
 
 \section{Proposed methodology in context of the literature}
@@ -72,7 +72,7 @@ Estimate the dose-response function by averaging over the estimated potential ou
 \end{enumerate}
 
 \item
-\textbf{Estimate the average dose-response function} (ADRF) for a particular level of the joint treatment by taking the weighted average of the estimated dose-response functions over the subclasses, i.e.,
+\textbf{Estimate the average dose-response function} (ADRF) $\mu(z,g;V_g)=\E\left[Y_i(z,g)|i\in V_g\right]$ for a particular level of the joint treatment by taking the weighted average of the estimated dose-response functions over the subclasses, i.e.,
 \[
 \hat{\mu}(z,g;V_g) = \sum_{j=1}^J\hat{\mu}_j(z,g;V_g)\left(\frac{\left|B_j^g\right|}{v_g}\right) \;.
 \]
@@ -118,8 +118,78 @@ A small number of works consider more specific and niche contexts. For example, 
 
 \section{Potential bias of naive estimator when unconfoundedness holds}
 
-\todo In this section, we provide an example that illustrates the relevance of Theorem~2.A, Corollary~2 and Corollary~3 in the paper by \textcite{Forastiere:2021}.
+\todo In this section, we describe a simple example that illustrates the relevance of Theorem~2.A, Corollary~2 and Corollary~3 in the paper by \textcite{Forastiere:2021}. Specifically, we show how given a simple network under certain assumptions, an unbiased naive estimator for the treatment effect that assumes SUTVA may be biased depending on the exact treatment assignment mechanism.
 \\
+
+Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by $i\in\bbN$ for the pair and $j\in\{0,1\}$ for the unit within a pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ be whether a unit's paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some covariate available for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=0.5$. Other details, such as the space of outcomes $\calY$ and the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion.
+\\
+
+\todo: make assignment probabilistic \parencite{Imbens:2015}. We examine the network under two settings. In the first setting, suppose that the covariate $X_{ij}$ exactly determines the treatment status of a unit, i.e., $Z_{ij} = X_{ij}$. Because $X_{ij}$ are generated independently, it follows that $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$ in this setting (they are independent unconditionally regardless of $X_{ij}$). In the second setting, suppose that the treatment assignment mechanism follows
+\[
+Z_{ij} = \begin{cases} 1 & \text{if } X_{i1} = X_{i2} \\ 0 & \text{otherwise} \end{cases} \;.
+\]
+This corresponds to a homophily situation where the units in a pair are treated only if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ in this setting as a unit can only have values $(Z_{ij}=1,G_{ij}=1)$ or $(Z_{ij}=0,G_{ij}=0)$. In both settings, we further assume that Assumption~1 (no multiple versions of treatment), Assumption~2 (neighbourhood interference), and Assumption~3 (unconfoundedness) of \textcite{Forastiere:2021} hold. Hence, the assumptions of Corollary~1 are satisfied in the first setting, and the assumptions of Corollary~2 are satisfied in the second setting.
+
+\subsection{Setting~1: conditionally independent individual and neighbourhood treatments}
+
+In our first setting, the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$ are conditionally independent given $X_{ij}$. \todo example? Then by Corollary~1, an estimator that is unbiased under SUTVA will still be unbiased under the assumptions of our setting.
+\\
+
+The treatment effects $\tau(g)$ and overall treatment effect $\tau$ in our example are given by
+\begin{align*}
+\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
+\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
+\tau &= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
+&= 0.5\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
+\end{align*}
+The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
+\begin{align*}
+\tau_{X}^\text{obs} &= \left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=0\right]\right)\P(X_{ij}=0) \\
+&\quad + \left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=1\right]\right)\P(X_{ij}=1) \\
+&= \E\left[Y_{ij}|Z_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0\right] \\
+&= \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0\right]\right)\P(G_{ij}=0) \\
+&\quad + \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1\right]\right)\P(G_{ij}=1) \\
+&= 0.5\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right)
+\end{align*}
+where the third equality as $X_{i1}\condind X_{i2}$ (and so $Z_{ij}\condind G_{ij}$) and the fourth equality from Assumptions~1 and 2. Note that the conditional expectations where The second equality follows under the ``super-population'' perspective \parencite{Forastiere:2021} where expectations should be interpreted as the exp \todo (impossible event?) The above derivations suggest that $\tau_{X}^\text{obs}-\tau=0$, and therefore an unbiased estimator of the naive effect estimator is also unbiased for the treatment effect in this setting.
+
+\subsection{Setting~2: correlated individual and neighbourhood treatments}
+
+\begin{itemize}
+
+\item
+Setting 2:
+\begin{align*}
+\tau(1) &= \mu(1,1) \\
+\tau(0) &= - \mu(0,0) \\
+\tau &= 0.5(\mu(1,1) - \mu(0,0))
+\end{align*}
+\begin{align*}
+\tau_{X^*}^\text{obs} &= 0.5(\E[Y|Z=1,X=0] - \E[Y|Z=0,X=0] + \E[Y|Z=1,X=1] - \E[Y|Z=0,X=1]) \\
+&= \E[Y|Z=1] - \E[Y|Z=0] \\
+&= \E[Y|Z=1,G=1]P(G=1|Z=1) + \E[Y|Z=1,G=0]P(G=0|Z=1) - \E[Y|Z=0,G=1]P(G=1|Z=0) - \E[Y|Z=0,G=0]P(G=0|Z=0) \\
+&= \E[Y|Z=1,G=1] - \E[Y|Z=0,G=0]
+\end{align*}
+\begin{align*}
+&\tau_{X^*}^\text{obs} \\
+&= (\E[Y(1,1)|X=1]P(G=1|Z=1,X=1) - \E[Y(0,1)|X=1]P(G=1|Z=0,X=1))P(X=1) \\
+& + (\E[Y(1,0)|X=1]P(G=0|Z=1,X=1) - \E[Y(0,0)|X=1]P(G=0|Z=0,X=1))P(X=1) \\
+& + (\E[Y(1,1)|X=0]P(G=1|Z=1,X=0) - \E[Y(0,1)|X=0]P(G=1|Z=0,X=0))P(X=0) \\
+& + (\E[Y(1,0)|X=0]P(G=0|Z=1,X=0) - \E[Y(0,0)|X=0]P(G=0|Z=0,X=0))P(X=0) \\
+&= 0.5\E[Y(1,1)|X=1] - 0.5\E[Y(0,0)|X=1] + 0.5\E[Y(1,1)|X=0] - 0.5\E[Y(0,0)|X=0] \\
+&= \E[Y(1,1)] - \E[Y(0,0)]
+\end{align*}
+\begin{align*}
+&\tau_{X^*}^\text{obs} - \tau \\
+&=(\E[Y|Z=1,G=1,X=1]-\E[Y|Z=1,G=0,X=1])(P(G=1|Z=1,X=1)-P(G=1|X=1))P(X=1) \\
+&- (\E[Y|Z=0,G=1,X=1]-\E[Y|Z=0,G=0,X=1])(P(G=1|Z=0,X=1)-P(G=1|X=1))P(X=1) \\
+&+ (\E[Y|Z=1,G=1,X=0]-\E[Y|Z=1,G=0,X=0])(P(G=1|Z=1,X=0)-P(G=1|X=0))P(X=0) \\
+&- (\E[Y|Z=0,G=1,X=0]-\E[Y|Z=0,G=0,X=0])(P(G=1|Z=0,X=0)-P(G=1|X=0))P(X=0) \\
+&= 0.25\E[Y|Z=1,G=1,X=1] - 0.25\E[Y|Z=0,G=0,X=1] + 0.25\E[Y|Z=1,G=1,X=0] - 0.25\E[Y|Z=0,G=0,X=0] \\
+&= 0.5\E[Y|Z=1,G=1] - 0.5\E[Y|Z=0,G=0]
+\end{align*}
+
+\end{itemize}
 
 
 \section{Reproducing results of simulation study}
@@ -162,3 +232,60 @@ A small number of works consider more specific and niche contexts. For example, 
 
 
 The work by \textcite{Forastiere:2021} fits into the niche literature that looks at performing causal inference on observational network data in the presence of interference. \textcite{Forastiere:2021} formulate the network interference problem under the potential outcome framework (\todo cite), and propose a procedure to estimate causal treatment and spillover effects (as defined under their formulation) based on a joint propensity score that they define for network data. Their proposed propensity-adjusted estimators are unbiased under three assumptions, two of which form the Stable Unit Treatment on Neighbourhood Value Assumption (SUTNVA, a generalization of SUTVA that relaxes the no interference assumption to allow interference from directly connected nodes) and the third being an unconfoundedness assumption that says the treatment assignment mechanism is conditionally independent of the outcomes for some set of covariates. In addition, \textcite{Forastiere:2021} also derive the bias of SUTVA-assuming estimators when SUTVA does not hold or when the unconfoundedness assumption does not hold for the given set of covariates. The problem formulation, the proposed estimation procedure (based on a defined joint propensity score), and the derived bias of the naive estimator are the main contributions of \citeauthor{Forastiere:2021}.
+
+\item
+$\calN=\{1,2,3,4\}$, $\calE=\{(1,2),(3,4)\}$
+
+\item
+$\calY=\bbR$, $Z_i\in\{0,1\}$, $\calX=\{0,1\}$, $\calG_i=\{0,1\}$ for all $i$ (has treated friend), $V_g=\calN$ for all $g$
+
+\item
+If unconfoundedness assumption holds:
+\begin{align*}
+Y_i(z,g)|X_i &\sim N(\mu(z,g,X_i),1) \\
+\mu(z,g,X_i) &= 6X_i + 3z + g
+\end{align*}
+Make deterministic:
+\[
+Y_i(z,g)|X_i = \mu(z,g,X_i) = 6X_i+3z+g
+\]
+
+\item
+Corollary~1 holds:
+\[
+\textrm{logit}(P(Z_i=1)) = \log(0.5) + \log(4)X_i
+\]
+Make deterministic:
+
+\item
+Corollary~2 holds:
+\[
+\textrm{logit}(P(Z_i=1)) = \log(0.5) + \log(4)X_i + \log(2)\sum_{(i,j)\in\calE}X_j
+\]
+
+
+\item
+Consider network where all units are in pairs.
+
+$\calY=\bbR$, $Z_i\in\{0,1\}$, $\calX=\{0,1\}$, $\calG_i=\{0,1\}$ for all $i$ (has treated friend), $V_g=\calN$ for all $g$. $\P(X=1)=0.5$.
+
+Corollary~1 setting: $Z_i=\mathbbm{1}(X_i=1)$ ($Z_i$ and $G_i$ entirely independent).
+
+Corollary~2 setting: $Z_i=\sim X_i\otimes X_i'$ ($Z_i$ and $G_i$ not conditionally independent given $X_i$; only possible combinations are $(Z_i=1,G_i=1)$ and $(Z_i=0,G_i=0)$).
+
+Show unbiasedness/biasedness of naive estimator (not accounting for spillover) based on averaging
+
+
+\item
+Setting 1:
+\begin{align*}
+\tau(1) &= \mu(1,1) - \mu(0,1) \\
+\tau(0) &= \mu(1,0) - \mu(0,0) \\
+\tau &= 0.5(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)) \\
+\end{align*}
+\begin{align*}
+\tau_{X^*}^\text{obs} &= 0.5(\E[Y|Z=1,X=0] - \E[Y|Z=0,X=0] + \E[Y|Z=1,X=1] - \E[Y|Z=0,X=1]) \\
+&= \E[Y|Z=1] - \E[Y|Z=0] \\
+&= \E[Y|Z=1,G=1]P(G=1|Z=1) + \E[Y|Z=1,G=0]P(G=0|Z=1) - \E[Y|Z=0,G=1]P(G=1|Z=0) - \E[Y|Z=0,G=0]P(G=0|Z=0) \\
+&= 0.5(\E[Y|Z=1,G=1] + \E[Y|Z=1,G=0] - \E[Y|Z=0,G=1] - \E[Y|Z=0,G=0])
+\end{align*}
