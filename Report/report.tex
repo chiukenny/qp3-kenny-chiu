@@ -121,75 +121,109 @@ A small number of works consider more specific and niche contexts. For example, 
 \todo In this section, we describe a simple example that illustrates the relevance of Theorem~2.A, Corollary~2 and Corollary~3 in the paper by \textcite{Forastiere:2021}. Specifically, we show how given a simple network under certain assumptions, an unbiased naive estimator for the treatment effect that assumes SUTVA may be biased depending on the exact treatment assignment mechanism.
 \\
 
-Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by $i\in\bbN$ for the pair and $j\in\{0,1\}$ for the unit within a pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ be whether a unit's paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some covariate available for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=0.5$. Other details, such as the space of outcomes $\calY$ and the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion.
+Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by $i\in\bbN$ for the pair and $j\in\{0,1\}$ for the unit within a pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ be whether a unit's paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some covariate available for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=\frac{1}{2}$. Other details, such as the space of outcomes $\calY$ and the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion.
 \\
 
-\todo: make assignment probabilistic \parencite{Imbens:2015}. We examine the network under two settings. In the first setting, suppose that the covariate $X_{ij}$ exactly determines the treatment status of a unit, i.e., $Z_{ij} = X_{ij}$. Because $X_{ij}$ are generated independently, it follows that $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$ in this setting (they are independent unconditionally regardless of $X_{ij}$). In the second setting, suppose that the treatment assignment mechanism follows
+\todo: make assignment probabilistic \parencite{Imbens:2015}. We examine the network under two settings. In the first setting, suppose that $\P(Z_{ij}=1|X_{ij}) = \frac{1}{4} + \frac{1}{2}X_{ij}$.
+%the covariate $X_{ij}$ exactly determines the treatment status of a unit, i.e., $Z_{ij} = X_{ij}$.
+Because $X_{ij}$ are generated independently, it follows that $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$ in this setting (they are independent unconditionally regardless of $X_{ij}$). In the second setting, suppose that the treatment assignment mechanism follows
 \[
-Z_{ij} = \begin{cases} 1 & \text{if } X_{i1} = X_{i2} \\ 0 & \text{otherwise} \end{cases} \;.
+\P(Z_{ij}=1|X_{i1},X_{i2}) = \frac{3}{4}\mathbbm{1}[X_{i1}=X_{i2}] + \frac{1}{4}\mathbbm{1}[X_{i1}\neq X_{i2}]
 \]
-This corresponds to a homophily situation where the units in a pair are treated only if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ in this setting as a unit can only have values $(Z_{ij}=1,G_{ij}=1)$ or $(Z_{ij}=0,G_{ij}=0)$. In both settings, we further assume that Assumption~1 (no multiple versions of treatment), Assumption~2 (neighbourhood interference), and Assumption~3 (unconfoundedness) of \textcite{Forastiere:2021} hold. Hence, the assumptions of Corollary~1 are satisfied in the first setting, and the assumptions of Corollary~2 are satisfied in the second setting.
+where $\mathbbm{1}[\argdot]$ is the indicator function. This corresponds to a homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ in this setting as the probability of a unit being treated also depends on its counterpart.
+%as a unit can only have values $(Z_{ij}=1,G_{ij}=1)$ or $(Z_{ij}=0,G_{ij}=0)$.
+In both settings, we further assume that Assumption~1 (no multiple versions of treatment), Assumption~2 (neighbourhood interference), and Assumption~3 (unconfoundedness) of \textcite{Forastiere:2021} hold. Hence, the assumptions of Corollary~1 are satisfied in the first setting, and the assumptions of Corollary~2 are satisfied in the second setting.
 
 \subsection{Setting~1: conditionally independent individual and neighbourhood treatments}
 
-In our first setting, the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$ are conditionally independent given $X_{ij}$. \todo example? Then by Corollary~1, an estimator that is unbiased under SUTVA will still be unbiased under the assumptions of our setting.
+In our first setting, the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$ are conditionally independent given $X_{ij}$. \todo example? Then by Corollary~1, an effect estimator that is unbiased under SUTVA will still be unbiased under the assumptions of our setting.
 \\
 
-The treatment effects $\tau(g)$ and overall treatment effect $\tau$ in our example are given by
+The overall treatment effect $\tau$ in this setting is given by
 \begin{align*}
-\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
-\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
-\tau &= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
-&= 0.5\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
+%\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
+%\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
+\tau %&= \sum_{g\in\{0,1\}} \tau(g)\P(G_{ij}=g) \\
+&= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
+&= \frac{1}{2}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)|X_{ij}=x\right] - \E\left[Y_{ij}(0,g)|X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)
+%&= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
+%&= \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
 \end{align*}
-The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
+where the third equality follows from Assumption~3. The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
 \begin{align*}
-\tau_{X}^\text{obs} &= \left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=0\right]\right)\P(X_{ij}=0) \\
-&\quad + \left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=1\right]\right)\P(X_{ij}=1) \\
-&= \E\left[Y_{ij}|Z_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0\right] \\
-&= \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0\right]\right)\P(G_{ij}=0) \\
-&\quad + \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1\right]\right)\P(G_{ij}=1) \\
-&= 0.5\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right)
+\tau_{X}^\text{obs} &=
+\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\right)\P(G_{ij}=g) \\
+&= \frac{1}{4}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\right)
+%&= \frac{1}{4}\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]\right. \\
+%&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right)
 \end{align*}
-where the third equality as $X_{i1}\condind X_{i2}$ (and so $Z_{ij}\condind G_{ij}$) and the fourth equality from Assumptions~1 and 2. Note that the conditional expectations where The second equality follows under the ``super-population'' perspective \parencite{Forastiere:2021} where expectations should be interpreted as the exp \todo (impossible event?) The above derivations suggest that $\tau_{X}^\text{obs}-\tau=0$, and therefore an unbiased estimator of the naive effect estimator is also unbiased for the treatment effect in this setting.
+where the second equality follows from the fact that $G_{ij}\condind X_{ij}, Z_{ij}$. It then follows from the above derivations that $\tau_{X}^\text{obs}-\tau = 0$.
+\iffalse
+and Assumptions~1 and 3 that
+\begin{align*}
+&\tau_{X}^\text{obs}-\tau \\
+&= \tau_{X}^\text{obs} - \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \\
+&= \tau_{X}^\text{obs} - \frac{1}{2}\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right)\P(X_{ij}=x) \\
+&= 0 \;.
+\end{align*}
+\fi
+Therefore, an unbiased estimator of the naive effect estimator is also unbiased for the treatment effect in this setting.
 
 \subsection{Setting~2: correlated individual and neighbourhood treatments}
 
-\begin{itemize}
+In our second setting, the covariate $X_{ij}$ alone is insufficient for the conditional independence of the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$. \todo example. Then by Corollary~2, an effect estimator that is unbiased under SUTVA will be biased under the assumptions of our setting.
+\\
 
-\item
-Setting 2:
+The overall treatment effect $\tau$ in this setting is the same as the one computed in the first setting.
+\iffalse
 \begin{align*}
-\tau(1) &= \mu(1,1) \\
-\tau(0) &= - \mu(0,0) \\
-\tau &= 0.5(\mu(1,1) - \mu(0,0))
+%\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
+%\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
+\tau &= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
+&= \sum_{x_1,x_2\in\{0,1\}}\left(\tau(0)\P(G_{ij}=0|X_{i1}=x_1,X_{i2}=x_2) + \tau(1)\P(G_{ij}=1|X_{i1}=x_1,X_{i2}=x_2)\right)\P(X_{i1}=x_1,X_{i2}=x_2) \\
+&= \frac{1}{4}\left(\tau(0)\left(\frac{1}{2}+\frac{3}{2}\right) + \tau(1)\left(\frac{3}{2}+\frac{1}{2}\right)\right) \\
+&= \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
 \end{align*}
+\fi
+The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
 \begin{align*}
-\tau_{X^*}^\text{obs} &= 0.5(\E[Y|Z=1,X=0] - \E[Y|Z=0,X=0] + \E[Y|Z=1,X=1] - \E[Y|Z=0,X=1]) \\
-&= \E[Y|Z=1] - \E[Y|Z=0] \\
-&= \E[Y|Z=1,G=1]P(G=1|Z=1) + \E[Y|Z=1,G=0]P(G=0|Z=1) - \E[Y|Z=0,G=1]P(G=1|Z=0) - \E[Y|Z=0,G=0]P(G=0|Z=0) \\
-&= \E[Y|Z=1,G=1] - \E[Y|Z=0,G=0]
+\tau_{X}^\text{obs} &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=1,X_{ij}=x)\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=0,X_{ij}=x)\right) \\
+&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x)\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x'|Z_{ij}=0,X_{ij}=x)\right) \\
+&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=0|X_{ij}=x,X_{ik}=x')\right) \\
+&= \frac{1}{2}\sum_{x\in\{0,1\}}\left(\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2\right)\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right]\right) \right. \\
+&\quad +\left. 4\cdot\frac{1}{4}\cdot\frac{3}{4}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right) \right) \\
+&= \sum_{x\in\{0,1\}}\left(\frac{5}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right]\right) \right. \\
+&\quad +\left. \frac{3}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right) \right)
+%&= \frac{1}{2}\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2\right)\left(\mu(1,1) - \mu(0,0)\right) + \frac{1}{2}\cdot4\cdot\frac{1}{4}\cdot\frac{3}{4}\left(\mu(1,0) - \mu(0,1)\right) \\
+%&= \frac{5}{8}\left(\mu(1,1) - \mu(0,0)\right) + \frac{3}{8}\left(\mu(1,0) - \mu(0,1)\right)
 \end{align*}
+where the third equality follows from the fact that $Z_{ij}\condind G_{ij}|X_{i1},X_{i2}$ and the fourth equality from Bayes' theorem manipulation (\todo Appendix?). The bias of an unbiased estimator for $\tau_{X}^\text{obs}$ is then
+\[
+\tau_{X}^\text{obs} - \tau = \frac{1}{8}\sum_{z,x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right)
+%&= \frac{1}{8}\left(\mu(1,1) - \mu(1,0) - \mu(0,0) + \mu(0,1)\right) \;,
+\]
+which can be verified using the bias formula in Corollary~2 given by
 \begin{align*}
-&\tau_{X^*}^\text{obs} \\
-&= (\E[Y(1,1)|X=1]P(G=1|Z=1,X=1) - \E[Y(0,1)|X=1]P(G=1|Z=0,X=1))P(X=1) \\
-& + (\E[Y(1,0)|X=1]P(G=0|Z=1,X=1) - \E[Y(0,0)|X=1]P(G=0|Z=0,X=1))P(X=1) \\
-& + (\E[Y(1,1)|X=0]P(G=1|Z=1,X=0) - \E[Y(0,1)|X=0]P(G=1|Z=0,X=0))P(X=0) \\
-& + (\E[Y(1,0)|X=0]P(G=0|Z=1,X=0) - \E[Y(0,0)|X=0]P(G=0|Z=0,X=0))P(X=0) \\
-&= 0.5\E[Y(1,1)|X=1] - 0.5\E[Y(0,0)|X=1] + 0.5\E[Y(1,1)|X=0] - 0.5\E[Y(0,0)|X=0] \\
-&= \E[Y(1,1)] - \E[Y(0,0)]
+\tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}} \left(\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0,X_{ij}=x\right]\right)\right. \\
+&\qquad \left(\P(G_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(G_{ij}=1|X_{ij}=x)\right) \\
+&\quad - \left(\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0,X_{ij}=x\right]\right) \\
+&\qquad \left.\left(\P(G_{ij}=1|Z_{ij}=0,X_{ij}=x)-\P(G_{ij}=1|X_{ij}=x)\right)\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\sum_{x,x'\in\{0,1\}} \left(\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0,X_{ij}=x\right]\right)\right. \\
+&\qquad \left(\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')-\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')\right) \\
+&\quad - \left(\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0,X_{ij}=x\right]\right) \\
+&\qquad \left.\left(\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=0|X_{ij}=x,X_{ik}=x')-\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')\right)\right) \\
+&= \frac{1}{2}\sum_{x\in\{0,1\}}\left(\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2 - 1\right)\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0,X_{ij}=x\right]\right)\right. \\
+&\quad - \left.\left(4\cdot\frac{1}{4}\cdot\frac{3}{4} - 1\right)\left(\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0,X_{ij}=x\right]\right)\right) \\
+&= \frac{1}{8}\sum_{x,z\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right)
 \end{align*}
-\begin{align*}
-&\tau_{X^*}^\text{obs} - \tau \\
-&=(\E[Y|Z=1,G=1,X=1]-\E[Y|Z=1,G=0,X=1])(P(G=1|Z=1,X=1)-P(G=1|X=1))P(X=1) \\
-&- (\E[Y|Z=0,G=1,X=1]-\E[Y|Z=0,G=0,X=1])(P(G=1|Z=0,X=1)-P(G=1|X=1))P(X=1) \\
-&+ (\E[Y|Z=1,G=1,X=0]-\E[Y|Z=1,G=0,X=0])(P(G=1|Z=1,X=0)-P(G=1|X=0))P(X=0) \\
-&- (\E[Y|Z=0,G=1,X=0]-\E[Y|Z=0,G=0,X=0])(P(G=1|Z=0,X=0)-P(G=1|X=0))P(X=0) \\
-&= 0.25\E[Y|Z=1,G=1,X=1] - 0.25\E[Y|Z=0,G=0,X=1] + 0.25\E[Y|Z=1,G=1,X=0] - 0.25\E[Y|Z=0,G=0,X=0] \\
-&= 0.5\E[Y|Z=1,G=1] - 0.5\E[Y|Z=0,G=0]
-\end{align*}
-
-\end{itemize}
+where the second equality follows from the same reasoning used in the derivation of $\tau_X^\text{obs}$.
 
 
 \section{Reproducing results of simulation study}
@@ -221,11 +255,20 @@ Setting 2:
 \end{refcontext}
 
 
-%\newpage
+\newpage
 
-%\appendix
+\appendix
 
-%\section{}
+\section{Additional derivations}
+
+Under the second setting,
+\begin{align*}
+\P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x) &= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=x)} \\
+&= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=X_{ik})P(X_{ij}=x) + \P(Z_{ij}=1|X_{ij}\neq X_{ik})P(X_{ij}=x')} \\
+&= \left(\frac{\frac{1}{2}}{\frac{3}{4}\cdot\frac{1}{2}+\frac{1}{4}\cdot\frac{1}{2}}\right)\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x') \\
+&= \P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')
+\end{align*}
+where the first equality follows from Bayes' theorem and the assumption $X_{i1}\condind X_{i2}$.
 
 \end{document}
 
@@ -289,3 +332,55 @@ Setting 1:
 &= \E[Y|Z=1,G=1]P(G=1|Z=1) + \E[Y|Z=1,G=0]P(G=0|Z=1) - \E[Y|Z=0,G=1]P(G=1|Z=0) - \E[Y|Z=0,G=0]P(G=0|Z=0) \\
 &= 0.5(\E[Y|Z=1,G=1] + \E[Y|Z=1,G=0] - \E[Y|Z=0,G=1] - \E[Y|Z=0,G=0])
 \end{align*}
+
+\iffalse
+\begin{align*}
+\tau_{X}^\text{obs} &= \left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=0\right]\right)\P(X_{ij}=0) \\
+&\quad + \left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=1\right]\right)\P(X_{ij}=1) \\
+&= \E\left[Y_{ij}|Z_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0\right] \\
+&= \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0\right]\right)\P(G_{ij}=0) \\
+&\quad + \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1\right]\right)\P(G_{ij}=1) \\
+&= 0.5\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right)
+
+&= \frac{1}{2}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=0,G_{ij}=0\right]\P(G_{ij}=0) + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=0,G_{ij}=1\right]\P(G_{ij}=1)\right. \\
+&\quad - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=0,G_{ij}=0\right]\P(G_{ij}=0) - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=0,G_{ij}=1\right]\P(G_{ij}=1) \\
+&\quad + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=1,G_{ij}=0\right]\P(G_{ij}=0) + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=1,G_{ij}=1\right]\P(G_{ij}=1) \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=1,G_{ij}=0\right]\P(G_{ij}=0) - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=1,G_{ij}=1\right]\P(G_{ij}=1)\right) \\
+\end{align*}
+\fi
+
+\begin{itemize}
+
+\item
+Setting 2:
+\begin{align*}
+\tau(1) &= \mu(1,1) \\
+\tau(0) &= - \mu(0,0) \\
+\tau &= 0.5(\mu(1,1) - \mu(0,0))
+\end{align*}
+\begin{align*}
+\tau_{X^*}^\text{obs} &= 0.5(\E[Y|Z=1,X=0] - \E[Y|Z=0,X=0] + \E[Y|Z=1,X=1] - \E[Y|Z=0,X=1]) \\
+&= \E[Y|Z=1] - \E[Y|Z=0] \\
+&= \E[Y|Z=1,G=1]P(G=1|Z=1) + \E[Y|Z=1,G=0]P(G=0|Z=1) - \E[Y|Z=0,G=1]P(G=1|Z=0) - \E[Y|Z=0,G=0]P(G=0|Z=0) \\
+&= \E[Y|Z=1,G=1] - \E[Y|Z=0,G=0]
+\end{align*}
+\begin{align*}
+&\tau_{X^*}^\text{obs} \\
+&= (\E[Y(1,1)|X=1]P(G=1|Z=1,X=1) - \E[Y(0,1)|X=1]P(G=1|Z=0,X=1))P(X=1) \\
+& + (\E[Y(1,0)|X=1]P(G=0|Z=1,X=1) - \E[Y(0,0)|X=1]P(G=0|Z=0,X=1))P(X=1) \\
+& + (\E[Y(1,1)|X=0]P(G=1|Z=1,X=0) - \E[Y(0,1)|X=0]P(G=1|Z=0,X=0))P(X=0) \\
+& + (\E[Y(1,0)|X=0]P(G=0|Z=1,X=0) - \E[Y(0,0)|X=0]P(G=0|Z=0,X=0))P(X=0) \\
+&= 0.5\E[Y(1,1)|X=1] - 0.5\E[Y(0,0)|X=1] + 0.5\E[Y(1,1)|X=0] - 0.5\E[Y(0,0)|X=0] \\
+&= \E[Y(1,1)] - \E[Y(0,0)]
+\end{align*}
+\begin{align*}
+&\tau_{X^*}^\text{obs} - \tau \\
+&=(\E[Y|Z=1,G=1,X=1]-\E[Y|Z=1,G=0,X=1])(P(G=1|Z=1,X=1)-P(G=1|X=1))P(X=1) \\
+&- (\E[Y|Z=0,G=1,X=1]-\E[Y|Z=0,G=0,X=1])(P(G=1|Z=0,X=1)-P(G=1|X=1))P(X=1) \\
+&+ (\E[Y|Z=1,G=1,X=0]-\E[Y|Z=1,G=0,X=0])(P(G=1|Z=1,X=0)-P(G=1|X=0))P(X=0) \\
+&- (\E[Y|Z=0,G=1,X=0]-\E[Y|Z=0,G=0,X=0])(P(G=1|Z=0,X=0)-P(G=1|X=0))P(X=0) \\
+&= 0.25\E[Y|Z=1,G=1,X=1] - 0.25\E[Y|Z=0,G=0,X=1] + 0.25\E[Y|Z=1,G=1,X=0] - 0.25\E[Y|Z=0,G=0,X=0] \\
+&= 0.5\E[Y|Z=1,G=1] - 0.5\E[Y|Z=0,G=0]
+\end{align*}
+
+\end{itemize}
