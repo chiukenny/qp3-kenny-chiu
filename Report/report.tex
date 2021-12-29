@@ -2,6 +2,8 @@
 \input{header}
 \input{defs}
 
+\usepackage{tikz}
+
 \title{\todo\\\vspace{0.5em}\large{STAT 548 Qualifying Paper}}
 \author{Kenny Chiu}
 \date{\today}
@@ -118,25 +120,54 @@ A small number of works consider more specific and niche contexts. For example, 
 
 \section{Potential bias of naive estimator when unconfoundedness holds}
 
-\todo In this section, we describe a simple example that illustrates the relevance of Theorem~2.A, Corollary~2 and Corollary~3 in the paper by \textcite{Forastiere:2021}. Specifically, we show how given a simple network under certain assumptions, an unbiased naive estimator for the treatment effect that assumes SUTVA may be biased depending on the exact treatment assignment mechanism.
+In this section, we describe a simple example that illustrates the relevance of Theorem~2.A, Corollary~2 and Corollary~3 in the paper by \textcite{Forastiere:2021}. Specifically, we show how for a simple network under certain assumptions, an unbiased naive estimator for the treatment effect that assumes SUTVA may be biased depending on the exact treatment assignment mechanism.
 \\
 
-Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by $i\in\bbN$ for the pair and $j\in\{0,1\}$ for the unit within a pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ be whether a unit's paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some covariate available for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=\frac{1}{2}$. Other details, such as the space of outcomes $\calY$ and the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion.
+Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by $i\in\bbN$ for the pair and $j\in\{1,2\}$ for the unit within a pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ be whether a unit's paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some covariate available for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=\frac{1}{2}$. Other details, such as the space of outcomes $\calY$ and the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion. Figure~\ref{fig:example} shows an example network.
 \\
 
-\todo: make assignment probabilistic \parencite{Imbens:2015}. We examine the network under two settings. In the first setting, suppose that $\P(Z_{ij}=1|X_{ij}) = \frac{1}{4} + \frac{1}{2}X_{ij}$.
-%the covariate $X_{ij}$ exactly determines the treatment status of a unit, i.e., $Z_{ij} = X_{ij}$.
-Because $X_{ij}$ are generated independently, it follows that $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$ in this setting (they are independent unconditionally regardless of $X_{ij}$). In the second setting, suppose that the treatment assignment mechanism follows
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[thick,main/.style={draw,circle},node distance={6.5em},minimum size={1cm}]
+\node[main,align=center,label={[yshift=-0.5em]$X_{11}=1$}] (11) {$Z_{11}=1$\\$G_{11}=0$};
+\node[main,align=center,label={[yshift=-7.5em]$X_{12}=0$}] (12) [below of=11] {$Z_{12}=0$\\$G_{12}=1$};
+\draw[line width={0.5mm}] (11) -- (12);
+\node[main,align=center,label={[yshift=-0.5em]$X_{21}=0$}] (21) [right of=11]{$Z_{21}=1$\\$G_{21}=1$};
+\node[main,align=center,label={[yshift=-7.5em]$X_{22}=1$}] (22) [right of=12] {$Z_{22}=1$\\$G_{22}=1$};
+\draw[line width={0.5mm}] (21) -- (22);
+\node[] [right of=21] (d1) {\footnotesize$\bullet\bullet\bullet$};
+\node[] [right of=22] (d2) {\footnotesize$\bullet\bullet\bullet$};
+\node[main,align=center,label={[yshift=-0.5em]$X_{n1}=0$}] (n1) [right of=d1]{$Z_{n1}=0$\\$G_{n1}=0$};
+\node[main,align=center,label={[yshift=-7.5em]$X_{n1}=0$}] (n2) [right of=d2] {$Z_{n2}=0$\\$G_{n2}=0$};
+\draw[line width={0.5mm}] (n1) -- (n2);
+\node[] [right of=n1] (d3) {\footnotesize$\bullet\bullet\bullet$};
+\node[] [right of=n2] (d4) {\footnotesize$\bullet\bullet\bullet$};
+\end{tikzpicture}
+\caption{Example network of paired units with their individual treatment $Z_{ij}$, neighbourhood treatment $G_{ij}$, and covariate $X_{ij}$.}
+\label{fig:example}
+\end{figure}
+
+We examine the network under two settings. In the first setting, suppose that the treatment assignment mechanism follows
 \[
-\P(Z_{ij}=1|X_{i1},X_{i2}) = \frac{3}{4}\mathbbm{1}[X_{i1}=X_{i2}] + \frac{1}{4}\mathbbm{1}[X_{i1}\neq X_{i2}]
+\P(Z_{ij}=1|X_{ij}) = \frac{1}{4} + \frac{1}{2}X_{ij} \;,
 \]
-where $\mathbbm{1}[\argdot]$ is the indicator function. This corresponds to a homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ in this setting as the probability of a unit being treated also depends on its counterpart.
-%as a unit can only have values $(Z_{ij}=1,G_{ij}=1)$ or $(Z_{ij}=0,G_{ij}=0)$.
+i.e., the probability of being treated is greater when a unit has a 1-value for the covariate.
+%the covariate $X_{ij}$ exactly determines the treatment status of a unit, i.e., $Z_{ij} = X_{ij}$.
+Because $X_{ij}$ are generated independently, it follows that $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$ in this setting (they are independent unconditionally regardless of $X_{ij}$). An example study corresponding to this setting may be one where the paired units correspond to a pair of friends from potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters ($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$.
+\\
+
+In the second setting, suppose that the treatment assignment follows
+\[
+\P(Z_{ij}=1|X_{i1},X_{i2}) = \frac{3}{4}\mathbbm{1}\left[X_{i1}=X_{i2}\right] + \frac{1}{4}\mathbbm{1}\left[X_{i1}\neq X_{i2}\right]
+\]
+where $\mathbbm{1}[\argdot]$ is the indicator function. This assignment corresponds to a type of homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ in this setting as the probability of a unit being treated also depends on its counterpart. An example study corresponding to this setting may be one similar to the first but involving spouses rather than friends, where spouses coming from similar backgrounds may find it easier to discuss finances (at a more intimate level).
+\\
+
 In both settings, we further assume that Assumption~1 (no multiple versions of treatment), Assumption~2 (neighbourhood interference), and Assumption~3 (unconfoundedness) of \textcite{Forastiere:2021} hold. Hence, the assumptions of Corollary~1 are satisfied in the first setting, and the assumptions of Corollary~2 are satisfied in the second setting.
 
 \subsection{Setting~1: conditionally independent individual and neighbourhood treatments}
 
-In our first setting, the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$ are conditionally independent given $X_{ij}$. \todo example? Then by Corollary~1, an effect estimator that is unbiased under SUTVA will still be unbiased under the assumptions of our setting.
+In our first setting, the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$ are conditionally independent given $X_{ij}$. By Corollary~1, an effect estimator that is unbiased under SUTVA will still be unbiased under the assumptions of our setting.
 \\
 
 The overall treatment effect $\tau$ in this setting is given by
@@ -145,12 +176,12 @@ The overall treatment effect $\tau$ in this setting is given by
 %\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
 \tau %&= \sum_{g\in\{0,1\}} \tau(g)\P(G_{ij}=g) \\
 &= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
-&= \frac{1}{2}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)|X_{ij}=x\right] - \E\left[Y_{ij}(0,g)|X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
 &= \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)
 %&= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
 %&= \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
 \end{align*}
-where the third equality follows from Assumption~3. The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
+where the second equality follows from Theorem~1 in the work by \textcite{Forastiere:2021}. The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
 \begin{align*}
 \tau_{X}^\text{obs} &=
 \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
@@ -174,10 +205,10 @@ Therefore, an unbiased estimator of the naive effect estimator is also unbiased 
 
 \subsection{Setting~2: correlated individual and neighbourhood treatments}
 
-In our second setting, the covariate $X_{ij}$ alone is insufficient for the conditional independence of the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$. \todo example. Then by Corollary~2, an effect estimator that is unbiased under SUTVA will be biased under the assumptions of our setting.
+In our second setting, the covariate $X_{ij}$ alone is insufficient for the conditional independence of the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$. By Corollary~2, an effect estimator that is unbiased under SUTVA will be biased under the assumptions of our setting.
 \\
 
-The overall treatment effect $\tau$ in this setting is the same as the one computed in the first setting.
+The overall treatment effect $\tau$ in this setting is the same as the one given in the first setting.
 \iffalse
 \begin{align*}
 %\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
@@ -223,7 +254,7 @@ which can be verified using the bias formula in Corollary~2 given by
 &\quad - \left.\left(4\cdot\frac{1}{4}\cdot\frac{3}{4} - 1\right)\left(\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0,X_{ij}=x\right]\right)\right) \\
 &= \frac{1}{8}\sum_{x,z\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right)
 \end{align*}
-where the second equality follows from the same reasoning used in the derivation of $\tau_X^\text{obs}$.
+where the second equality follows from the same reasoning in the derivation of $\tau_X^\text{obs}$.
 
 
 \section{Reproducing results of simulation study}
@@ -261,14 +292,14 @@ where the second equality follows from the same reasoning used in the derivation
 
 \section{Additional derivations}
 
-Under the second setting,
+Under the assumptions of our second example setting,
 \begin{align*}
 \P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x) &= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=x)} \\
 &= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=X_{ik})P(X_{ij}=x) + \P(Z_{ij}=1|X_{ij}\neq X_{ik})P(X_{ij}=x')} \\
 &= \left(\frac{\frac{1}{2}}{\frac{3}{4}\cdot\frac{1}{2}+\frac{1}{4}\cdot\frac{1}{2}}\right)\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x') \\
 &= \P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')
 \end{align*}
-where the first equality follows from Bayes' theorem and the assumption $X_{i1}\condind X_{i2}$.
+where the first equality follows from Bayes' theorem and the assumption that $X_{i1}\condind X_{i2}$.
 
 \end{document}
 
