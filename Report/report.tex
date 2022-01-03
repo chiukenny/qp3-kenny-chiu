@@ -265,11 +265,12 @@ where the second equality follows from the same reasoning in the derivation of $
 \begin{align*}
 \text{logit}(P(Z_i=1) &= -3 + 3X_i^\text{game1} + 5X_i^\text{game2} \\
 Y_i(z,g)|\Xind_i &\sim N\left(\mu(z,g,\Xind_i),1\right) \\
-\mu(z,g,\Xind_i) &= 5 + 6\mathbbm{1}[\phi(1;\Xind_i)\geq 0.7] + 10z - 3z\mathbbm{1}[\phi(1;\Xind_i)\geq0.7] + \delta g \\
+\mu(z,g,\Xind_i) &= 5 + 6\mathbbm{1}[\phi(1;\Xind_i)\geq 0.7] + 10z - 3z\mathbbm{1}[\phi(1;\Xind_i)\geq0.7] + \beta g \\
 \tau(g) &= \mu(1,g,\Xind_i) - \mu(0,g,\Xind_i) = 10 - 3\mathbbm{1}[\phi(1;\Xind_i)\geq0.7] \qquad \forall g\in\calG \\
 \tau &= \tau(g) \\
-\delta(g;z) &= \mu(z,g,\Xind_i) - \mu(z,0,\Xind_i) = \delta g \\
-\Delta(z) &= \delta\E[G_i] \qquad \forall z\in\{0,1\}
+\delta(g;z) &= \mu(z,g,\Xind_i) - \mu(z,0,\Xind_i) = \beta g \\
+\Delta(z) &= \delta\E[G_i] \qquad \forall z\in\{0,1\} \\
+\mu(z,g,u) - \mu(z,0,u') &= 6(\mathbbm{1}[\phi(1;u)\geq 0.7]-\mathbbm{1}[\phi(1;u')\geq 0.7]) - 3z(\mathbbm{1}[\phi(1;u)\geq0.7] - \mathbbm{1}[\phi(1;u')\geq0.7]) + \beta g
 \end{align*}
 
 \todo: Complication: some larger degrees, difficult to compute $V_g$ for proportion $G$. For sum $G$, covariates must include degree for unconfoundedness to hold.
