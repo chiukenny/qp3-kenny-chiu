@@ -14,6 +14,12 @@
 #5  3152 3180
 #6  2645 2461
 
+
+# Parameters
+#interf = 4 # {4,6,8} mean
+interf = 0.5 # sum
+
+
 library(rjson)
 library(tidyverse)
 library(Matrix)
@@ -47,132 +53,350 @@ remove(dat_mat)
 edge_csv = read.csv("musae_ENGB_edges.csv", header=T) + 1
 dat_edMat = sparseMatrix(i=edge_csv$from, j=edge_csv$to, symmetric=T)
 remove(edge_csv)
-#degrees = as.data.frame(table(c(dat_csv$from,dat_csv$to))) %>%
-#  arrange(desc(Freq))
-#summary(degrees$Freq)
 
 
-# Simulation
-
-sim = dat
-sim$Ngame1 = 0
-sim$Ngame2 = 0
-sim$N = 0
-
-for (i in 1:nrow(sim))
-{
-  id = sim$id[i]
-  ii = which(dat_edMat[id,])
-  sim$Ngame1[i] = sum(sim$game1[ii]) # Sum is easier to subset
-  sim$Ngame2[i] = sum(sim$game2[ii])
-  sim$N[i] = length(ii)
-}
-
-interf = 4 # {4,6,8} mean
-#interf = 0.5 # sum
-
-# Scenario 1
+# Functions
 expit = function(x) {1 / (1+exp(-x))}
 ind_prop = function(x1, x2)
 {
   return(expit(-3 + 3*x1 + 5*x2))
 }
-prop = ind_prop(sim$game1, sim$game2)
-sim$Z = rbernoulli(nrow(sim), prop)*1
-
-# Function to compute neighbourhood covariates
-nbr_trt = function(x)
-{
-  return(mean(sim$Z[which(dat_edMat[x,])]))
-  #return(sum(sim$Z[which(dat_edMat[x,])]))
-}
-sim$G = sapply(sim$id, nbr_trt)
-
 outcome_mean = function(z,g,x1,x2,beta)
 {
   prop = ind_prop(x1,x2)
   return(5 + 6*(prop>=0.7) + 10*z - 3*z*(prop>=0.7) + beta*g)
 }
+
+
+# Simulation
+
+sim = dat
+sim$Ngame1 = as.vector(dat_edMat %*% sim$game1)
+sim$Ngame2 = as.vector(dat_edMat %*% sim$game2)
+sim$N = rowSums(dat_edMat)
+
+# Scenario 1
+prop = ind_prop(sim$game1, sim$game2)
+sim$Z = rbernoulli(nrow(sim), prop)*1
+
+#sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat) # Mean
+sim$G = as.vector(dat_edMat %*% sim$Z) # Sum
+
 #mu = 5 + 6*(prop1>=0.7) + 10*sim$Z - 3*sim$Z*(prop1>=0.7) + delta*sim$G
 mu = outcome_mean(sim$Z,sim$G,sim$game1,sim$game2,interf)
 sim$Y = rnorm(nrow(sim), mu)
 
-#i00 = which(sim$game1==0 & sim$game2==0)
-#i01 = which(sim$game1==0 & sim$game2==1)
-#i10 = which(sim$game1==1 & sim$game2==0)
-#i11 = which(sim$game1==1 & sim$game2==1)
-
 
 # Table 1
-
-# trt_est = function(sim)
-# {
-#   obs_g = sort(unique(sim$G))
-#   
-#   sim_1 = sim[which(sim$Z==1),]
-#   sim_0 = sim[which(sim$Z==0),]
-#   n_Z1 = nrow(sim_1)
-#   n_Z0 = nrow(sim_0)
-#   
-#   tau = 0
-#   sim_V1 = sim_1
-#   sim_V0 = sim_0
-#   for (g in obs_g)
-#   {
-#     sim_V1 = sim_V1[which(sim_V1$N >= g),]
-#     sim_V0 = sim_V0[which(sim_V0$N >= g),]
-#     Y_1g = sim_V1$Y[which(sim_V1$G==g)]
-#     Y_0g = sim_V0$Y[which(sim_V0$G==g)]
-#     P_1g = length(Y_1g) / n_Z1
-#     P_0g = length(Y_0g) / n_Z0
-#     
-#     if (length(Y_1g)>0) {tau = tau + mean(Y_1g)*P_1g}
-#     if (length(Y_0g)>0) {tau = tau - mean(Y_0g)*P_0g}
-#   }
-#   return(tau)
-# }
 
 # Theorem 2B (eqn. 12)
 
 # Computed using generating model
+# bias_T2B = function(sim, beta)
+# {
+#   # Take g' = 0, u' = (0,0)
+#   n = nrow(sim)
+#   n_Z1 = length(which(sim$Z==1))
+#   n_Z0 = length(which(sim$Z==0))
+#   
+#   bias = 0
+#   sim_V = sim
+#   obs_g = sort(unique(sim$G))
+#   for (g in obs_g)
+#   {
+#     sim_V = sim_V[which(sim_V$N>=g),]
+#     sim_Vg = sim_V[which(sim_V$G==g),]
+#     sim_V1g = sim_Vg[which(sim_Vg$Z==1),]
+#     sim_V0g = sim_Vg[which(sim_Vg$Z==0),]
+#     
+#     Pg = nrow(sim_Vg) / n
+#     Pg_1 = nrow(sim_V1g) / n_Z1
+#     Pg_0 = nrow(sim_V0g) / n_Z0
+#     
+#     for (u1 in 0:1)
+#     {
+#       for (u2 in 0:1)
+#       {
+#         Pu_g = length(which(sim_Vg$game1==u1 & sim_Vg$game2==u2)) / nrow(sim_Vg)
+#         if (Pu_g == 0) {next}
+#         Pu_1g = length(which(sim_V1g$game1==u1 & sim_V1g$game2==u2)) / nrow(sim_V1g)
+#         Pu_0g = length(which(sim_V0g$game1==u1 & sim_V0g$game2==u2)) / nrow(sim_V0g)
+#         if (is.nan(Pu_1g)) {Pu_1g = 0}
+#         if (is.nan(Pu_0g)) {Pu_0g = 0}
+#         bias = bias + (outcome_mean(1,g,u1,u2,beta)-outcome_mean(1,0,0,0,beta))*(Pu_1g*Pg_1-Pu_g*Pg)
+#         bias = bias - (outcome_mean(0,g,u1,u2,beta)-outcome_mean(0,0,0,0,beta))*(Pu_0g*Pg_0-Pu_g*Pg)
+#       }
+#     }
+#   }
+#   return(bias)
+# }
+
 bias_T2B = function(sim, beta)
 {
   # Take g' = 0, u' = (0,0)
   n = nrow(sim)
-  n_Z1 = length(which(sim$Z==1))
-  n_Z0 = length(which(sim$Z==0))
-  
+  i_1 = which(sim$Z==1)
+  n_1 = length(i_1)
+  i_0 = sim$id[-i_1]
+  n_0 = n - n_1
   bias = 0
-  sim_V = sim
-  obs_g = sort(unique(sim$G))
-  for (g in obs_g)
+  for (g in unique(sim$G))
   {
-    sim_V = sim_V[which(sim_V$N>=g),]
-    sim_Vg = sim_V[which(sim_V$G==g),]
-    sim_V1g = sim_Vg[which(sim_Vg$Z==1),]
-    sim_V0g = sim_Vg[which(sim_Vg$Z==0),]
+    i_g = which(sim$G==g)
+    n_g = length(i_g)
     
-    Pg = nrow(sim_Vg) / n
-    Pg_1 = nrow(sim_V1g) / n_Z1
-    Pg_0 = nrow(sim_V0g) / n_Z0
-    
+    i_1g = intersect(i_1, i_g)
+    n_1g = length(i_1g)
+    i_0g = intersect(i_0, i_g)
+    n_0g = n_g - n_1g
     for (u1 in 0:1)
     {
       for (u2 in 0:1)
       {
-        Pu_g = length(which(sim_Vg$game1==u1 & sim_Vg$game2==u2)) / nrow(sim_Vg)
-        if (Pu_g == 0) {next}
-        Pu_1g = length(which(sim_V1g$game1==u1 & sim_V1g$game2==u2)) / nrow(sim_V1g)
-        Pu_0g = length(which(sim_V0g$game1==u1 & sim_V0g$game2==u2)) / nrow(sim_V0g)
-        if (is.nan(Pu_1g)) {Pu_1g = 0}
-        if (is.nan(Pu_0g)) {Pu_0g = 0}
-        bias = bias + (outcome_mean(1,g,u1,u2,beta)-outcome_mean(1,0,0,0,beta))*(Pu_1g*Pg_1-Pu_g*Pg)
-        bias = bias - (outcome_mean(0,g,u1,u2,beta)-outcome_mean(0,0,0,0,beta))*(Pu_0g*Pg_0-Pu_g*Pg)
+        i_uu = which(sim$game1==u1 & sim$game2==u2)
+        
+        Pug_1 = length(intersect(i_1g, i_uu)) / n_1 #/ n_1g
+        #Pg_1 = n_1g / n_1
+        Pug_0 = length(intersect(i_0g, i_uu)) / n_0
+        Pug = length(intersect(i_g, i_uu)) / n
+        bias = bias + (outcome_mean(1,g,u1,u2,beta)-outcome_mean(1,0,0,0,beta))*(Pug_1-Pug) - (outcome_mean(0,g,u1,u2,beta)-outcome_mean(0,0,0,0,beta))*(Pug_0-Pug)
       }
     }
   }
   return(bias)
 }
+
+
+# Corollary 2
+# Computed using generating model
+# bias_C2 = function(sim, beta)
+# {
+#   # Take g' = 0
+#   bias = 0
+#   #counter = 0
+#   total_p = 0
+#   for (x1 in 0:1)
+#   {
+#     for (x2 in 0:1)
+#     {
+#       sim_x = sim[which(sim$game1==x1 & sim$game2==x2),]
+#       
+#       n_x = nrow(sim_x)
+#       n_1x = length(which(sim_x$Z==1))
+#       n_0x = n_x - n_1x
+#       
+#       bias_x = 0
+#       obs_g = sort(unique(sim_x$G))
+#       sim_Vx = sim_x
+#       for (g in obs_g)
+#       {
+#         #spl = split(sim_Vx, sim_Vx$G==g)
+#         #sim_Vx = spl["FALSE"]
+#         #sim_Vgx = spl["TRUE"]
+#         sim_Vx = sim_Vx[which(sim_Vx$N>=g),]
+#         Z_gx = sim_Vx$Z[which(sim_Vx$G==g)]
+#         
+#         n_1gx = length(which(Z_gx==1))
+#         Pg_1x = n_1gx / n_1x
+#         Pg_0x = (length(Z_gx)-n_1gx) / n_0x
+#         #bias_x = bias_x + beta*g*(Pg_1x-Pg_0x)
+#         # Z irrelevant in bias computation
+#         bias_x = bias_x + (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*(Pg_1x-Pg_0x)
+#         #counter = counter + nrow(sim_Vgx)
+#       }
+#       total_p = total_p + n_x/nrow(sim)
+#       bias = bias + bias_x*n_x#/nrow(sim)
+#     }
+#   }
+#   #message(counter)
+#   message(total_p)
+#   return(bias/nrow(sim))
+# }
+bias_C2 = function(sim, beta)
+{
+  # Take g' = 0
+  i_1 = which(sim$Z==1)
+  i_0 = sim$id[-i_1]
+  bias = 0
+  for (x1 in 0:1)
+  {
+    for (x2 in 0:1)
+    {
+      i_xx = which(sim$game1==x1 & sim$game2==x2)
+      n_xx = length(i_xx)
+      
+      i_1xx = intersect(i_1, i_xx)
+      n_1xx = length(i_1xx)
+      i_0xx = intersect(i_0, i_xx)
+      n_0xx = n_xx - n_1xx
+      
+      bias_xx = 0
+      for (g in unique(sim$G))
+      {
+        Pg_1xx = length(which(sim$G[i_1xx]==g)) / n_1xx
+        Pg_0xx = length(which(sim$G[i_0xx]==g)) / n_0xx
+        bias_xx = bias_xx + (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*(Pg_1xx-Pg_0xx)
+      }
+      bias = bias + bias_xx*n_xx
+    }
+  }
+  return(bias/nrow(sim))
+}
+
+
+# Include Ngame1, Ngame2, and N as covariates
+# bias_C2_Xn = function(sim, beta)
+# {
+#   # Take g' = 0
+#   bias = 0
+#   #counter = 0
+#   total_p = 0
+#   for (x1 in 0:1)
+#   {
+#     for (x2 in 0:1)
+#     {
+#       sim_x = sim[which(sim$game1==x1 & sim$game2==x2),]
+# 
+#       obs_N = sort(unique(sim_x$N))
+#       for (N in obs_N)
+#       {
+#         sim_Nx = sim_x[which(sim_x$N==N),]
+# 
+#         obs_n1 = sort(unique(sim_Nx$Ngame1))
+#         for (n1 in obs_n1)
+#         {
+#           #sim_xN = sim_xN[which(sim_xN$N>=n1),]
+#           sim_xn = sim_Nx[which(sim_Nx$Ngame1==n1),]
+# 
+#           obs_n2 = sort(unique(sim_xn$Ngame2))
+#           for (n2 in obs_n2)
+#           {
+#             #sim_xn = sim_xn[which(sim_xn$N>=n2),]
+#             sim_xnn = sim_xn[which(sim_xn$Ngame2==n2),]
+#             #if (nrow(sim_xnn)==0) {next}
+# 
+#             n_xnn = nrow(sim_xnn)
+#             n_1xnn = length(which(sim_xnn$Z==1))
+#             n_0xnn = n_xnn - n_1xnn
+# 
+#             bias_xnn = 0
+#             obs_g = sort(unique(sim_xnn$G))
+#             #sim_Vxnn = sim_xnn
+#             for (g in obs_g)
+#             {
+#               #sim_Vxnn = sim_Vxnn[which(sim_Vxnn$N>=g),]
+#               #sim_Vgxnn = sim_Vxnn[which(sim_Vxnn$G==g),]
+#               sim_Vgxnn = sim_xnn[which(sim_xnn$G==g),]
+# 
+#               n_1gxnn = length(which(sim_Vgxnn$Z==1))
+#               p = 0
+#               if (n_1xnn>0) {p = p + n_1gxnn/n_1xnn}
+#               if (n_0xnn>0) {p = p - (nrow(sim_Vgxnn)-n_1gxnn)/n_0xnn}
+#               bias_xnn = bias_xnn + (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*p
+#             }
+#             #counter = counter + n_1xnn + n_0xnn
+#             total_p = total_p + n_xnn
+#             bias = bias + bias_xnn*n_xnn#/nrow(sim)
+#           }
+#         }
+#       }
+#     }
+#   }
+#   #message(counter)
+#   message(total_p/nrow(sim))
+#   return(bias/nrow(sim))
+# }
+
+# Different from above implementation--why?
+bias_C2_Xn = function(sim, beta)
+{
+  # Take g' = 0
+  bias = 0
+  for (x1 in 0:1)
+  {
+    for (x2 in 0:1)
+    {
+      i_xx = which(sim$game1==x1 & sim$game2==x2)
+
+      for (N in unique(sim$N[i_xx]))
+      {
+        i_xxN = which(sim$game1==x1 & sim$game2==x2 & sim$N==N)
+        sim_xxN = sim[i_xxN,]
+        for (n1 in unique(sim_xxN$Ngame1))
+        {
+          for (n2 in unique(sim_xxN$Ngame2))
+          {
+            i_xxnnN = which(sim_xxN$Ngame1==n1 & sim_xxN$Ngame2==n2)
+            n_xxnnN = length(i_xxnnN)
+            if (n_xxnnN==0) {next}
+            i_1xxnnN = intersect(i_xxnnN,which(sim_xxN$Z==1))
+            n_1xxnnN = length(i_1xxnnN)
+            i_0xxnnN = intersect(i_xxnnN,which(sim_xxN$Z==0))
+            n_0xxnnN = length(i_0xxnnN)
+
+            bias_xxnnN = 0
+            for (g in unique(sim$G[i_xxnnN]))
+            {
+              i_gxxnnN = intersect(i_xxnnN,which(sim_xxN$G==g))
+              p = 0
+              if (n_1xxnnN>0) {p = p+length(intersect(i_1xxnnN,i_gxxnnN))/n_1xxnnN}
+              if (n_0xxnnN>0) {p = p-length(intersect(i_0xxnnN,i_gxxnnN))/n_0xxnnN}
+              bias_xxnnN = bias_xxnnN + (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*p
+            }
+            bias = bias + bias_xxnnN*n_xxnnN
+          }
+        }
+      }
+    }
+  }
+  return(bias/nrow(sim))
+}
+
+
+# n_1xxnnN = 0
+# n_0xxnnN = 0
+# for (g in unique(sim$G[i_xx]))
+# {
+#   i_gxx = which(sim$game1==x1 & sim$game2==x2 & sim$G==g)
+#   
+#   i_1gxx = intersect(i_1, i_gxx)
+#   i_0gxx = intersect(i_0, i_gxx)
+#   
+#   bias_g = 0
+#   sim_1gxx = sim[i_1gxx,]
+#   for (N in unique(sim$N[i_1gxx]))
+#   {
+#     for (n1 in unique(sim$Ngame1[i_1gxx]))
+#     {
+#       for (n2 in unique(sim$Ngame2[i_1gxx]))
+#       {
+#         i_1gxxnnN = which(sim_1gxx$N==N & sim_1gxx$Ngame==n1 & sim_1gxx$Ngame==n2)
+#         if (length(i_1gxxnnN)==0) {next}
+#         
+#       }
+#     }
+#   }
+# }
+
+
+# Bias of estimator that does not adjust for any covariates
+#tau_nocov = trt_est(sim)
+#bias_nocov = tau_nocov - tau1
+bias_t2b = bias_T2B(sim, interf)
+
+# Bias of estimator that adjusts for X_ind
+#tau_Xind = trt_est_Xind(sim)
+#bias_Xind = tau_Xind - tau1
+bias_c2 = bias_C2(sim, interf)
+
+# Bias of estimator that adjusts for X_z
+bias_c2_xn = bias_C2_Xn(sim, interf)
+# TODO: should equal bias_c2?
+
+
+
+
+# TODO: DELETE
 
 # g vs g'
 # bias_T2B = function(sim)
@@ -260,7 +484,6 @@ bias_T2B = function(sim, beta)
 #   return(tau)
 # }
 
-# Corollary 2
 # Keeping dependence on g
 # bias_C2 = function(sim)
 # {
@@ -378,103 +601,6 @@ bias_T2B = function(sim, beta)
 #   return(bias)
 # }
 
-# Computed using generating model
-bias_C2 = function(sim, beta)
-{
-  # Take g' = 0
-  bias = 0
-  #counter = 0
-  for (x1 in 0:1)
-  {
-    for (x2 in 0:1)
-    {
-      sim_x = sim[which(sim$game1==x1 & sim$game2==x2),]
-      
-      n_x = nrow(sim_x)
-      n_1x = length(which(sim_x$Z==1))
-      n_0x = n_x - n_1x
-      
-      bias_x = 0
-      obs_g = sort(unique(sim_x$G))
-      sim_Vx = sim_x
-      for (g in obs_g)
-      {
-        sim_Vx = sim_Vx[which(sim_Vx$N>=g),]
-        sim_Vgx = sim_Vx[which(sim_Vx$G==g),]
-        
-        n_1gx = length(which(sim_Vgx$Z==1))
-        Pg_1x = n_1gx / n_1x
-        Pg_0x = (nrow(sim_Vgx)-n_1gx) / n_0x
-        #bias_x = bias_x + beta*g*(Pg_1x-Pg_0x)
-        bias_x = bias_x + (outcome_mean(1,g,x1,x2,beta)-outcome_mean(1,0,x1,x2,beta))*(Pg_1x-Pg_0x)
-        #counter = counter + nrow(sim_Vgx)
-      }
-      bias = bias + bias_x*n_x/nrow(sim)
-    }
-  }
-  #message(counter)
-  return(bias)
-}
-
-# Include Ngame1, Ngame2, and N as covariates
-bias_C2_Xn = function(sim, beta)
-{
-  # Take g' = 0
-  bias = 0
-  #counter = 0
-  for (x1 in 0:1)
-  {
-    for (x2 in 0:1)
-    {
-      sim_x = sim[which(sim$game1==x1 & sim$game2==x2),]
-      
-      obs_N = sort(unique(sim_x$N))
-      for (N in obs_N)
-      {
-        sim_Nx = sim_x[which(sim_x$N==N),]
-        
-        obs_n1 = sort(unique(sim_Nx$Ngame1))
-        obs_n2 = sort(unique(sim_Nx$Ngame2))
-        for (n1 in obs_n1)
-        {
-          #sim_xN = sim_xN[which(sim_xN$N>=n1),]
-          sim_xn = sim_Nx[which(sim_Nx$Ngame1==n1),]
-          for (n2 in obs_n2)
-          {
-            #sim_xn = sim_xn[which(sim_xn$N>=n2),]
-            sim_xnn = sim_xn[which(sim_xn$Ngame2==n2),]
-            if (nrow(sim_xnn)==0) {next}
-            
-            n_xnn = nrow(sim_xnn)
-            n_1xnn = length(which(sim_xnn$Z==1))
-            n_0xnn = n_xnn - n_1xnn
-            
-            bias_xnn = 0
-            obs_g = sort(unique(sim_xnn$G))
-            sim_Vxnn = sim_xnn
-            for (g in obs_g)
-            {
-              sim_Vxnn = sim_Vxnn[which(sim_Vxnn$N>=g),]
-              sim_Vgxnn = sim_Vxnn[which(sim_Vxnn$G==g),]
-              
-              n_1gxnn = length(which(sim_Vgxnn$Z==1))
-              p = 0
-              if (n_1xnn>0) {p = p + n_1gxnn/n_1xnn}
-              if (n_0xnn>0) {p = p - (nrow(sim_Vgxnn)-n_1gxnn)/n_0xnn}
-              bias_xnn = bias_xnn + (outcome_mean(1,g,x1,x2,beta)-outcome_mean(1,0,x1,x2,beta))*p
-            }
-            #counter = counter + n_1xnn + n_0xnn
-            bias = bias + bias_xnn*n_xnn/nrow(sim)
-          }
-        }
-      }
-    }
-  }
-  #message(counter)
-  return(bias)
-}
-
-
 # tau1 = 0
 # for (x1 in 0:1)
 # {
@@ -497,20 +623,6 @@ bias_C2_Xn = function(sim, beta)
 #   }
 # }
 #tau1 = tau1 / nrow(sim)^2
-
-# Bias of estimator that does not adjust for any covariates
-#tau_nocov = trt_est(sim)
-#bias_nocov = tau_nocov - tau1
-bias_t2b = bias_T2B(sim, interf)
-
-# Bias of estimator that adjusts for X_ind
-#tau_Xind = trt_est_Xind(sim)
-#bias_Xind = tau_Xind - tau1
-bias_c2 = bias_C2(sim, interf)
-
-# Bias of estimator that adjusts for X_z
-bias_c2_xn = bias_C2_Xn(sim, interf)
-# TODO: should equal bias_c2?
 
 
 
