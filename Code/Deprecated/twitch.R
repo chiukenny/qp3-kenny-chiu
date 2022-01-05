@@ -1,6 +1,6 @@
 # Games -> Self-promotion -> Views?
 
-# https://snap.stanford.edu/data/twitch_gamers.html
+# https://snap.stanford.edu/data/twitch-social-networks.html
 # https://arxiv.org/pdf/1909.13021.pdf
 # Nodes: 7126
 # Features: 3169
@@ -16,8 +16,8 @@
 
 
 # Parameters
-#interf = 4 # {4,6,8} mean
-interf = 0.5 # sum
+interf = 4 # {4,6,8} mean
+#interf = 0.5 # sum
 
 
 library(rjson)
@@ -71,6 +71,10 @@ outcome_mean = function(z,g,x1,x2,beta)
 # Simulation
 
 sim = dat
+# Mean
+#sim$Ngame1 = as.vector(dat_edMat %*% sim$game1) / rowSums(dat_edMat)
+#sim$Ngame2 = as.vector(dat_edMat %*% sim$game2) / rowSums(dat_edMat)
+# Sum
 sim$Ngame1 = as.vector(dat_edMat %*% sim$game1)
 sim$Ngame2 = as.vector(dat_edMat %*% sim$game2)
 sim$N = rowSums(dat_edMat)
@@ -79,8 +83,8 @@ sim$N = rowSums(dat_edMat)
 prop = ind_prop(sim$game1, sim$game2)
 sim$Z = rbernoulli(nrow(sim), prop)*1
 
-#sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat) # Mean
-sim$G = as.vector(dat_edMat %*% sim$Z) # Sum
+sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat) # Mean
+#sim$G = as.vector(dat_edMat %*% sim$Z) # Sum
 
 #mu = 5 + 6*(prop1>=0.7) + 10*sim$Z - 3*sim$Z*(prop1>=0.7) + delta*sim$G
 mu = outcome_mean(sim$Z,sim$G,sim$game1,sim$game2,interf)
@@ -249,8 +253,6 @@ bias_C2 = function(sim, beta)
 # {
 #   # Take g' = 0
 #   bias = 0
-#   #counter = 0
-#   total_p = 0
 #   for (x1 in 0:1)
 #   {
 #     for (x2 in 0:1)
@@ -294,20 +296,15 @@ bias_C2 = function(sim, beta)
 #               if (n_0xnn>0) {p = p - (nrow(sim_Vgxnn)-n_1gxnn)/n_0xnn}
 #               bias_xnn = bias_xnn + (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*p
 #             }
-#             #counter = counter + n_1xnn + n_0xnn
-#             total_p = total_p + n_xnn
 #             bias = bias + bias_xnn*n_xnn#/nrow(sim)
 #           }
 #         }
 #       }
 #     }
 #   }
-#   #message(counter)
-#   message(total_p/nrow(sim))
 #   return(bias/nrow(sim))
 # }
 
-# Different from above implementation--why?
 bias_C2_Xn = function(sim, beta)
 {
   # Take g' = 0
@@ -335,7 +332,7 @@ bias_C2_Xn = function(sim, beta)
             n_0xxnnN = length(i_0xxnnN)
 
             bias_xxnnN = 0
-            for (g in unique(sim$G[i_xxnnN]))
+            for (g in unique(sim_xxN$G[i_xxnnN]))
             {
               i_gxxnnN = intersect(i_xxnnN,which(sim_xxN$G==g))
               p = 0
