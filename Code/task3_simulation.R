@@ -1,6 +1,14 @@
 # Simulation parameters
-interf = c(4, 6, 8) # {4,6,8} mean
-#interf = 0.5 # sum
+sum_exposure = F
+
+if (sum_exposure)
+{
+  # Sum
+  spillover = c(0.4, 0.6, 0.8)
+} else {
+  # Mean
+  spillover = c(4, 6, 8)
+}
 
 sims = 500
 
@@ -73,13 +81,18 @@ res_tab1 = data.frame(beta=integer(),
                       bias_all=double())
 
 sim = dat
-# TODO
 # Simulate individual and neighbourhood treatments Z and G
 sim$Z = rbernoulli(nrow(sim), ind_prop(sim$game1, sim$game2))*1
-sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat) # Mean
-#sim$G = as.vector(dat_edMat %*% sim$Z) # Sum
+if (sum_exposure)
+{
+  # Sum
+  sim$G = as.vector(dat_edMat %*% sim$Z)
+} else {
+  # Mean
+  sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat)
+}
 
-for (b in interf)
+for (b in spillover)
 {
   # Bias when not adjusting for covariates
   bias_t2b = bias_T2B(sim, b)
@@ -99,21 +112,27 @@ colnames(res_tab1) = c("beta","bias_none","bias_ind","bias_all")
 # Simulation: Table 2 - Scenario 1
 # ---------------------------------------------------------
 
-naive_err = matrix(0, sims, length(interf))
-reg_err = matrix(0, sims, length(interf))
+naive_err = matrix(0, sims, length(spillover))
+reg_err = matrix(0, sims, length(spillover))
 for (n in 1:sims)
 {
   # Use same network across methods in each simulation
   sim = dat
-  # TODO
+  
   # Simulate individual and neighbourhood treatments Z and G
   sim$Z = rbernoulli(nrow(sim), ind_prop(sim$game1, sim$game2))*1
-  sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat) # Mean
-  #sim$G = as.vector(dat_edMat %*% sim$Z) # Sum
-  
-  for (j in 1:length(interf))
+  if (sum_exposure)
   {
-    b = interf[j]
+    # Sum
+    sim$G = as.vector(dat_edMat %*% sim$Z)
+  } else {
+    # Mean
+    sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat)
+  }
+  
+  for (j in 1:length(spillover))
+  {
+    b = spillover[j]
     
     # Simulate outcomes
     sim$Y = rnorm(nrow(sim), outcome_mean(sim$Z,sim$G,sim$game1,sim$game2,b))
@@ -137,7 +156,7 @@ rmse_naive = sqrt(colMeans(naive_err^2))
 bias_reg = colMeans(reg_err)
 rmse_reg = sqrt(colMeans(reg_err^2))
 
-res_tab2 = data.frame(beta=interf,
+res_tab2 = data.frame(beta=spillover,
                       bias_naive=bias_naive,
                       rmse_naive=rmse_naive,
                       bias_reg=bias_reg,
