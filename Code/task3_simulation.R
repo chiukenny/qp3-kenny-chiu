@@ -114,6 +114,8 @@ colnames(res_tab1) = c("beta","bias_none","bias_ind","bias_all")
 
 naive_err = matrix(0, sims, length(spillover))
 reg_err = matrix(0, sims, length(spillover))
+reg_z_err = matrix(0, sims, length(spillover))
+sub_ind_err = matrix(0, sims, length(spillover))
 for (n in 1:sims)
 {
   # Use same network across methods in each simulation
@@ -145,8 +147,12 @@ for (n in 1:sims)
     naive_est = mean(sim$Y[which(sim$Z==1)]) - mean(sim$Y[which(sim$Z==0)])
     naive_err[n,j] = naive_est - mean(taus)
     
-    # Compute error of regression estimator
+    # Compute error of regression estimators
     reg_err[n,j] = lm(Y~Z+game1+game2, data=sim)$coefficients["Z"] - mean(taus)
+    reg_z_err[n,j] = lm(Y~Z+game1+game2+Ngame1+Ngame2+N, data=sim)$coefficients["Z"] - mean(taus)
+    
+    # Compute error of subclass estimators
+    sub_ind_err[n,j] = subcl_ind(sim, 4) - mean(taus)
   }
 }
 
@@ -155,9 +161,17 @@ bias_naive = colMeans(naive_err)
 rmse_naive = sqrt(colMeans(naive_err^2))
 bias_reg = colMeans(reg_err)
 rmse_reg = sqrt(colMeans(reg_err^2))
+bias_reg_z = colMeans(reg_z_err)
+rmse_reg_z = sqrt(colMeans(reg_z_err^2))
+bias_sub_ind = colMeans(sub_ind_err)
+rmse_sub_ind = sqrt(colMeans(sub_ind_err^2))
 
 res_tab2 = data.frame(beta=spillover,
                       bias_naive=bias_naive,
                       rmse_naive=rmse_naive,
                       bias_reg=bias_reg,
-                      rmse_reg=rmse_reg)
+                      rmse_reg=rmse_reg,
+                      bias_reg_z=bias_reg_z,
+                      rmse_reg_z=rmse_reg_z,
+                      bias_sub_ind=bias_sub_ind,
+                      rmse_sub_ind=rmse_sub_ind)

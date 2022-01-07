@@ -259,10 +259,10 @@ where the second equality follows from the same reasoning in the derivation of $
 
 \section{Reproducing simulation study results}
 
-In this section, we aim to reproduce the general findings of the simulation study conducted by \textcite{Forastiere:2021}. Note that the complete Add Health dataset that \citeauthor{Forastiere:2021} work with is publicly inaccessible, and so we instead work with the Twitch Social Network dataset \parencite{Rozemberczki:2021} that is comparable in size. Twitch is an American live streaming service that focuses on video game streaming. The dataset contains several networks of streamers and their mutual friendships that were collected in May 2018. We consider a hypothetical study where we are interested in understanding the effect of streamer self-promotions and advertising (the individual treatment) on the number of subscribers (users who follow a particular streamer; the outcome). It is reasonable to assume that there is interference at play where promoting one's self will also promote the streamer's network due to the site's recommendation algorithms that suggest similar streams to a viewer.
+In this section, we aim to reproduce the general findings of the simulation study conducted by \textcite{Forastiere:2021}. Note that the complete Add Health dataset that \citeauthor{Forastiere:2021} work with is publicly inaccessible, and so we instead work with the Twitch Social Network dataset \parencite{Rozemberczki:2021} that is comparable in size. Twitch is an American live streaming service that focuses on video game streaming. The dataset contains several networks of streamers and their mutual friendships that were collected in May~2018. We consider a hypothetical study where we are interested in understanding the effect of streamer self-promotions and advertising (the individual treatment) on the number of subscribers (users who follow a particular streamer; the outcome). It is reasonable to assume that there is interference at play where promoting one's self would inadvertently promote the streamer's network due to the site's recommendation algorithms that suggest similar streams to a viewer.
 \\
 
-\todo details about dataset, binary covariates  The subset contains data for 6504 students (\todo: schools?) as opposed to the 16,410 students from 29 schools considered in their study. differences in degree, Add Health degree limited to 10
+We specifically work with the EN subnetwork of the Twitch dataset, which includes a sample of streamers who stream in English. The network includes 7126 streamers and 35,324 mutual friendship relationships. A total of 3169 binary features (e.g., games liked and played, location, streaming habits, etc.) are collected from each streamer. However, the individual features are unnamed. For the purposes of this study, we only consider feature \verb|224| and feature \verb|569| due to their distribution (the second and third most represented features in the dataset, respectively). We view these features as covariates representing whether a streamer plays a particular \verb|game1| and \verb|game2|. We note that one major difference between the Twitch dataset and the Add Health dataset is that the degree of each unit is limited to at most 10 in the Add Health dataset while there is no built-in limit in the Twitch dataset. More details about the Twitch network is provided in Appendix~\ref{apx:twitch}.
 \\
 
 In the following sections, we describe our efforts to translate the simulation procedure and (partial) findings of Tables~1 and 2 in the work by \textcite{Forastiere:2021} to our Twitch data. Under various individual and neighbourhood treatment generation scenarios, Table~1 compares the theoretical bias of estimators that adjust for different sets of covariates, while Table~2 compares the observed bias and RMSE of several estimators on simulated data. In our work, we focus specifically on Scenario~1 where the unconfoundedness assumption holds given the individual-level covariates.
@@ -273,7 +273,7 @@ To study the bias of estimators, we simulate both the treatment $Z$ (self-promot
 \[
 \text{logit}(P(Z_i=1)) = \text{logit}(\phi(1;\Xind_i)) = -3 + 3X_i^\text{game1} + 4X_i^\text{game2} \;.
 \]
-Because $Z_i$ is generated only based on the individual covariates $\Xind_i$, it follows that the unconfoundedness assumption holds given $\Xind_i$. For the neighbourhood treatment $G$, we consider both the proportion (following \citeauthor{Forastiere:2021}) and the sum of treated neighbours (which may make more sense in our context) in our simulations. \todo covariate balance in one simulated dataset.
+Because $Z_i$ is generated only based on the individual covariates $\Xind_i$, it follows that the unconfoundedness assumption holds given $\Xind_i$. For the neighbourhood treatment $G$, we consider both the proportion (following \citeauthor{Forastiere:2021}) and the sum of treated neighbours (which may make more sense in our context) in our simulations. Additional details about the simulated treatments can be found in Appendix~\ref{apx:covbal}.
 \\
 
 Our outcome generation model is given by
@@ -308,11 +308,11 @@ $G$ exposure type & Interference $(\beta)$ & Bias$(\emptyset)$ & Bias$(\Xind_i)$
 & High (0.8) & 4.085 & -0.289 & 1.472 \\
 \bottomrule
 \end{tabular}
-\caption{Bias of covariate-adjusted SUTVA estimators for $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) in one simulated dataset.}
+\caption{Bias of covariate-adjusted SUTVA estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) on one simulated dataset.}
 \label{tab:table1}
 \end{table}
 
-Our findings for the estimator that does not adjust for covariates and for the estimator that adjusts for the individual covariates $\Xind_i$ are consistent with what is reported in Table~1 in the work of \textcite{Forastiere:2021}. For the estimator that adjusts for both individual and neighbourhood covariates $\bfX^z_i$, we report biases that are larger than expected. Our investigation suggests that these large values are arising due to \todo. Because there is a much larger range in node degrees in the Twitch network compared to the Add Health network, there are many more values of the neighbourhood treatment to consider in the bias computation. This consideration combined with the smaller dataset size means that many combinations of covariate values appear in only one node \todo
+Our findings for the estimator that does not adjust for covariates and for the estimator that adjusts for the individual covariates $\Xind_i$ are consistent with what is reported in Table~1 in the work of \textcite{Forastiere:2021}. For the estimator that adjusts for both individual and neighbourhood covariates $\bfX^z_i$, we report biases that are larger than expected. Assuming that our implementation is correct, our investigation suggests that these large values are arising due to \todo. Because there is a much larger range in node degrees in the Twitch network compared to the Add Health network, there are many more values of the neighbourhood treatment to consider in the bias computation. This consideration combined with the smaller dataset size means that many combinations of covariate values appear in only one node \todo
 
 \subsection{Observed bias and RMSE of estimators}
 
@@ -322,9 +322,10 @@ We examine the observed bias and RMSE of two estimators of $\tau$ that assume SU
 \]
 where $\bar{Y}_{\argdot}$ is the mean outcome across units with $\argdot$. The regression estimator $\tau_\text{reg}$ \parencite{Imbens:2015} is extracted from a fitted linear model given by
 \[
-\E[Y|\Xind_i] = \beta_0 + \tau_\text{reg}Z_i + \beta_1X^\text{game1} + \beta_2X^\text{game2} \;.
+\E[Y|Z_i,\Xind_i] = \beta_0 + \tau_\text{reg}Z_i + \beta_1X^\text{game1} + \beta_2X^\text{game2}
 \]
-The estimates are compared to the value of $\tau$ computed using the formula provided in Section~$\ref{sec:models}$. Table~\ref{tab:table2} reports the average computed biases for the two estimators over 500 simulated datasets. In each simulation, the individual and neighbourhood treatments are re-generated, and the same simulated treatments are used for all estimators and interference levels (only the outcomes are re-generated between interference levels).
+where $\beta_j$ are the other parameters of the model. The observed bias for one simulated dataset is computed as the differences between estimates $\hat{\tau}_\text{naive}$ and $\hat{\tau}_\text{reg}$ and the expected value $\tau$, which is computed using the formula provided in Section~$\ref{sec:models}$. Table~\ref{tab:table2} reports the mean computed biases and RMSE for the two estimators over 500 simulated datasets. In each simulation, the individual and neighbourhood treatments are re-generated, and the same simulated treatments are used for all estimators and interference levels (only the outcomes are re-generated between interference levels).
+\\
 
 \begin{table}[ht]
 \centering
@@ -342,19 +343,18 @@ $G$ exposure type & Interference $(\beta)$ & Bias & RMSE & Bias & RMSE \\
 & High (0.8) & 4.280 & 4.289 & 0.479 & 0.664 \\
 \bottomrule
 \end{tabular}
-\caption{\todo Bias of covariate-adjusted SUTVA estimators for $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) in one simulated dataset.}
+\caption{Mean bias and RMSE of estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) over 500 simulated datasets.}
 \label{tab:table2}
 \end{table}
 
-\todo
+Our findings are generally consistent with the results of \textcite{Forastiere:2021} reported in Table~2 (Unadjusted and Regression $\sim Z_i,\Xind_i$ estimators under Scenario~1) where a greater interference effect leads to a greater RMSE.
 
+\todo: DELETE
 \begin{align*}
 \delta(g;z) &= \mu(z,g,\Xind_i) - \mu(z,0,\Xind_i) = \beta g \\
 \Delta(z) &= \delta\E[G_i] \qquad \forall z\in\{0,1\} \\
 \mu(z,g,u) - \mu(z,0,u') &= 6(\mathbbm{1}[\phi(1;u)\geq 0.7]-\mathbbm{1}[\phi(1;u')\geq 0.7]) - 3z(\mathbbm{1}[\phi(1;u)\geq0.7] - \mathbbm{1}[\phi(1;u')\geq0.7]) + \beta g
 \end{align*}
-
-\todo: Complication: some larger degrees, difficult to compute $V_g$ for proportion $G$. For sum $G$, covariates must include degree for unconfoundedness to hold.
 
 
 \section{Extending the simulation study}
@@ -394,6 +394,92 @@ Under the assumptions of our second example setting,
 &= \P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')
 \end{align*}
 where the first equality follows from Bayes' theorem and the assumption that $X_{i1}\condind X_{i2}$.
+
+\section{Twitch dataset details}\label{apx:twitch}
+
+\todo
+
+Distribution of features \verb|224| and \verb|569|:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}rrrl@{}}
+\toprule
+& \multicolumn{2}{c}{game2} \\
+\cmidrule(lr){2-3}
+game1 & 0 & 1 & Total \\
+\midrule
+0 & 1582 (22\%) & 1728 (24\%) & 3310 (46\%) \\
+1 & 1834 (26\%) & 1982 (28\%) & 3816 (54\%) \\
+Total & 3416 (48\%) & 3710 (52\%) & 7216 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Distribution of degrees:
+\begin{verbatim}
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  1.000   2.000   5.000   9.914  11.000 720.000
+  
+ SD = 22.19026
+\end{verbatim}
+
+\subsection{Covariate balance} \label{apx:covbal}
+
+In one simulated dataset:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Variable & $\bar{X}_{Z=1}$ & $\bar{X}_{Z=0}$ & Standardized Diff. \\
+\midrule
+game1 & 0.683 & 0.326 &  \\
+game2 & 0.763 & 0.176 &  \\
+Neighbours' game1 & 0.486 & 0.466 & \\
+Neighbours' game2 & 0.620 & 0.586 & \\
+Degree & 10.757 & 8.717 & \\
+Proportion $G_i$ & 0.604 & 0.569 & \\
+Sum $G_i$ & 6.979 & 5.365 & \\
+\bottomrule
+\end{tabular}
+\caption{Covariate balance across individual treatment arms.}
+\end{table}
+
+Distribution of proportion $G_i$'s:
+\begin{verbatim}
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+ 0.0000  0.4444  0.6250  0.5896  0.7989  1.0000
+ 
+ SD = 0.298948
+\end{verbatim}
+
+Distribution of sum $G_i$'s:
+\begin{verbatim}
+   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+  0.000   1.000   3.000   6.312   7.000 489.000 
+  
+ SD = 14.73202
+\end{verbatim}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{@{}lrrrrrr@{}}
+\toprule
+Variable & $\bar{X}_{G\geq0.5}$ & $\bar{X}_{G<0.5}$ & Standardized Diff. & $\bar{X}_{G\geq3}$ & $\bar{X}_{G<3}$ & Standardized Diff. \\
+\midrule
+game1 & 0.558 & 0.471 & & 0.723 & 0.334 & \\
+game2 & 0.542 & 0.461 & & 0.555 & 0.483 & \\
+Neighbours' game1 & 0.553 & 0.267 & & 0.564 & 0.385 & \\
+Neighbours' game2 & 0.669 & 0.430 & & 0.631 & 0.580 & \\
+Degree & 11.694 & 4.897 & & 16.905 & 2.432 & \\
+$Z_i$ & 0.608 & 0.526 & & 0.677 & 0.490 & \\
+\bottomrule
+\end{tabular}
+\caption{Covariate balance across dichotomized neighbourhood treatment arms.}
+\end{table}
+
+\todo: add histogram of log $N_i$ and $G_i$?
 
 \end{document}
 
