@@ -349,6 +349,57 @@ bias_C2_Xn = function(sim, beta)
   return(bias/nrow(sim))
 }
 
+bias_C2N = function(dat, beta)
+{
+  bias = 0
+  # Subset by (game1, game2, N, Ngame1, Ngame2)
+  for (x1 in 0:1)
+  {
+    for (x2 in 0:1)
+    {
+      for (N in unique(dat$N[dat$game1==x1 & dat$game2==x2]))
+      {
+        i_xxN = dat$game1==x1 & dat$game2==x2 & dat$N==N
+        dat_xxN = dat[i_xxN,] # Save subsetted data for performance
+        i_1xxN = dat_xxN$Z==1
+        
+        for (n1 in unique(dat_xxN$Ngame1))
+        {
+          for (n2 in unique(dat_xxN$Ngame2))
+          {
+            i_xxnnN = dat_xxN$Ngame1==n1 & dat_xxN$Ngame2==n2
+            n_xxnnN = sum(i_xxnnN)
+            if (n_xxnnN==0) {next}
+            i_1xxnnN = i_xxnnN & i_1xxN
+            n_1xxnnN = sum(i_1xxnnN)
+            i_0xxnnN = i_xxnnN & !i_1xxN
+            n_0xxnnN = n_xxnnN - n_1xxnnN
+            
+            bias_xxnnN = 0
+            for (g in unique(dat_xxN$G[i_xxnnN]))
+            {
+              i_gxxN = dat_xxN$G==g
+              
+              # Compute empirical probabilities
+              pg_1xxnnN = 0
+              pg_0xxnnN = 0
+              pg_xxnnN = sum(i_xxnnN & i_gxxN) / n_xxnnN
+              if (n_1xxnnN>0) {pg_1xxnnN = sum(i_1xxnnN & i_gxxN)/n_1xxnnN}
+              if (n_0xxnnN>0) {pg_0xxnnN = sum(i_0xxnnN & i_gxxN)/n_0xxnnN}
+              
+              # Take g'=0
+              bias_xxnnN = bias_xxnnN +
+                (outcome_mean(1,g,x1,x2,beta)-outcome_mean(1,0,x1,x2,beta))*(pg_1xxnnN-pg_xxnnN) - (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*(pg_0xxnnN-pg_xxnnN)
+            }
+            bias = bias + bias_xxnnN*n_xxnnN
+          }
+        }
+      }
+    }
+  }
+  return(bias/nrow(dat))
+}
+
 
 # n_1xxnnN = 0
 # n_0xxnnN = 0
