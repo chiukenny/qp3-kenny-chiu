@@ -12,6 +12,8 @@ if (sum_exposure)
 
 sims = 500
 
+save_results = T
+
 
 # Initialization
 # ---------------------------------------------------------
@@ -107,6 +109,17 @@ for (b in spillover)
 }
 colnames(res_tab1) = c("beta","bias_none","bias_ind","bias_all")
 
+# Save results
+if (save_results)
+{
+  if (sum_exposure)
+  {
+    write.table(res_tab1, "Results/table1_sum.txt", quote=F)
+  } else {
+    write.table(res_tab1, "Results/table1_prop.txt", quote=F)
+  }
+}
+
 
 
 # Simulation: Table 2 - Scenario 1
@@ -119,7 +132,7 @@ sub_ind_err = matrix(0, sims, length(spillover))
 sub_all_err = matrix(0, sims, length(spillover))
 sub_gps_err = matrix(0, sims, length(spillover))
 
-system.time(
+#system.time(
 for (n in 1:sims)
 {
   # Use same network across methods in each simulation
@@ -157,13 +170,13 @@ for (n in 1:sims)
     
     # Compute error of subclass estimators
     sub_ind_err[n,j] = subcl_est(sim, subcl_ind(sim,4)) - tau
-    sub_all_err[n,j] = subcl_est(sim, subcl_all(sim,10)) - tau
+    sub_all_err[n,j] = subcl_est(sim, subcl_all(sim,5)) - tau
     
     # Compute error of Forastiere (2021) proposed estimator
     sub_gps_err[n,j] = subcl_gps(sim,5,sum_exposure=sum_exposure) - tau
   }
 }
-)
+#)
 
 # Compute bias and RMSE
 res_tab2 = data.frame(beta = spillover,
@@ -179,3 +192,14 @@ res_tab2 = data.frame(beta = spillover,
                       rmse_sub_all = sqrt(colMeans(sub_all_err^2)),
                       bias_sub_gps = colMeans(sub_gps_err),
                       rmse_sub_gps = sqrt(colMeans(sub_gps_err^2)))
+
+# Save results
+if (save_results)
+{
+  if (sum_exposure)
+  {
+    write.table(res_tab2, "Results/table2_sum.txt", quote=F)
+  } else {
+    write.table(res_tab2, "Results/table2_prop.txt", quote=F)
+  }
+}

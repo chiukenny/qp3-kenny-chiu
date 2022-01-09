@@ -35,7 +35,7 @@ Throughout this report, we closely follow the notation used by \textcite{Forasti
 
 \todo In this section, we explain the method proposed by \textcite{Forastiere:2021} and discuss its relevance in the context of the related literature. We also discuss its advantages over other methods used in similar contexts.
 
-\subsection{Setting, objective and method}
+\subsection{Setting, objective and method}\label{sec:method}
 
 \textcite{Forastiere:2021} examine the problem of performing causal inference of treatment effects from observational network data under interference. The setting is challenging for causal inference because
 \begin{enumerate}
@@ -63,9 +63,9 @@ Partition the units into $J$ subclasses $B_j$, $j\in\{1,\ldots,J\}$, based on si
 \textbf{Estimate potential outcomes}. Let $B_j^g=	V_g\cap B_j$. For each subclass~$B_j$:
 \begin{enumerate}
 \item
-Fit some regression model on the neighbourhood treatments $G_i$ given the individual treatments~$Z_i$ and covariates~$\bfX_i^g$, and use the model to predict the neighbourhood propensity scores~$\lambda(g;z;\bfX_i^g)$.
+Fit some regression model on the neighbourhood treatments $G_i$ given the individual treatments~$Z_i$ and covariates~$\bfX_i^g$, and use the model to estimate the neighbourhood propensity scores~$\lambda(g;z;\bfX_i^g)$.
 \item
-Fit some regression model on the potential outcomes~$Y_i(z,g)$ given the estimated neighbourhood propensity scores~$\hat{\lambda}(g;z;\bfX_i^g)$.
+Fit some regression model on the potential outcomes~$Y_i(z,g)$ given the individual and neighbourhood treatments~$Z_i$ and $G_i$ and the estimated neighbourhood propensity scores~$\hat{\lambda}(g;z;\bfX_i^g)$.
 \item
 Estimate the dose-response function by averaging over the estimated potential outcomes for a particular level of the joint treatment, i.e.,
 \[
@@ -314,7 +314,7 @@ $G$ exposure type & Interference $(\beta)$ & Bias$(\emptyset)$ & Bias$(\Xind_i)$
 
 Our findings for the estimator that does not adjust for covariates and for the estimator that adjusts for the individual covariates $\Xind_i$ are consistent with what is reported in Table~1 in the work of \textcite{Forastiere:2021}. For the estimator that adjusts for both individual and neighbourhood covariates $\bfX^z_i$, we report biases that are larger than expected. Assuming that our implementation is correct, our investigation suggests that these large values are arising due to \todo. Because there is a much larger range in node degrees in the Twitch network compared to the Add Health network, there are many more values of the neighbourhood treatment to consider in the bias computation. This consideration combined with the smaller dataset size means that many combinations of covariate values appear in only one node \todo
 
-\subsection{Observed bias and RMSE of estimators}
+\subsection{Observed bias and RMSE of estimators}\label{sec:observedbias}
 
 We examine the observed bias and RMSE of two estimators of $\tau$ that assume SUTVA on simulated datasets. The naive unadjusted estimator is the simple contrast between treated and untreated units given by
 \[
@@ -322,7 +322,7 @@ We examine the observed bias and RMSE of two estimators of $\tau$ that assume SU
 \]
 where $\bar{Y}_{\argdot}$ is the mean outcome across units with $\argdot$. The regression estimator $\tau_\text{reg}$ \parencite{Imbens:2015} is extracted from a fitted linear model given by
 \[
-\E[Y|Z_i,\Xind_i] = \beta_0 + \tau_\text{reg}Z_i + \beta_1X^\text{game1} + \beta_2X^\text{game2}
+\E[Y|Z_i,\Xind_i] = \beta_0 + \tau_\text{reg}Z_i + \beta_1X_i^\text{game1} + \beta_2X_i^\text{game2}
 \]
 where $\beta_j$ are the other parameters of the model. The observed bias for one simulated dataset is computed as the differences between estimates $\hat{\tau}_\text{naive}$ and $\hat{\tau}_\text{reg}$ and the expected value $\tau$, which is computed using the formula provided in Section~$\ref{sec:models}$. Table~\ref{tab:table2} reports the mean computed biases and RMSE for the two estimators over 500 simulated datasets. In each simulation, the individual and neighbourhood treatments are re-generated, and the same simulated treatments are used for all estimators and interference levels (only the outcomes are re-generated between interference levels).
 \\
@@ -333,7 +333,7 @@ where $\beta_j$ are the other parameters of the model. The observed bias for one
 \toprule
 & & \multicolumn{2}{c}{$\tau_\text{naive}$} & \multicolumn{2}{c}{$\tau_\text{reg}$} \\
 \cmidrule(r){3-4} \cmidrule(l){5-6}
-$G$ exposure type & Interference $(\beta)$ & Bias & RMSE & Bias & RMSE \\
+$G_i$ exposure type & Interference $(\beta)$ & Bias & RMSE & Bias & RMSE \\
 \midrule
 \multirow{3}{*}{Proportion} & Low (4) & 2.915 & 2.916 & 0.414 & 0.418 \\
 & Medium (6) & 2.958 & 2.958 & 0.411 & 0.418 \\
@@ -347,20 +347,76 @@ $G$ exposure type & Interference $(\beta)$ & Bias & RMSE & Bias & RMSE \\
 \label{tab:table2}
 \end{table}
 
-Our findings are generally consistent with the results of \textcite{Forastiere:2021} reported in Table~2 (Unadjusted and Regression $\sim Z_i,\Xind_i$ estimators under Scenario~1) where a greater interference effect leads to a greater RMSE.
+Our findings are generally consistent with the results of \textcite{Forastiere:2021} reported in Table~2 (Unadjusted and Regression $\sim Z_i,\Xind_i$ estimators under Scenario~1) where a greater interference effect leads to a greater RMSE. The bias of the regression estimator is smaller than that of the unadjusted estimator but is still non-trivial, and is presumably due to the misspecification of the linear model.
 
-\todo: DELETE
-\begin{align*}
-\delta(g;z) &= \mu(z,g,\Xind_i) - \mu(z,0,\Xind_i) = \beta g \\
-\Delta(z) &= \delta\E[G_i] \qquad \forall z\in\{0,1\} \\
-\mu(z,g,u) - \mu(z,0,u') &= 6(\mathbbm{1}[\phi(1;u)\geq 0.7]-\mathbbm{1}[\phi(1;u')\geq 0.7]) - 3z(\mathbbm{1}[\phi(1;u)\geq0.7] - \mathbbm{1}[\phi(1;u')\geq0.7]) + \beta g
-\end{align*}
 
 
 \section{Extending the simulation study}
 
-\todo In this section, we consider a small extension to the simulation study.
+In this section, we extend our simulation study from Section~\ref{sec:observedbias} to the other estimators considered in Table~2 of the work by \textcite{Forastiere:2021}. These estimators include
+\begin{enumerate}
+
+\item
+a second regression estimator $\tau_\text{reg}(Z_i,\bfX_i^z)$ that is adjusted for all covariates rather than only the individual covariates, i.e.,
+\[
+\E[Y|Z_i,\bfX_i^z] = \beta_0 + \tau_\text{reg}Z_i + \beta_1X_i^\text{game1} + \beta_2X_i^\text{game2} + \beta_3X_i^\text{Ngame1} + \beta_4X_i^\text{Ngame2} + \beta_5N_i
+\]
+where \verb|Ngame1| and \verb|Ngame2| are the neighbourhood proportion covariates in $\Xneigh_i$;
+
+\item
+an estimator $\tau_\text{sub}(\Xind_i)$ based on taking averages within subclasses \parencite{Imbens:2015}, which are defined based on a propensity score that adjusts for individual covariates. The procedure to compute the estimate is as follows:
+\begin{enumerate}
+\item
+Fit a logistic regression model on the individual treatment $Z_i$ with covariates $\Xind_i$.
+\item
+Estimate an individual propensity score $\hat{\phi}(1;\Xind_i)$ for each unit.
+\item
+Partition the units into $J$ roughly equal-sized subclasses based on $\hat{\phi}(1;\Xind_i)$. In our context, $J=4$ is the maximum number of subclasses possible given the two binary covariates. We take $J=4$ in our simulations.
+\item
+Let $\bar{Y}^{(j)}$ denote an average computed over subclass $B_j$. Compute the estimate given by
+\[
+\tau_\text{sub} = \frac{1}{N}\sum_{j=1}^J\left(\bar{Y}_{Z=1}^{(j)}-\bar{Y}_{Z=0}^{(j)}\right)|B_j| \;;
+\]
+\end{enumerate}
+
+\item
+a second subclassification estimator $\tau_\text{sub}(\bfX^z_i)$ where the subclasses are defined based on a propensity score that adjusts for all covariates. The estimation procedure is the same as the first subclassification estimator, except that $\bfX^z_i$ is used instead of $\Xind_i$ and that we take $J=5$ in our simulations following the recommendations of \textcite{Rosenbaum:1984}; and
+
+\item
+the estimator $\tau_\text{GPS}$ proposed by \textcite{Forastiere:2021} with the estimation procedure outline in Section~\ref{sec:method}. For proportion neighbourhood treatments, logistic regression models are used for both the individual and neighbourhood propensity scores (the latter in which $N_i$ are used as weights). For sum neighbourhood treatments, a negative binomial model is used to estimate the neighbourhood propensity scores\footnote{In some instances, a particular subclass would end up with very few units and the model would fail to be fit. The units in this subclass would generally be the ones with the largest degrees in the network. In these cases, we took the estimated neighbourhood propensity scores to be 0.}. We again take $J=5$ for the number of subclasses.
+
+\end{enumerate}
+Note that where applicable, we take $V_g=\calN$ in the case of proportion neighbourhood treatment for convenience of computation. Table~\ref{tab:table3} shows the bias and RMSE of the above estimators (as well as the previous two estimators for comparison). In the case of proportion neighbourhood treatments, our obtained biases and RMSEs are consistent with that reported by \textcite{Forastiere:2021}. The regression estimators have relatively larger biases and RMSE due to misspecification. The subclassification estimators based on individual propensity scores have smaller biases that are comparable to the analytical bias of an unbiased SUTVA estimator that adjusts for $\Xind_i$ reported in Table~\ref{tab:table1}. The estimator proposed by \citeauthor{Forastiere:2021} based on individual and neighbourhood propensity scores leads to the smallest RMSE across all compared estimators.
 \\
+
+\begin{table}[ht]
+\centering
+{\footnotesize
+\begin{tabular}{@{}rrrrrrrrrrrrr@{}}
+\toprule
+& & & \multicolumn{2}{c}{$\tau_\text{reg}$} & \multicolumn{2}{c}{$\tau_\text{reg}$} & \multicolumn{2}{c}{$\tau_\text{sub}$} & \multicolumn{2}{c}{$\tau_\text{sub}$}  \\
+Interference & \multicolumn{2}{c}{$\tau_\text{naive}$} & \multicolumn{2}{c}{$\sim Z_i,\Xind_i$} & \multicolumn{2}{c}{$\sim Z_i,\bfX^z_i$} & \multicolumn{2}{c}{$\hat{\phi}(1;\Xind_i)$} & \multicolumn{2}{c}{$\hat{\phi}(1;\bfX^z_i)$} & \multicolumn{2}{c}{$\tau_\text{GPS}$} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13}
+\multicolumn{1}{c}{$(\beta)$} & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE \\
+\midrule
+\multicolumn{13}{l}{Proportion $G_i$} \\[0.5em]
+Low (4) & 2.915 & 2.916 & 0.414 & 0.418 & 0.417 & 0.420 & 0.036 & 0.158 & 0.002 & 0.085 & 0.003 & 0.055 \\
+Med (6) & 2.958 & 2.958 & 0.411 & 0.418 & 0.416 & 0.420 & 0.033 & 0.169 & -0.001 & 0.112 & 0.000 & 0.059 \\
+High (8) & 3.004 & 3.005 & 0.411 & 0.422 & 0.417 & 0.424 & 0.036 & 0.194 & 0.002 & 0.144 & 0.003 & 0.054 \\[1em]
+\multicolumn{13}{l}{Sum $G_i$} \\[0.5em]
+Low (0.4) & 3.553 & 3.556 & 0.448 & 0.504 & 0.406 & 0.409 & 0.021 & 0.304 & -0.310 & 0.584 & -0.064 & 0.089 \\
+Med (0.6) & 3.915 & 3.921 & 0.462 & 0.579 & 0.400 & 0.404 & 0.010 & 0.431 & -0.469 & 0.877 & -0.066 & 0.093 \\
+High (0.8) & 4.280 & 4.289 & 0.479 & 0.664 & 0.395 & 0.402 & 0.006 & 0.563 & -0.623 & 1.170 & -0.062 & 0.088 \\
+\bottomrule
+\end{tabular}
+}
+\caption{Mean bias and RMSE of estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) over 500 simulated datasets.}
+\label{tab:table3}
+\end{table}
+
+In the case of sum neighbourhood treatments, the results are similar to the proportion case except for the subclassification estimators based on individual propensity scores. The RMSE of these estimators are relatively larger in this case compared to the other estimators. It is also worth noting that the estimator proposed by \citeauthor{Forastiere:2021} still obtains the smallest RMSE out of all the compared estimators.
+
+
 
 
 \section{Critical appraisal and concluding remarks}
@@ -595,3 +651,11 @@ Setting 2:
 \end{align*}
 
 \end{itemize}
+
+
+
+\begin{align*}
+\delta(g;z) &= \mu(z,g,\Xind_i) - \mu(z,0,\Xind_i) = \beta g \\
+\Delta(z) &= \delta\E[G_i] \qquad \forall z\in\{0,1\} \\
+\mu(z,g,u) - \mu(z,0,u') &= 6(\mathbbm{1}[\phi(1;u)\geq 0.7]-\mathbbm{1}[\phi(1;u')\geq 0.7]) - 3z(\mathbbm{1}[\phi(1;u)\geq0.7] - \mathbbm{1}[\phi(1;u')\geq0.7]) + \beta g
+\end{align*}

@@ -1,3 +1,5 @@
+library(MASS)
+
 # Helper functions
 # ---------------------------------------------------------
 
@@ -10,7 +12,7 @@ ind_prop = function(x1, x2)
   return(expit(-3 + 3*x1 + 4*x2))
 }
 
-# Compute outcome mean (model for main effects datulations)
+# Compute outcome mean (model for main effects simulations)
 outcome_mean = function(z, g, x1, x2, beta)
 {
   prop = ind_prop(x1, x2)
@@ -205,6 +207,14 @@ subcl_est = function(dat, classes)
   return(tau_est/nrow(dat))
 }
 
+predict_nb = function(fit, dat)
+{
+  if (is.null(fit)) {return(rep(0,nrow(dat)))}
+  return(dnbinom(dat$N,
+                 mu=predict(fit,newdata=dat,type="response"),
+                 size=dat$G))
+}
+
 subcl_gps = function(dat, j, sum_exposure=F)
 {
   # Subclassification based on individual propensity
@@ -216,6 +226,16 @@ subcl_gps = function(dat, j, sum_exposure=F)
   n_g = length(obs_g)
   tau_g = rep(0, n_g)
   
+  if (sum_exposure)
+  {
+    # Compute size of V_g's
+    v_g = rep(0, n_g)
+    for (i in 1:n_g)
+    {
+      v_g[i] = sum(dat$N >= obs_g[i])
+    }
+  }
+  
   for (c in unique(ind_classes))
   {
     dat_c = dat[ind_classes==c,]
@@ -223,9 +243,38 @@ subcl_gps = function(dat, j, sum_exposure=F)
     
     if (sum_exposure)
     {
-      # TODO
+      # Fit a negative binomial model for neighbourhood treatment
+      # Note: may throw error if there are too few units in subclass
+      #       These subclasses typically correspond to units with
+      #       large N. May be reasonable to assume any estimated
+      #       propensity score will be very small, so just set
+      #       the scores to 0.
+      prop_fit = tryCatch(glm.nb(G~Z+Ngame1+Ngame2+N,data=dat_c),
+                          error=function(e) {return(NULL)})
+      dat_c$nbr_prop = predict_nb(prop_fit, dat_c)
+      lin_fit = lm(Y~Z+G+nbr_prop, data=dat_c)
+      
+      for (i in 1:n_g)
+      {
+        g = obs_g[i]
+        i_g = dat_c$N >= g
+        n_cg = sum(i_g)
+        if (n_cg==0) {next}
+        dat_c$G = g
+        
+        dat_c$Z = 1
+        dat_c$nbr_prop[i_g] = predict_nb(prop_fit,dat_c[i_g,])
+        Y_c1g = mean(predict(lin_fit,newdata=dat_c[i_g,]))
+        
+        dat_c$Z = 0
+        dat_c$nbr_prop[i_g] = predict_nb(prop_fit,dat_c[i_g,])
+        Y_c0g = mean(predict(lin_fit,newdata=dat_c[i_g,]))
+        
+        tau_g[i] = tau_g[i] + (Y_c1g-Y_c0g)*n_cg/v_g[i]
+      }
     } else {
       # Note: assumes V_g = all units in subclass
+      # Fit a logistic model for neighbourhood treatment
       prop_fit = glm(G~Z+Ngame1+Ngame2+N, data=dat_c, family=binomial, weights=N)
       dat_c$nbr_prop = prop_fit$fitted.values
       lin_fit = lm(Y~Z+G+nbr_prop, data=dat_c)
