@@ -28,7 +28,7 @@
 
 \section{Notation}
 
-Throughout this report, we closely follow the notation used by \textcite{Forastiere:2021}. Let $G=(\calN,\calE)$ be an undirected network where $\calN$ is a set of $N$ units (nodes) and $\calE$ is a set of edges $(i,j)$. A partition~$(i,\Ni,\Nmi)$ of $\calN$ describes unit~$i$'s neighbourhood~$\calN_i$ (the set of $N_i$ units connected to unit $i$) and the set~$\calN_{-i}$ of all other units that are not $i$ and are not in $\calN_i$. Let $Z_i\in\{0,1\}$ be the treatment assigned to unit $i$ and $Y_i\in\calY$ the observed outcome of unit $i$. Denote the treatment and outcome vector for the population~$\calN$ as $\bfZ$ and $\bfY$, respectively, and the corresponding vectors for partition~$(i,\Ni,\Nmi)$ as $(Z_i,\ZNi,\ZNmi)$ and $(Y_i,\YNi,\YNmi)$. Let $G_i=g_i(\ZNi)\in\calG_i$ be some known and well-specified summary~$g_i$ of the treatments in unit~$i$'s neighbourhood, and denote the vector of neighbourhood treatments for the population as $\bfG$. Depending on the size of a unit's neighbourhood, the space $\calG_i$ may differ between units. Let $V_g=\{i\in\calN:g\in\calG_i\}$ denote the subset containing $v_g$ units that have $g$ as a possible value for the neighbourhood treatment. Let $\bfX_i\in\calX$ be a vector of covariates for unit~$i$ that partitions into individual-level characteristics $\Xind_i\in\calX^\text{ind}$ and neighbourhood-level/aggregated individidual-level characteristics $\Xneigh_i\in\calX^\text{neigh}$.
+Throughout this report, we closely follow the notation used by \textcite{Forastiere:2021}. Let $G=(\calN,\calE)$ be an undirected network where $\calN$ is a set of $N$ units (nodes) and $\calE$ is a set of edges $(i,j)$. A partition~$(i,\Ni,\Nmi)$ of $\calN$ describes unit~$i$'s neighbourhood~$\calN_i$ (the set of $N_i$ units connected to unit $i$) and the set~$\calN_{-i}$ of all other units that are not $i$ and are not in $\calN_i$. Let $Z_i\in\{0,1\}$ be the treatment assigned to unit $i$ and $Y_i\in\calY$ the observed outcome of unit $i$. Denote the treatment and outcome vector for the population~$\calN$ as $\bfZ$ and $\bfY$, respectively, and the corresponding vectors for partition~$(i,\Ni,\Nmi)$ as $(Z_i,\ZNi,\ZNmi)$ and $(Y_i,\YNi,\YNmi)$. Let $G_i=g_i(\ZNi)\in\calG_i$ be some known and well-specified summary~$g_i$ of the treatments in unit~$i$'s neighbourhood, and denote the vector of neighbourhood treatments for the population as $\bfG$. Depending on the size of a unit's neighbourhood, the space $\calG_i$ may differ between units. Let $V_g=\{i\in\calN:g\in\calG_i\}$ denote the subset containing $v_g$ units that have $g$ as a possible value for the neighbourhood treatment. Let $\bfX_i\in\calX$ be a vector of covariates for unit~$i$ that partitions into individual-level characteristics $\Xind_i\in\calX^\text{ind}$ and neighbourhood-level/aggregated individual-level characteristics $\Xneigh_i\in\calX^\text{neigh}$.
 
 
 \section{Proposed methodology in context of the literature}
@@ -118,12 +118,13 @@ A small number of works consider more specific and niche contexts. For example, 
 %Outside of the observational setting, there are many works that study causal inference in randomized studies with potential interference. These works generally examine study designs that allow for treatment effect estimation in the presence of interference under varying contexts \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}
 
 
-\section{Potential bias of naive estimator when unconfoundedness holds}
+\section{Potential bias of naive estimator when unconfoundedness holds}\label{sec:example}
 
-In this section, we describe a simple example that illustrates the relevance of Theorem~2.A, Corollary~2 and Corollary~3 in the paper by \textcite{Forastiere:2021}. Specifically, we show how for a simple network under certain assumptions, an unbiased naive estimator for the treatment effect that assumes SUTVA may be biased depending on the exact treatment assignment mechanism.
+In this section, we describe a simple example that illustrates the relevance of Theorem~2.A, Corollary~2 and Corollary~3 in the paper by \textcite{Forastiere:2021}. Specifically, we show how for a simple network under certain assumptions, an unbiased naive estimator for the treatment effect that assumes SUTVA will be biased with the bias depending on the treatment assignment mechanism and the presence of unmeasured confounders.
+% may be biased depending on the exact treatment assignment mechanism.
 \\
 
-Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by $i\in\bbN$ for the pair and $j\in\{1,2\}$ for the unit within a pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ be whether a unit's paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some covariate available for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=\frac{1}{2}$. Other details, such as the space of outcomes $\calY$ and the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion. Figure~\ref{fig:example} shows an example network.
+Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by $i\in\bbN$ for the pair and $j\in\{1,2\}$ for the unit within a pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ be whether a unit's paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some covariate available for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=\frac{1}{2}$. Let $Y_{ij}\in\bbR$ be the outcome measured for each unit. Other details, such as the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion. Figure~\ref{fig:example} shows an example network.
 \\
 
 \begin{figure}[ht]
@@ -143,11 +144,15 @@ Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (h
 \node[] [right of=n1] (d3) {\footnotesize$\bullet\bullet\bullet$};
 \node[] [right of=n2] (d4) {\footnotesize$\bullet\bullet\bullet$};
 \end{tikzpicture}
-\caption{Example network of paired units with their individual treatment $Z_{ij}$, neighbourhood treatment $G_{ij}$, and covariate $X_{ij}$.}
+\caption{\todo Example network of paired units with their individual treatment $Z_{ij}$, neighbourhood treatment $G_{ij}$, and covariate $X_{ij}$.}
 \label{fig:example}
 \end{figure}
 
-We examine the network under two settings. In the first setting, suppose that the treatment assignment mechanism follows
+We examine the bias of a naive estimator on this network under two settings. In both settings, we assume that Assumption~1 (no multiple versions of treatment) and Assumption~2 (neighbourhood interference) of \textcite{Forastiere:2021} hold.
+% Hence, the assumptions of Corollary~2 are satisfied in the first setting, and the assumptions of Corollary~3 are satisfied in the second setting.
+
+\iffalse
+In the first setting, suppose that the treatment assignment mechanism follows
 \[
 \P(Z_{ij}=1|X_{ij}) = \frac{1}{4} + \frac{1}{2}X_{ij} \;,
 \]
@@ -161,54 +166,26 @@ In the second setting, suppose that the treatment assignment follows
 \P(Z_{ij}=1|X_{i1},X_{i2}) = \frac{3}{4}\mathbbm{1}\left[X_{i1}=X_{i2}\right] + \frac{1}{4}\mathbbm{1}\left[X_{i1}\neq X_{i2}\right]
 \]
 where $\mathbbm{1}[\argdot]$ is the indicator function. This assignment corresponds to a type of homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ in this setting as the probability of a unit being treated also depends on its counterpart. An example study corresponding to this setting may be one similar to the first but involving spouses rather than friends, where spouses coming from similar backgrounds may find it easier to discuss finances (at a more intimate level).
-\\
-
-In both settings, we further assume that Assumption~1 (no multiple versions of treatment), Assumption~2 (neighbourhood interference), and Assumption~3 (unconfoundedness) of \textcite{Forastiere:2021} hold. Hence, the assumptions of Corollary~1 are satisfied in the first setting, and the assumptions of Corollary~2 are satisfied in the second setting.
-
-\subsection{Setting~1: conditionally independent individual and neighbourhood treatments}
-
-In our first setting, the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$ are conditionally independent given $X_{ij}$. By Corollary~1, an effect estimator that is unbiased under SUTVA will still be unbiased under the assumptions of our setting.
-\\
-
-The overall treatment effect $\tau$ in this setting is given by
-\begin{align*}
-%\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
-%\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
-\tau %&= \sum_{g\in\{0,1\}} \tau(g)\P(G_{ij}=g) \\
-&= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
-&= \frac{1}{2}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
-&= \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)
-%&= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
-%&= \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
-\end{align*}
-where the second equality follows from Theorem~1 in the work by \textcite{Forastiere:2021}. The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
-\begin{align*}
-\tau_{X}^\text{obs} &=
-\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
-&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\right)\P(G_{ij}=g) \\
-&= \frac{1}{4}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\right)
-%&= \frac{1}{4}\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]\right. \\
-%&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right)
-\end{align*}
-where the second equality follows from the fact that $G_{ij}\condind X_{ij}, Z_{ij}$. It then follows from the above derivations that $\tau_{X}^\text{obs}-\tau = 0$.
-\iffalse
-and Assumptions~1 and 3 that
-\begin{align*}
-&\tau_{X}^\text{obs}-\tau \\
-&= \tau_{X}^\text{obs} - \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \\
-&= \tau_{X}^\text{obs} - \frac{1}{2}\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]\right. \\
-&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right)\P(X_{ij}=x) \\
-&= 0 \;.
-\end{align*}
 \fi
-Therefore, an unbiased estimator of the naive effect estimator is also unbiased for the treatment effect in this setting.
 
-\subsection{Setting~2: correlated individual and neighbourhood treatments}
+\subsection{Setting~1: bias of naive estimator due to correlated individual and neighbourhood treatments}
 
-In our second setting, the covariate $X_{ij}$ alone is insufficient for the conditional independence of the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$. By Corollary~2, an effect estimator that is unbiased under SUTVA will be biased under the assumptions of our setting.
+In our first setting, suppose that the treatment assignment follows
+\[
+\P(Z_{ij}=1|X_{i1},X_{i2}) = \frac{3}{4}\mathbbm{1}\left[X_{i1}=X_{i2}\right] + \frac{1}{4}\mathbbm{1}\left[X_{i1}\neq X_{i2}\right]
+\]
+where $\mathbbm{1}[\argdot]$ is the indicator function, and suppose that $Y_{ij}(z,g)\sim N(5+3z,1)$. This treatment assignment corresponds to a type of homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ as the probability of a unit being treated also depends on its counterpart. On the other hand, the unconfoundedness assumption holds for the outcome~$Y_{ij}(z,g)$ given $X_{ij}$ (or any other covariates) as the outcome only depends on the observed value of the individual treatment $z$. Therefore, by Corollary~2, an effect estimator that is unbiased under SUTVA will be biased due to the association between the individual and neighbourhood treatments. A hypothetical study that corresponds to this setting may be one where the paired units correspond to a pair of spouses with potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters~($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$. The homophily context arises from the assumption that spouses who come from similar backgrounds will find it easier to discuss finances (at a more intimate level).
+%An example study corresponding to this setting may be one similar to the first but involving spouses rather than friends, where spouses coming from similar backgrounds may find it easier to discuss finances (at a more intimate level).
 \\
 
-The overall treatment effect $\tau$ in this setting is the same as the one given in the first setting.
+%In our first setting, the covariate $X_{ij}$ alone is insufficient for the conditional independence of the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$. By Corollary~2, an effect estimator that is unbiased under SUTVA will be biased due to the association between the individual and neighbourhood treatments.
+%\\
+
+%The overall treatment effect $\tau$ in this setting is the same as the one given in the first setting.
+The overall treatment effect $\tau$ in this setting is given by
+\[
+\tau = \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right) \;.
+\]
 \iffalse
 \begin{align*}
 %\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
@@ -219,42 +196,96 @@ The overall treatment effect $\tau$ in this setting is the same as the one given
 &= \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
 \end{align*}
 \fi
-The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
+Using Theorem~2.A, the naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
 \begin{align*}
-\tau_{X}^\text{obs} &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
-&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=1,X_{ij}=x)\right. \\
-&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=0,X_{ij}=x)\right) \\
-&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x)\right. \\
-&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x'|Z_{ij}=0,X_{ij}=x)\right) \\
-&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\right. \\
-&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=0|X_{ij}=x,X_{ik}=x')\right) \\
-&= \frac{1}{2}\sum_{x\in\{0,1\}}\left(\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2\right)\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right]\right) \right. \\
-&\quad +\left. 4\cdot\frac{1}{4}\cdot\frac{3}{4}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right) \right) \\
-&= \sum_{x\in\{0,1\}}\left(\frac{5}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right]\right) \right. \\
-&\quad +\left. \frac{3}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right) \right)
+\tau_{X}^\text{obs} &= \sum_{x\in\{0,1\}}\left(\frac{5}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right]\right) \right. \\
+&\quad +\left. \frac{3}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right) \right) \;.
 %&= \frac{1}{2}\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2\right)\left(\mu(1,1) - \mu(0,0)\right) + \frac{1}{2}\cdot4\cdot\frac{1}{4}\cdot\frac{3}{4}\left(\mu(1,0) - \mu(0,1)\right) \\
 %&= \frac{5}{8}\left(\mu(1,1) - \mu(0,0)\right) + \frac{3}{8}\left(\mu(1,0) - \mu(0,1)\right)
 \end{align*}
-where the third equality follows from the fact that $Z_{ij}\condind G_{ij}|X_{i1},X_{i2}$ and the fourth equality from Bayes' theorem manipulation (\todo Appendix?). The bias of an unbiased estimator for $\tau_{X}^\text{obs}$ is then
+It then follows that the bias of an unbiased estimator for $\tau_{X}^\text{obs}$ is
 \[
-\tau_{X}^\text{obs} - \tau = \frac{1}{8}\sum_{z,x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right)
+\tau_{X}^\text{obs} - \tau = \frac{1}{8}\sum_{z,x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right) \;.
 %&= \frac{1}{8}\left(\mu(1,1) - \mu(1,0) - \mu(0,0) + \mu(0,1)\right) \;,
 \]
-which can be verified using the bias formula in Corollary~2 given by
+Therefore, an unbiased estimator of the naive effect estimator is biased for the treatment effect when the individual and neighbourhood treatments are not conditionally independent given the set of covariates.
+\\
+
+The derivation for the overall treatment effect $\tau$, the estimator $\tau_{X}^\text{obs}$ and the bias $\tau_{X}^\text{obs}-\tau$ can be found in Appendix~\ref{apx:setting1}.
+
+\subsection{Setting~2: bias of naive estimator due to unmeasured confounders}
+
+In our second setting,
+\iffalse
+suppose that the covariates are jointly generated according to the distribution
+\[
+\P(X_{i1}=x_1,X_{i2}=x_2) =
+\begin{cases}
+\frac{3}{8} & \text{for }x_1=x_2 \\
+\frac{1}{8} & \text{for }x_1\neq x_2
+\end{cases} \;,
+\]
+i.e., a homophily situation where the units are more likely to be paired with another unit that has similar characteristics. Further
+\fi
+suppose that the treatment assignment mechanism follows
+\[
+\P(Z_{ij}=1|X_{ij}) = \frac{1}{4} + \frac{1}{2}X_{ij} \;.
+\]
+Further suppose that there is some unmeasured confounder $U_{ij}\in\{0,1\}$ for each unit that is generated based on $Z_{ij}$ with probability
+\[
+\P(U_{ij}=1|Z_{ij}) = \frac{1}{4} + \frac{1}{2}Z_{ij}\;,
+\]
+and that $Y_{ij}(z,g)\sim N(5+3z+U_{ij},1)$ where $j\neq k$. It then follows that $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$ in this setting. However, because the outcome $Y_{ij}(z,g)$ also depends on $U_{ij}$, the unconfoundedness assumption no longer holds given only $X_{ij}$. Therefore, by Corollary~3, an effect estimator that is unbiased under SUTVA will be biased due to the unmeasured confounder $U_{ij}$. \todo A hypothetical study corresponding to this setting may be one where the paired units correspond to a pair of friends from potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters ($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$.
+\\
+
+%In our first setting, the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$ are conditionally independent given $X_{ij}$. By Corollary~1, an effect estimator that is unbiased under SUTVA will still be unbiased under the assumptions of our setting.
+%\\
+
+\todo The overall treatment effect $\tau$ in this setting is given by
 \begin{align*}
-\tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}} \left(\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0,X_{ij}=x\right]\right)\right. \\
-&\qquad \left(\P(G_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(G_{ij}=1|X_{ij}=x)\right) \\
-&\quad - \left(\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0,X_{ij}=x\right]\right) \\
-&\qquad \left.\left(\P(G_{ij}=1|Z_{ij}=0,X_{ij}=x)-\P(G_{ij}=1|X_{ij}=x)\right)\right)\P(X_{ij}=x) \\
-&= \frac{1}{2}\sum_{x,x'\in\{0,1\}} \left(\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0,X_{ij}=x\right]\right)\right. \\
-&\qquad \left(\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')-\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')\right) \\
-&\quad - \left(\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0,X_{ij}=x\right]\right) \\
-&\qquad \left.\left(\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=0|X_{ij}=x,X_{ik}=x')-\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')\right)\right) \\
-&= \frac{1}{2}\sum_{x\in\{0,1\}}\left(\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2 - 1\right)\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0,X_{ij}=x\right]\right)\right. \\
-&\quad - \left.\left(4\cdot\frac{1}{4}\cdot\frac{3}{4} - 1\right)\left(\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0,X_{ij}=x\right]\right)\right) \\
-&= \frac{1}{8}\sum_{x,z\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right)
+\tau &= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
+&= \frac{1}{2}\sum_{g,x,u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x,U_{ij}=u\right]\right) \\
+&\quad \times \P(U_{ij}=u|X_{ij}=x)\P(X_{ij}=x) \\
+&= \frac{1}{4}\sum_{u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=u|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x) \\
+&= \frac{1}{4}\left(\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=0\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=0|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x) \right. \\
+& \quad+ \left.\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=1\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=1|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x)\right) \\
+&= \frac{1}{4}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,U_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=1\right]\right)
 \end{align*}
-where the second equality follows from the same reasoning in the derivation of $\tau_X^\text{obs}$.
+\todo where the second equality follows from independence of $X_{i1}$ and $X_{i2}$, fourth equality from marginalization. The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
+\begin{align*}
+\tau_{X}^\text{obs} &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\sum_{x,u,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,X_{ik}=u,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,X_{ik}=u,G_{ij}=g\right]\right)\P(G_{ij}=g|X_{ik}=u)\P(X_{ik}=u)
+\end{align*}
+Corollary~3:
+\begin{align*}
+\tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=0\right]\right)\left(\P(U_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(U_{ij}=1|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\left(\P(U_{ij}=1|Z_{ij}=1)-\P(U_{ij}=1|Z_{ij}=0)\right)\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=0\right]\right) \\
+&= \frac{1}{4}\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=0\right]\right)
+\end{align*}
+
+The overall treatment effect $\tau$ in this setting is given by
+\[
+\tau = \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right) \;.
+\]
+Using Theorem~2.A, it can be shown that the naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the same quantity
+\[
+\tau_{X}^\text{obs} = \frac{1}{4}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\right) \;.
+\]
+It then follows from the above that $\tau_{X}^\text{obs}-\tau = 0$.
+\iffalse
+and Assumptions~1 and 3 that
+\begin{align*}
+&\tau_{X}^\text{obs}-\tau \\
+&= \tau_{X}^\text{obs} - \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \\
+&= \tau_{X}^\text{obs} - \frac{1}{2}\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right)\P(X_{ij}=x) \\
+&= 0 \;.
+\end{align*}
+\fi
+Therefore, an unbiased estimator of the naive effect estimator is also unbiased for the treatment effect when the individual and neighbourhood treatments are conditionally independent given the set of covariates.
+\\
+
+The derivation for the overall treatment effect and the estimator $\tau_{X}^\text{obs}$ can be found in Appendix~\ref{apx:setting1}.
 
 
 \section{Reproducing simulation study results}
@@ -324,9 +355,10 @@ where $\bar{Y}_{\argdot}$ is the mean outcome across units with $\argdot$. The r
 \[
 \E[Y|Z_i,\Xind_i] = \beta_0 + \tau_\text{reg}Z_i + \beta_1X_i^\text{game1} + \beta_2X_i^\text{game2}
 \]
-where $\beta_j$ are the other parameters of the model. The observed bias for one simulated dataset is computed as the differences between estimates $\hat{\tau}_\text{naive}$ and $\hat{\tau}_\text{reg}$ and the expected value $\tau$, which is computed using the formula provided in Section~$\ref{sec:models}$. Table~\ref{tab:table2} reports the mean computed biases and RMSE for the two estimators over 500 simulated datasets. In each simulation, the individual and neighbourhood treatments are re-generated, and the same simulated treatments are used for all estimators and interference levels (only the outcomes are re-generated between interference levels).
+where $\beta_j$ are the other parameters of the model. The observed bias for one simulated dataset is computed as the differences between estimates $\hat{\tau}_\text{naive}$ and $\hat{\tau}_\text{reg}$ and the expected value $\tau$, which is computed using the formula provided in Section~$\ref{sec:models}$. Table~\ref{tab:table2} (estimators 1--2) reports the mean computed biases and RMSE for the two estimators over 500 simulated datasets. In each simulation, the individual and neighbourhood treatments are re-generated, and the same simulated treatments are used for all estimators and interference levels (only the outcomes are re-generated between interference levels).
 \\
 
+\iffalse
 \begin{table}[ht]
 \centering
 \begin{tabular}{@{}rrrrrr@{}}
@@ -343,6 +375,32 @@ $G_i$ exposure type & Interference $(\beta)$ & Bias & RMSE & Bias & RMSE \\
 & High (0.8) & 4.280 & 4.289 & 0.479 & 0.664 \\
 \bottomrule
 \end{tabular}
+\caption{Mean bias and RMSE of estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) over 500 simulated datasets.}
+\label{tab:table2}
+\end{table}
+\fi
+
+\begin{table}[ht]
+\centering
+{\footnotesize
+\begin{tabular}{@{}rrrrrrrrrrrrr@{}}
+\toprule
+& & & \multicolumn{2}{c}{$\tau_\text{reg}$} & \multicolumn{2}{c}{$\tau_\text{reg}$} & \multicolumn{2}{c}{$\tau_\text{sub}$} & \multicolumn{2}{c}{$\tau_\text{sub}$}  \\
+Interference & \multicolumn{2}{c}{$\tau_\text{naive}$} & \multicolumn{2}{c}{$\sim Z_i,\Xind_i$} & \multicolumn{2}{c}{$\sim Z_i,\bfX^z_i$} & \multicolumn{2}{c}{$\hat{\phi}(1;\Xind_i)$} & \multicolumn{2}{c}{$\hat{\phi}(1;\bfX^z_i)$} & \multicolumn{2}{c}{$\tau_\text{GPS}$} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13}
+\multicolumn{1}{c}{$(\beta)$} & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE \\
+\midrule
+\multicolumn{13}{l}{Proportion $G_i$} \\[0.5em]
+Low (4) & 2.915 & 2.916 & 0.414 & 0.418 & 0.417 & 0.420 & 0.036 & 0.158 & 0.002 & 0.085 & 0.003 & 0.055 \\
+Med (6) & 2.958 & 2.958 & 0.411 & 0.418 & 0.416 & 0.420 & 0.033 & 0.169 & -0.001 & 0.112 & 0.000 & 0.059 \\
+High (8) & 3.004 & 3.005 & 0.411 & 0.422 & 0.417 & 0.424 & 0.036 & 0.194 & 0.002 & 0.144 & 0.003 & 0.054 \\[1em]
+\multicolumn{13}{l}{Sum $G_i$} \\[0.5em]
+Low (0.4) & 3.553 & 3.556 & 0.448 & 0.504 & 0.406 & 0.409 & 0.021 & 0.304 & -0.310 & 0.584 & -0.064 & 0.089 \\
+Med (0.6) & 3.915 & 3.921 & 0.462 & 0.579 & 0.400 & 0.404 & 0.010 & 0.431 & -0.469 & 0.877 & -0.066 & 0.093 \\
+High (0.8) & 4.280 & 4.289 & 0.479 & 0.664 & 0.395 & 0.402 & 0.006 & 0.563 & -0.623 & 1.170 & -0.062 & 0.088 \\
+\bottomrule
+\end{tabular}
+}
 \caption{Mean bias and RMSE of estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) over 500 simulated datasets.}
 \label{tab:table2}
 \end{table}
@@ -386,46 +444,28 @@ a second subclassification estimator $\tau_\text{sub}(\bfX^z_i)$ where the subcl
 the estimator $\tau_\text{GPS}$ proposed by \textcite{Forastiere:2021} with the estimation procedure outline in Section~\ref{sec:method}. For proportion neighbourhood treatments, logistic regression models are used for both the individual and neighbourhood propensity scores (the latter in which $N_i$ are used as weights). For sum neighbourhood treatments, a negative binomial model is used to estimate the neighbourhood propensity scores\footnote{In some instances, a particular subclass would end up with very few units and the model would fail to be fit. The units in this subclass would generally be the ones with the largest degrees in the network. In these cases, we took the estimated neighbourhood propensity scores to be 0.}. We again take $J=5$ for the number of subclasses.
 
 \end{enumerate}
-Note that where applicable, we take $V_g=\calN$ in the case of proportion neighbourhood treatment for convenience of computation. Table~\ref{tab:table3} shows the bias and RMSE of the above estimators (as well as the previous two estimators for comparison). In the case of proportion neighbourhood treatments, our obtained biases and RMSEs are consistent with that reported by \textcite{Forastiere:2021}. The regression estimators have relatively larger biases and RMSE due to misspecification. The subclassification estimators based on individual propensity scores have smaller biases that are comparable to the analytical bias of an unbiased SUTVA estimator that adjusts for $\Xind_i$ reported in Table~\ref{tab:table1}. The estimator proposed by \citeauthor{Forastiere:2021} based on individual and neighbourhood propensity scores leads to the smallest RMSE across all compared estimators.
+Note that where applicable, we take $V_g=\calN$ in the case of proportion neighbourhood treatment for convenience of computation. Table~\ref{tab:table2} (estimators 3--6) shows the bias and RMSE of the above estimators. In the case of proportion neighbourhood treatments, our obtained biases and RMSEs are consistent with that reported by \textcite{Forastiere:2021}. The regression estimators have relatively larger biases and RMSE due to misspecification. The subclassification estimators based on individual propensity scores have smaller biases that are comparable to the analytical bias of an unbiased SUTVA estimator that adjusts for $\Xind_i$ reported in Table~\ref{tab:table1}. The estimator proposed by \citeauthor{Forastiere:2021} based on individual and neighbourhood propensity scores achieves the smallest RMSE compared to the other estimators that ignore the effect of interference.
 \\
 
-\begin{table}[ht]
-\centering
-{\footnotesize
-\begin{tabular}{@{}rrrrrrrrrrrrr@{}}
-\toprule
-& & & \multicolumn{2}{c}{$\tau_\text{reg}$} & \multicolumn{2}{c}{$\tau_\text{reg}$} & \multicolumn{2}{c}{$\tau_\text{sub}$} & \multicolumn{2}{c}{$\tau_\text{sub}$}  \\
-Interference & \multicolumn{2}{c}{$\tau_\text{naive}$} & \multicolumn{2}{c}{$\sim Z_i,\Xind_i$} & \multicolumn{2}{c}{$\sim Z_i,\bfX^z_i$} & \multicolumn{2}{c}{$\hat{\phi}(1;\Xind_i)$} & \multicolumn{2}{c}{$\hat{\phi}(1;\bfX^z_i)$} & \multicolumn{2}{c}{$\tau_\text{GPS}$} \\
-\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13}
-\multicolumn{1}{c}{$(\beta)$} & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE \\
-\midrule
-\multicolumn{13}{l}{Proportion $G_i$} \\[0.5em]
-Low (4) & 2.915 & 2.916 & 0.414 & 0.418 & 0.417 & 0.420 & 0.036 & 0.158 & 0.002 & 0.085 & 0.003 & 0.055 \\
-Med (6) & 2.958 & 2.958 & 0.411 & 0.418 & 0.416 & 0.420 & 0.033 & 0.169 & -0.001 & 0.112 & 0.000 & 0.059 \\
-High (8) & 3.004 & 3.005 & 0.411 & 0.422 & 0.417 & 0.424 & 0.036 & 0.194 & 0.002 & 0.144 & 0.003 & 0.054 \\[1em]
-\multicolumn{13}{l}{Sum $G_i$} \\[0.5em]
-Low (0.4) & 3.553 & 3.556 & 0.448 & 0.504 & 0.406 & 0.409 & 0.021 & 0.304 & -0.310 & 0.584 & -0.064 & 0.089 \\
-Med (0.6) & 3.915 & 3.921 & 0.462 & 0.579 & 0.400 & 0.404 & 0.010 & 0.431 & -0.469 & 0.877 & -0.066 & 0.093 \\
-High (0.8) & 4.280 & 4.289 & 0.479 & 0.664 & 0.395 & 0.402 & 0.006 & 0.563 & -0.623 & 1.170 & -0.062 & 0.088 \\
-\bottomrule
-\end{tabular}
-}
-\caption{Mean bias and RMSE of estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) over 500 simulated datasets.}
-\label{tab:table3}
-\end{table}
+In the case of sum neighbourhood treatments, the results are similar to the proportion case except for the subclassification estimators based on individual propensity scores. The RMSE of these estimators are relatively larger compared to the other estimators in this case. It is also worth noting that the estimator proposed by \citeauthor{Forastiere:2021} still achieves the smallest RMSE out of all the compared estimators.
+\\
 
-In the case of sum neighbourhood treatments, the results are similar to the proportion case except for the subclassification estimators based on individual propensity scores. The RMSE of these estimators are relatively larger in this case compared to the other estimators. It is also worth noting that the estimator proposed by \citeauthor{Forastiere:2021} still obtains the smallest RMSE out of all the compared estimators.
-
+\todo: investigate why; effect of $J$?
 
 
 
 \section{Critical appraisal and concluding remarks}
 
-\todo We conclude this report with a critical appraisal of the method proposed by \textcite{Forastiere:2021}.
+We conclude this report with a critical appraisal of the paper and proposed method by \textcite{Forastiere:2021}. The main contributions of the paper include a potential outcome formulation of the causal interference problem and a propensity score-based estimator for observational data that adjusts for possible interference. The formulation is useful as it provides a framework under which properties (e.g., bias) of estimators that ignore interference can be derived and quantified. Based on our simulation study, the proposed estimator appears to fulfill its purpose in being able to adjust for interference effects (when assumptions hold) as evident by the results in Table~\ref{tab:table2}. We note that the results were obtained with minimal tuning of our logistic and negative binomial models (due to the nature of the simulation study), and so we expect that this estimator would perform even better in practice with proper diagnostics and tuning of model fit.
+\\
 
-\todo contributions, limitations
+One practical consideration that seems to be missing in the paper by \textcite{Forastiere:2021} is the computational performance of the procedure to compute the estimator. The complexity notably scales with both the number of units and the number of distinct values of the neighbourhood treatment in the network. For the Add Health dataset that \citeauthor{Forastiere:2021} worked with, the latter was less of an issue as every unit was limited to having at most ten neighbours. For the Twitch dataset considered in this report, units could have many neighbours and so the number of distinct neighbourhood treatments was not trivial. With such datasets, it may be reasonable to expect that the max degree in the network scales with the total number of units, and so the computational complexity of the procedure is overall closer to quadratic in the number of units in the network. For large networks with millions of units, the procedure would likely be infeasible without further modifications.
+\\
 
-\todo unconfoundedness assumption? \textcite{Sanchez:2021}
+As discussed by \textcite{Forastiere:2021}, other limitations of their proposed method include its reliance on fully knowing the network structure and assuming it is fixed, and its dependence on models for the propensity scores that are likely to be misspecified. \textcite{Sanchez:2021} also questions the unconfoundedness assumption with respect to the propensity score. In practice, the unconfoundedness assumption holding with respect to a set of covariates may already be challenging to verify. Further assuming that unconfoundedness holds with respect to a (factorized) propensity score constructed on top of that set of covariates adds another layer of assumption that is difficult to justify.
+\\
+
+\todo: inconsistent results in simulation study?
 
 
 \newpage
@@ -440,16 +480,96 @@ In the case of sum neighbourhood treatments, the results are similar to the prop
 
 \appendix
 
-\section{Additional derivations}
 
-Under the assumptions of our second example setting,
+
+\section{Derivations of effects, estimators and biases in example network}\label{apx:example}
+
+This appendix section contains derivations of the estimators and their biases discussed in Section~\ref{sec:example}.
+
+\subsection{Derivation of effect, estimator and bias in Setting~1} \label{apx:setting1}
+
+Under Setting~1, the overall treatment effect $\tau$ is given by
+\begin{align*}
+%\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
+%\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
+\tau %&= \sum_{g\in\{0,1\}} \tau(g)\P(G_{ij}=g) \\
+&= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
+&= \frac{1}{2}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)
+%&= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
+%&= \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
+\end{align*}
+where the second equality follows from Theorem~1 in the work by \textcite{Forastiere:2021}. The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA is given by
+\begin{align*}
+\tau_{X}^\text{obs} &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=1,X_{ij}=x)\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=0,X_{ij}=x)\right) \\
+&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x)\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x'|Z_{ij}=0,X_{ij}=x)\right) \\
+&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=0|X_{ij}=x,X_{ik}=x')\right) \\
+&= \frac{1}{2}\sum_{x\in\{0,1\}}\left(\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2\right)\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right]\right) \right. \\
+&\quad +\left. 4\cdot\frac{1}{4}\cdot\frac{3}{4}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right) \right) \\
+&= \sum_{x\in\{0,1\}}\left(\frac{5}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right]\right) \right. \\
+&\quad +\left. \frac{3}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right) \right)
+%&= \frac{1}{2}\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2\right)\left(\mu(1,1) - \mu(0,0)\right) + \frac{1}{2}\cdot4\cdot\frac{1}{4}\cdot\frac{3}{4}\left(\mu(1,0) - \mu(0,1)\right) \\
+%&= \frac{5}{8}\left(\mu(1,1) - \mu(0,0)\right) + \frac{3}{8}\left(\mu(1,0) - \mu(0,1)\right)
+\end{align*}
+where the third equality follows from the fact that $Z_{ij}\condind G_{ij}|X_{i1},X_{i2}$. The fourth equality follows from Bayes' theorem manipulation where
 \begin{align*}
 \P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x) &= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=x)} \\
 &= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=X_{ik})P(X_{ij}=x) + \P(Z_{ij}=1|X_{ij}\neq X_{ik})P(X_{ij}=x')} \\
 &= \left(\frac{\frac{1}{2}}{\frac{3}{4}\cdot\frac{1}{2}+\frac{1}{4}\cdot\frac{1}{2}}\right)\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x') \\
 &= \P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')
 \end{align*}
-where the first equality follows from Bayes' theorem and the assumption that $X_{i1}\condind X_{i2}$.
+with the first equality following from Bayes' theorem and the assumption that $X_{i1}\condind X_{i2}$, and similarly for $Z_{ij}=0$.
+\\
+
+The bias of the naive estimator can be verified using Equation~10 from Corollary~2 in the work by \textcite{Forastiere:2021}, which gives
+\begin{align*}
+\tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}} \left(\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0,X_{ij}=x\right]\right)\right. \\
+&\qquad \left(\P(G_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(G_{ij}=1|X_{ij}=x)\right) \\
+&\quad - \left(\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0,X_{ij}=x\right]\right) \\
+&\qquad \left.\left(\P(G_{ij}=1|Z_{ij}=0,X_{ij}=x)-\P(G_{ij}=1|X_{ij}=x)\right)\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\sum_{x,x'\in\{0,1\}} \left(\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0,X_{ij}=x\right]\right)\right. \\
+&\qquad \left(\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')-\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')\right) \\
+&\quad - \left(\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0,X_{ij}=x\right]\right) \\
+&\qquad \left.\left(\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=0|X_{ij}=x,X_{ik}=x')-\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')\right)\right) \\
+&= \frac{1}{2}\sum_{x\in\{0,1\}}\left(\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2 - 1\right)\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0,X_{ij}=x\right]\right)\right. \\
+&\quad - \left.\left(4\cdot\frac{1}{4}\cdot\frac{3}{4} - 1\right)\left(\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0,X_{ij}=x\right]\right)\right) \\
+&= \frac{1}{8}\sum_{x,z\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right)
+\end{align*}
+where the second equality follows from the same reasoning in the derivation of $\tau_X^\text{obs}$.
+
+\subsection{Derivation of overall treatment effect and estimator in Setting~1}\label{apx:setting2}
+
+Under Setting~1, the overall treatment effect $\tau$ is given by
+\begin{align*}
+%\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
+%\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
+\tau %&= \sum_{g\in\{0,1\}} \tau(g)\P(G_{ij}=g) \\
+&= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
+&= \frac{1}{2}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)
+%&= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
+%&= \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
+\end{align*}
+where the second equality follows from Theorem~1 in the work by \textcite{Forastiere:2021}. The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA is given by
+\begin{align*}
+\tau_{X}^\text{obs} &=
+\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\right)\P(G_{ij}=g) \\
+&= \frac{1}{4}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\right)
+%&= \frac{1}{4}\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]\right. \\
+%&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right)
+\end{align*}
+where the second equality follows from the model assumptions where $G_{ij}\condind X_{ij}, Z_{ij}$.
+
+
+
+\newpage
+
+
 
 \section{Twitch dataset details}\label{apx:twitch}
 
