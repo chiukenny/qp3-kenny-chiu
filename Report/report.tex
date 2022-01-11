@@ -130,25 +130,25 @@ Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (h
 \begin{figure}[ht]
 \centering
 \begin{tikzpicture}[thick,main/.style={draw,circle},node distance={6.5em},minimum size={1cm}]
-\node[main,align=center,label={[yshift=-0.5em]$X_{11}=1$}] (11) {$Z_{11}=1$\\$G_{11}=0$};
-\node[main,align=center,label={[yshift=-7.5em]$X_{12}=0$}] (12) [below of=11] {$Z_{12}=0$\\$G_{12}=1$};
+\node[main,align=center,label={[yshift=-0.25em,align=center]$X_{11}=1$\\$Y_{11}=y_{11}$}] (11) {$Z_{11}=1$\\$G_{11}=0$};
+\node[main,align=center,label={[yshift=-7.75em,align=center]$X_{12}=0$\\$Y_{12}=y_{12}$}] (12) [below of=11] {$Z_{12}=0$\\$G_{12}=1$};
 \draw[line width={0.5mm}] (11) -- (12);
-\node[main,align=center,label={[yshift=-0.5em]$X_{21}=0$}] (21) [right of=11]{$Z_{21}=1$\\$G_{21}=1$};
-\node[main,align=center,label={[yshift=-7.5em]$X_{22}=1$}] (22) [right of=12] {$Z_{22}=1$\\$G_{22}=1$};
+\node[main,align=center,label={[yshift=-0.25em,align=center]$X_{21}=0$\\$Y_{21}=y_{21}$}] (21) [right of=11]{$Z_{21}=1$\\$G_{21}=1$};
+\node[main,align=center,label={[yshift=-7.75em,align=center]$X_{22}=1$\\$Y_{22}=y_{22}$}] (22) [right of=12] {$Z_{22}=1$\\$G_{22}=1$};
 \draw[line width={0.5mm}] (21) -- (22);
 \node[] [right of=21] (d1) {\footnotesize$\bullet\bullet\bullet$};
 \node[] [right of=22] (d2) {\footnotesize$\bullet\bullet\bullet$};
-\node[main,align=center,label={[yshift=-0.5em]$X_{n1}=0$}] (n1) [right of=d1]{$Z_{n1}=0$\\$G_{n1}=0$};
-\node[main,align=center,label={[yshift=-7.5em]$X_{n1}=0$}] (n2) [right of=d2] {$Z_{n2}=0$\\$G_{n2}=0$};
+\node[main,align=center,label={[yshift=-0.25em,align=center]$X_{n1}=0$\\$Y_{n1}=y_{n1}$}] (n1) [right of=d1]{$Z_{n1}=0$\\$G_{n1}=0$};
+\node[main,align=center,label={[yshift=-7.75em,align=center]$X_{n1}=0$\\$Y_{n2}=y_{n2}$}] (n2) [right of=d2] {$Z_{n2}=0$\\$G_{n2}=0$};
 \draw[line width={0.5mm}] (n1) -- (n2);
 \node[] [right of=n1] (d3) {\footnotesize$\bullet\bullet\bullet$};
 \node[] [right of=n2] (d4) {\footnotesize$\bullet\bullet\bullet$};
 \end{tikzpicture}
-\caption{\todo Example network of paired units with their individual treatment $Z_{ij}$, neighbourhood treatment $G_{ij}$, and covariate $X_{ij}$.}
+\caption{Example network of paired units with their observed individual treatment $Z_{ij}$, neighbourhood treatment $G_{ij}$, covariate $X_{ij}$, and outcome $Y_{ij}$.}
 \label{fig:example}
 \end{figure}
 
-We examine the bias of a naive estimator on this network under two settings. In both settings, we assume that Assumption~1 (no multiple versions of treatment) and Assumption~2 (neighbourhood interference) of \textcite{Forastiere:2021} hold.
+We examine the bias of a naive estimator on this network under two settings. In both settings, we assume that Assumption~1 (no multiple versions of treatment) and Assumption~2 (neighbourhood interference) of \textcite{Forastiere:2021} hold. Derivations of the quantities presented in this section can be found in Appendix~\ref{apx:example}.
 % Hence, the assumptions of Corollary~2 are satisfied in the first setting, and the assumptions of Corollary~3 are satisfied in the second setting.
 
 \iffalse
@@ -174,7 +174,7 @@ In our first setting, suppose that the treatment assignment follows
 \[
 \P(Z_{ij}=1|X_{i1},X_{i2}) = \frac{3}{4}\mathbbm{1}\left[X_{i1}=X_{i2}\right] + \frac{1}{4}\mathbbm{1}\left[X_{i1}\neq X_{i2}\right]
 \]
-where $\mathbbm{1}[\argdot]$ is the indicator function, and suppose that $Y_{ij}(z,g)\sim N(5+3z,1)$. This treatment assignment corresponds to a type of homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ as the probability of a unit being treated also depends on its counterpart. On the other hand, the unconfoundedness assumption holds for the outcome~$Y_{ij}(z,g)$ given $X_{ij}$ (or any other covariates) as the outcome only depends on the observed value of the individual treatment $z$. Therefore, by Corollary~2, an effect estimator that is unbiased under SUTVA will be biased due to the association between the individual and neighbourhood treatments. A hypothetical study that corresponds to this setting may be one where the paired units correspond to a pair of spouses with potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters~($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$. The homophily context arises from the assumption that spouses who come from similar backgrounds will find it easier to discuss finances (at a more intimate level).
+where $\mathbbm{1}[\argdot]$ is the indicator function, and suppose that $Y_{ij}(z,g)\sim N(c_zz+c_gg,1)$ for some constants $c_z,c_g\in\bbR$. This treatment assignment corresponds to a type of homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ as the probability of a unit being treated also depends on its counterpart. On the other hand, the unconfoundedness assumption holds for the outcome~$Y_{ij}(z,g)$ given $X_{ij}$ (or any other covariates) as the outcome only depends on the observed values of the treatments $z$ and $g$. Therefore, by Corollary~2, an effect estimator that is unbiased under SUTVA will be biased in the presence of neighbourhood interference. \todo A hypothetical study that corresponds to this setting may be one where the paired units correspond to a pair of spouses with potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters~($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$. The homophily context arises from the assumption that spouses who come from similar backgrounds will find it easier to discuss finances (at a more intimate level).
 %An example study corresponding to this setting may be one similar to the first but involving spouses rather than friends, where spouses coming from similar backgrounds may find it easier to discuss finances (at a more intimate level).
 \\
 
@@ -184,31 +184,15 @@ where $\mathbbm{1}[\argdot]$ is the indicator function, and suppose that $Y_{ij}
 %The overall treatment effect $\tau$ in this setting is the same as the one given in the first setting.
 The overall treatment effect $\tau$ in this setting is given by
 \[
-\tau = \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right) \;.
+\tau = \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g\right] = c_z \;.
 \]
-\iffalse
-\begin{align*}
-%\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
-%\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
-\tau &= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
-&= \sum_{x_1,x_2\in\{0,1\}}\left(\tau(0)\P(G_{ij}=0|X_{i1}=x_1,X_{i2}=x_2) + \tau(1)\P(G_{ij}=1|X_{i1}=x_1,X_{i2}=x_2)\right)\P(X_{i1}=x_1,X_{i2}=x_2) \\
-&= \frac{1}{4}\left(\tau(0)\left(\frac{1}{2}+\frac{3}{2}\right) + \tau(1)\left(\frac{3}{2}+\frac{1}{2}\right)\right) \\
-&= \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
-\end{align*}
-\fi
 Using Theorem~2.A, the naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
 \begin{align*}
-\tau_{X}^\text{obs} &= \sum_{x\in\{0,1\}}\left(\frac{5}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right]\right) \right. \\
-&\quad +\left. \frac{3}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right) \right) \;.
-%&= \frac{1}{2}\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2\right)\left(\mu(1,1) - \mu(0,0)\right) + \frac{1}{2}\cdot4\cdot\frac{1}{4}\cdot\frac{3}{4}\left(\mu(1,0) - \mu(0,1)\right) \\
-%&= \frac{5}{8}\left(\mu(1,1) - \mu(0,0)\right) + \frac{3}{8}\left(\mu(1,0) - \mu(0,1)\right)
+\tau_{X}^\text{obs} &= \frac{5}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0\right]\right) \\
+&\quad + \frac{3}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1\right]\right) \\
+&= c_z + \frac{1}{4}c_g \;.
 \end{align*}
-It then follows that the bias of an unbiased estimator for $\tau_{X}^\text{obs}$ is
-\[
-\tau_{X}^\text{obs} - \tau = \frac{1}{8}\sum_{z,x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right) \;.
-%&= \frac{1}{8}\left(\mu(1,1) - \mu(1,0) - \mu(0,0) + \mu(0,1)\right) \;,
-\]
-Therefore, an unbiased estimator of the naive effect estimator is biased for the treatment effect when the individual and neighbourhood treatments are not conditionally independent given the set of covariates.
+It then follows that the bias of an unbiased estimator for $\tau_{X}^\text{obs}$ is $\tau_{X}^\text{obs} - \tau = \frac{1}{4}c_g$, i.e., the bias due to interference. Therefore, an unbiased SUTVA estimator is biased for the treatment effect when the individual and neighbourhood treatments are not conditionally independent for the given set of covariates in the presence of interference.
 \\
 
 The derivation for the overall treatment effect $\tau$, the estimator $\tau_{X}^\text{obs}$ and the bias $\tau_{X}^\text{obs}-\tau$ can be found in Appendix~\ref{apx:setting1}.
@@ -231,38 +215,31 @@ suppose that the treatment assignment mechanism follows
 \[
 \P(Z_{ij}=1|X_{ij}) = \frac{1}{4} + \frac{1}{2}X_{ij} \;.
 \]
-Further suppose that there is some unmeasured confounder $U_{ij}\in\{0,1\}$ for each unit that is generated based on $Z_{ij}$ with probability
+Further suppose that there is some unmeasured confounder $U_{ij}\in\{0,1\}$ for each unit that is generated based on the individual treatment $Z_{ij}$ according to the distribution
 \[
 \P(U_{ij}=1|Z_{ij}) = \frac{1}{4} + \frac{1}{2}Z_{ij}\;,
 \]
-and that $Y_{ij}(z,g)\sim N(5+3z+U_{ij},1)$ where $j\neq k$. It then follows that $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$ in this setting. However, because the outcome $Y_{ij}(z,g)$ also depends on $U_{ij}$, the unconfoundedness assumption no longer holds given only $X_{ij}$. Therefore, by Corollary~3, an effect estimator that is unbiased under SUTVA will be biased due to the unmeasured confounder $U_{ij}$. \todo A hypothetical study corresponding to this setting may be one where the paired units correspond to a pair of friends from potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters ($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$.
+and suppose that $Y_{ij}(z,g)|U_{ij}\sim N(c_zz+c_uU_{ij},1)$ for some constants $c_z,c_u\in\bbR$. Because $Z_{ij}$ only depends on $X_{ij}$ in this setting, $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$. However, because the outcome $Y_{ij}(z,g)$ now depends on $U_{ij}$, the unconfoundedness assumption no longer holds given only $X_{ij}$. Therefore, by Corollary~3, an effect estimator that is unbiased under SUTVA will be biased due to the unmeasured confounder $U_{ij}$. \todo A hypothetical study corresponding to this setting may be one where the paired units correspond to a pair of friends from potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters ($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$.
 \\
 
 %In our first setting, the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$ are conditionally independent given $X_{ij}$. By Corollary~1, an effect estimator that is unbiased under SUTVA will still be unbiased under the assumptions of our setting.
 %\\
 
-\todo The overall treatment effect $\tau$ in this setting is given by
+The overall treatment effect $\tau$ in this setting is given by
+\[
+\tau = \frac{1}{2}\sum_{u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right) = c_z \;.
+\]
+The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
 \begin{align*}
-\tau &= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
-&= \frac{1}{2}\sum_{g,x,u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x,U_{ij}=u\right]\right) \\
-&\quad \times \P(U_{ij}=u|X_{ij}=x)\P(X_{ij}=x) \\
-&= \frac{1}{4}\sum_{u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=u|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x) \\
-&= \frac{1}{4}\left(\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=0\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=0|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x) \right. \\
-& \quad+ \left.\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=1\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=1|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x)\right) \\
-&= \frac{1}{4}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,U_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=1\right]\right)
+\tau_{X}^\text{obs} &= \sum_{u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=1) - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=0)\right) \\
+&= c_z + \frac{1}{2}c_u
 \end{align*}
-\todo where the second equality follows from independence of $X_{i1}$ and $X_{i2}$, fourth equality from marginalization. The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
-\begin{align*}
-\tau_{X}^\text{obs} &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
-&= \frac{1}{2}\sum_{x,u,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,X_{ik}=u,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,X_{ik}=u,G_{ij}=g\right]\right)\P(G_{ij}=g|X_{ik}=u)\P(X_{ik}=u)
-\end{align*}
-Corollary~3:
-\begin{align*}
-\tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=0\right]\right)\left(\P(U_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(U_{ij}=1|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
-&= \frac{1}{2}\left(\P(U_{ij}=1|Z_{ij}=1)-\P(U_{ij}=1|Z_{ij}=0)\right)\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=0\right]\right) \\
-&= \frac{1}{4}\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=0\right]\right)
-\end{align*}
+It then follows that the bias is $\tau_{X}^\text{obs} - \tau = \frac{1}{2}c_u$, i.e., the bias due to the unmeasured covariate. Therefore, an unbiased estimator of the SUTVA estimator is biased for the treatment effect when the unconfoundedness assumption does not hold for the given set of covariates.
+\\
 
+The derivation for the overall treatment effect $\tau$, the estimator $\tau_{X}^\text{obs}$ and the bias $\tau_{X}^\text{obs}$ can be found in Appendix~\ref{apx:setting2}.
+
+\iffalse
 The overall treatment effect $\tau$ in this setting is given by
 \[
 \tau = \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right) \;.
@@ -272,6 +249,7 @@ Using Theorem~2.A, it can be shown that the naive estimator $\tau_{X}^\text{obs}
 \tau_{X}^\text{obs} = \frac{1}{4}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\right) \;.
 \]
 It then follows from the above that $\tau_{X}^\text{obs}-\tau = 0$.
+\fi
 \iffalse
 and Assumptions~1 and 3 that
 \begin{align*}
@@ -282,10 +260,10 @@ and Assumptions~1 and 3 that
 &= 0 \;.
 \end{align*}
 \fi
+\iffalse
 Therefore, an unbiased estimator of the naive effect estimator is also unbiased for the treatment effect when the individual and neighbourhood treatments are conditionally independent given the set of covariates.
 \\
-
-The derivation for the overall treatment effect and the estimator $\tau_{X}^\text{obs}$ can be found in Appendix~\ref{apx:setting1}.
+\fi
 
 
 \section{Reproducing simulation study results}
@@ -484,22 +462,69 @@ As discussed by \textcite{Forastiere:2021}, other limitations of their proposed 
 
 \section{Derivations of effects, estimators and biases in example network}\label{apx:example}
 
-This appendix section contains derivations of the estimators and their biases discussed in Section~\ref{sec:example}.
+This appendix section contains derivations of the overall treatment effects, estimators and their biases discussed in Section~\ref{sec:example}.
 
-\subsection{Derivation of effect, estimator and bias in Setting~1} \label{apx:setting1}
+\subsection{Setting~1} \label{apx:setting1}
 
-Under Setting~1, the overall treatment effect $\tau$ is given by
+In Setting~1, the overall treatment effect $\tau$ is given by
 \begin{align*}
 %\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
 %\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
 \tau %&= \sum_{g\in\{0,1\}} \tau(g)\P(G_{ij}=g) \\
-&= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
-&= \frac{1}{2}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
-&= \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)
+%&= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
+&= \sum_{x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g\right]\right)\sum_{x\in\{0,1\}}\P(X_{ij}=x) \\
+&= \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g\right] \\
+&= c_z
 %&= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
 %&= \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
 \end{align*}
-where the second equality follows from Theorem~1 in the work by \textcite{Forastiere:2021}. The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA is given by
+where the first equality follows from Theorem~1 and the second equality follows from the model assumptions.
+\\
+
+The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA is given by
+\begin{align*}
+\tau_{X}^\text{obs} &= \sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=1,X_{ij}=x)\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
+&= \sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=1,X_{ij}=x)\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
+&= \sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x)\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g\right]\sum_{x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x'|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
+&= \sum_{g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g\right]\sum_{x,x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ij}=x)\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g\right]\sum_{x,x'\in\{0,1\}}\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=0|X_{ij}=x,X_{ik}=x')\P(X_{ij}=x)\right) \\
+&= \frac{1}{2}\left(\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2\right)\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0\right]\right)\right. \\
+&\quad + \left.4\left(\frac{1}{4}\right)\left(\frac{3}{4}\right)\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1\right]\right)\right) \\
+&= \frac{5}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0\right]\right) + \frac{3}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1\right]\right) \\
+&= \frac{5}{8}(c_z+c_g) + \frac{3}{8}(c_z-c_g) \\
+&= c_z + \frac{1}{4}c_g
+\end{align*}
+where the first equality follows from Theorem~2.A and the unconfoundedness assumption, the second follows from model assumptions, and the third from iterated conditioning on the counterpart unit $X_{ik}$ of $X_{ij}$, $j\neq k$, and the fact that $Z_{ij}\condind G_{ij}|X_{i1},X_{i2}$.  The fourth equality follows from Bayes' theorem manipulation where
+\begin{align*}
+\P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x) &= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=x)} \\
+&= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=X_{ik})P(X_{ik}=x) + \P(Z_{ij}=1|X_{ij}\neq X_{ik})P(X_{ik}=x')} \\
+&= \left(\frac{\frac{1}{2}}{\left(\frac{3}{4}\right)\left(\frac{1}{2}\right)+\left(\frac{1}{4}\right)\left(\frac{1}{2}\right)}\right)\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x') \\
+&= \P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')
+\end{align*}
+with the first equality following from Bayes' theorem and the assumption that $X_{i1}\condind X_{i2}$.
+\\
+
+The bias of the naive estimator can be verified using Equation~11 from Corollary~2 in the work by \textcite{Forastiere:2021}, which gives
+\begin{align*}
+\tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right]-\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right) \\
+&\quad \times\left(\P(G_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(G_{ij}=1|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
+&= \left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0\right]\right) \\
+&\quad \times\sum_{x,x'\in\{0,1\}}\left(\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x)\right. \\
+&\quad - \left.\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x'|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
+&= \left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0\right]\right) \\
+&\quad \times\sum_{x,x'\in\{0,1\}}\left(\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\right. \\
+&\quad - \left.\P(G_{ij}=1|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=0|X_{ij}=x,X_{ik}=x')\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2-4\left(\frac{1}{4}\right)\left(\frac{3}{4}\right)\right)\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0\right]\right) \\
+&= \frac{1}{4}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0\right]\right) \\
+&= \frac{1}{4}c_g
+\end{align*}
+where the second equality follows from model assumptions and iterated conditioning on the counterpart unit $X_{ik}$, $j\neq k$, and the third from the above Bayes' theorem manipulation.
+
+\iffalse
 \begin{align*}
 \tau_{X}^\text{obs} &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
 &= \frac{1}{2}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right]\P(G_{ij}=g|Z_{ij}=1,X_{ij}=x)\right. \\
@@ -515,17 +540,8 @@ where the second equality follows from Theorem~1 in the work by \textcite{Forast
 %&= \frac{1}{2}\left(2\left(\frac{3}{4}\right)^2+2\left(\frac{1}{4}\right)^2\right)\left(\mu(1,1) - \mu(0,0)\right) + \frac{1}{2}\cdot4\cdot\frac{1}{4}\cdot\frac{3}{4}\left(\mu(1,0) - \mu(0,1)\right) \\
 %&= \frac{5}{8}\left(\mu(1,1) - \mu(0,0)\right) + \frac{3}{8}\left(\mu(1,0) - \mu(0,1)\right)
 \end{align*}
-where the third equality follows from the fact that $Z_{ij}\condind G_{ij}|X_{i1},X_{i2}$. The fourth equality follows from Bayes' theorem manipulation where
-\begin{align*}
-\P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x) &= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=x)} \\
-&= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=X_{ik})P(X_{ij}=x) + \P(Z_{ij}=1|X_{ij}\neq X_{ik})P(X_{ij}=x')} \\
-&= \left(\frac{\frac{1}{2}}{\frac{3}{4}\cdot\frac{1}{2}+\frac{1}{4}\cdot\frac{1}{2}}\right)\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x') \\
-&= \P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')
-\end{align*}
-with the first equality following from Bayes' theorem and the assumption that $X_{i1}\condind X_{i2}$, and similarly for $Z_{ij}=0$.
-\\
+where the third equality follows from the fact that $Z_{ij}\condind G_{ij}|X_{i1},X_{i2}$.
 
-The bias of the naive estimator can be verified using Equation~10 from Corollary~2 in the work by \textcite{Forastiere:2021}, which gives
 \begin{align*}
 \tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}} \left(\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0,X_{ij}=x\right]\right)\right. \\
 &\qquad \left(\P(G_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(G_{ij}=1|X_{ij}=x)\right) \\
@@ -540,10 +556,58 @@ The bias of the naive estimator can be verified using Equation~10 from Corollary
 &= \frac{1}{8}\sum_{x,z\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right)
 \end{align*}
 where the second equality follows from the same reasoning in the derivation of $\tau_X^\text{obs}$.
+\fi
 
-\subsection{Derivation of overall treatment effect and estimator in Setting~1}\label{apx:setting2}
 
-Under Setting~1, the overall treatment effect $\tau$ is given by
+\subsection{Derivation of overall treatment effect and estimator in Setting~2}\label{apx:setting2}
+
+\todo In Setting~2, the overall treatment effect $\tau$ is given by
+\begin{align*}
+\tau &= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
+&= \frac{1}{2}\sum_{g,x,u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x,U_{ij}=u\right]\right) \\
+&\quad \times \P(U_{ij}=u|X_{ij}=x)\P(X_{ij}=x) \\
+&= \frac{1}{2}\sum_{u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=u|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x) \\
+&= \frac{1}{2}\left(\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=0\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=0|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x) \right. \\
+& \quad+ \left.\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=1\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=1|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x)\right) \\
+&= \frac{1}{2}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,U_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=1\right]\right) \\
+&= c_z
+\end{align*}
+\todo where the second equality follows from independence of $X_{i1}$ and $X_{i2}$, fourth equality from marginalization. \begin{align*}
+\tau_{X}^\text{obs} &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
+&= \frac{1}{2}\sum_{x,u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=1) - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=0)\right) \\
+&= \sum_{u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=1) - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=0)\right) \\
+&= \frac{1}{4}c_z - 0 + \cdot\frac{3}{4}(c_z+c_u) - \frac{1}{4}c_u \\
+&= c_z + \frac{1}{2}c_u
+\end{align*}
+following the same reasoning as in the derivation for $\tau$. Corollary~3:
+\begin{align*}
+\tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=0\right]\right)\left(\P(U_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(U_{ij}=1|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
+&= \left(\E\left[Y_{ij}|Z_{ij}=z,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,U_{ij}=0\right]\right)\left(\P(U_{ij}=1|Z_{ij}=1)-\P(U_{ij}=1|Z_{ij}=0)\right) \\
+&= \frac{1}{2}\left(\E\left[Y_{ij}|Z_{ij}=z,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,U_{ij}=0\right]\right) \\
+&=\frac{1}{2}c_u
+\end{align*}
+
+
+\iffalse
+\begin{align*}
+\tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,U_{ij}=1\right]\P(U_{ij}=1|Z_{ij}=1)-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,U_{ij}=1\right]\P(U_{ij}=1|Z_{ij}=0) \right. \\
+&\quad + \left.\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,U_{ij}=0\right]\P(U_{ij}=0|Z_{ij}=1)-\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,U_{ij}=0\right]\P(U_{ij}=0|Z_{ij}=0)\right) \\
+&\quad - \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,U_{ij}=1\right]\P(U_{ij}=1|Z_{ij}=1) +\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,U_{ij}=1\right]\P(U_{ij}=1|X_{ij}=x) \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,U_{ij}=0\right]\P(U_{ij}=0|Z_{ij}=1) +\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,U_{ij}=0\right]\P(U_{ij}=0|X_{ij}=x)\right)\P(X_{ij}=x) \\
+&= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=1\right](\P(U_{ij}=1|Z_{ij}=1)-\P(U_{ij}=1|X_{ij}=x))\right. \\
+&\quad -\E\left[Y_{ij}|Z_{ij}=0,U_{ij}=1\right](\P(U_{ij}=1|Z_{ij}=0)-\P(U_{ij}=1|X_{ij}=x))  \\
+&\quad + \E\left[Y_{ij}|Z_{ij}=1,U_{ij}=0\right](\P(U_{ij}=0|Z_{ij}=1)-\P(U_{ij}=0|X_{ij}=x)) \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,U_{ij}=0\right](\P(U_{ij}=0|Z_{ij}=0)-\P(U_{ij}=0|X_{ij}=x))\right)\P(X_{ij}=x) \\
+&= \left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=1\right](\P(U_{ij}=1|Z_{ij}=1)-\P(U_{ij}=1))\right. \\
+&\quad -\E\left[Y_{ij}|Z_{ij}=0,U_{ij}=1\right](\P(U_{ij}=1|Z_{ij}=0)-\P(U_{ij}=1))  \\
+&\quad + \E\left[Y_{ij}|Z_{ij}=1,U_{ij}=0\right](\P(U_{ij}=0|Z_{ij}=1)-\P(U_{ij}=0)) \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,U_{ij}=0\right](\P(U_{ij}=0|Z_{ij}=0)-\P(U_{ij}=0))\right) \\
+&= 9\cdot\frac{1}{4} - 6\cdot\left(-\frac{1}{4}\right) + 8\cdot\left(-\frac{1}{4}\right) - 5\cdot\frac{1}{4} \\
+&= \frac{1}{2}
+\end{align*}
+\fi
+
+\iffalse
 \begin{align*}
 %\tau(0) &= \mu(1,0) - \mu(0,0) \;, \\
 %\tau(1) &= \mu(1,1) - \mu(0,1) \;, \\
@@ -564,6 +628,7 @@ where the second equality follows from Theorem~1 in the work by \textcite{Forast
 %&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right)
 \end{align*}
 where the second equality follows from the model assumptions where $G_{ij}\condind X_{ij}, Z_{ij}$.
+\fi
 
 
 
