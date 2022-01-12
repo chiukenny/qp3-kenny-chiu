@@ -4,7 +4,7 @@
 
 \usepackage{tikz}
 
-\title{\todo\\\vspace{0.5em}\large{STAT 548 Qualifying Paper}}
+\title{Causal inference on observational network data\\\vspace{0.5em}\large{STAT 548 Qualifying Paper}}
 \author{Kenny Chiu}
 \date{\today}
 
@@ -25,13 +25,18 @@
 
 \section{Introduction}
 
+\textcite{Forastiere:2021} examine the problem of causal inference on observational network data in the presence of interference. \citeauthor{Forastiere:2021} formulate the problem in terms of a potential outcome framework under which the biases of treatment effect estimators that assume SUTVA can be derived, and they propose a propensity score-based estimator that is able to produce unbiased estimates under certain assumptions. In this report, we review the work by \textcite{Forastiere:2021}, present toy examples that illustrate their theoretical results, and replicate part of their simulation study on a different dataset.
+\\
 
-\section{Notation}
+This report is organized as follows: Section~\ref{sec:notation} introduces the notation used in this report; Section~\ref{sec:summary} summarizes their proposed methodology in the context of the literature; Section~\ref{sec:example} presents examples that illustrate the relevance of their theoretical results; Sections~\ref{sec:replication} and \ref{sec:extension} discusses our attempts at replicating part of their simulation study on a different dataset; and Section~\ref{sec:critique} concludes the report with a critique of their work. Appendix~\ref{apx:example} includes our technical derivations from Section~\ref{sec:example}, and Appendix~\ref{apx:twitch} contains additional information about the dataset and our simulations from Sections~\ref{sec:replication} and \ref{sec:extension}.
+
+
+\section{Notation} \label{sec:notation}
 
 Throughout this report, we closely follow the notation used by \textcite{Forastiere:2021}. Let $G=(\calN,\calE)$ be an undirected network where $\calN$ is a set of $N$ units (nodes) and $\calE$ is a set of edges $(i,j)$. A partition~$(i,\Ni,\Nmi)$ of $\calN$ describes unit~$i$'s neighbourhood~$\calN_i$ (the set of $N_i$ units connected to unit $i$) and the set~$\calN_{-i}$ of all other units that are not $i$ and are not in $\calN_i$. Let $Z_i\in\{0,1\}$ be the treatment assigned to unit $i$ and $Y_i\in\calY$ the observed outcome of unit $i$. Denote the treatment and outcome vector for the population~$\calN$ as $\bfZ$ and $\bfY$, respectively, and the corresponding vectors for partition~$(i,\Ni,\Nmi)$ as $(Z_i,\ZNi,\ZNmi)$ and $(Y_i,\YNi,\YNmi)$. Let $G_i=g_i(\ZNi)\in\calG_i$ be some known and well-specified summary~$g_i$ of the treatments in unit~$i$'s neighbourhood, and denote the vector of neighbourhood treatments for the population as $\bfG$. Depending on the size of a unit's neighbourhood, the space $\calG_i$ may differ between units. Let $V_g=\{i\in\calN:g\in\calG_i\}$ denote the subset containing $v_g$ units that have $g$ as a possible value for the neighbourhood treatment. Let $\bfX_i\in\calX$ be a vector of covariates for unit~$i$ that partitions into individual-level characteristics $\Xind_i\in\calX^\text{ind}$ and neighbourhood-level/aggregated individual-level characteristics $\Xneigh_i\in\calX^\text{neigh}$.
 
 
-\section{Proposed methodology in context of the literature}
+\section{Review of proposed methodology} \label{sec:summary}
 
 \todo In this section, we explain the method proposed by \textcite{Forastiere:2021} and discuss its relevance in the context of the related literature. We also discuss its advantages over other methods used in similar contexts.
 
@@ -44,10 +49,10 @@ the assignment mechanism of treatments is unknown with observational data and so
 \item
 naive inference methods that ignore interference may produce biased estimates.
 \end{enumerate}
-In the randomized study literature, these issues can generally be dealt with by designing the study in such a way that the influence of confounders is minimized and that inference methods that account for interference can be used \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}. In the observational setting, these considerations need to be addressed by the inference method in the analysis phase. \citeauthor{Forastiere:2021} consider a setting involving a binary treatment (e.g., intervention and control) and where the interference on a unit is limited to that of its immediate neighbouring units. They propose a method to estimate the causal treatment and spillover (interference) effects that yield unbiased estimates under certain assumptions.
+In the randomized controlled trial literature, these issues can generally be dealt with by designing the study in such a way that the influence of confounders is minimized and that inference methods that account for interference can be used \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}. In the observational setting, these considerations need to be addressed by the inference method in the analysis phase. \citeauthor{Forastiere:2021} consider a setting involving a binary treatment (e.g., intervention and control) and where the interference on a unit is limited to that of its immediate neighbouring units. They propose a method to estimate the causal treatment and spillover (interference) effects that yield unbiased estimates under certain assumptions.
 \\
 
-Under the potential outcome framework, the general procedure for estimating effects is to match units into sets based on covariate values, compute the effect contrast within each matched set, and estimate the effect by the (weighted) average of the contrasts across sets. However, matching may be difficult when the space of possible covariate values is large or if there are many covariates. \textcite{Forastiere:2021} address this problem in their proposed method by instead matching on a defined joint propensity score~$\psi(z;g;x)$ that factorizes into a neighbourhood propensity score~$\lambda(g;z;\bfx^g)$ (probability of being exposed to neighbourhood treatment $g$ given individual treatment $z$ and relevant covariates $\bfx^g$) and an individual propensity score~$\phi(z;\bfx^z)$ (probability of being assigned treatment $z$ given relevant covariates $\bfx^z$). Note that $\bfX^g$ and $\bfX^z$ do not necessarily correspond to $\Xneigh$ and $\Xind$, respectively, and as they may not be disjoint. The steps for their propensity-based method are as follows:
+Under the potential outcome framework, the general procedure for estimating effects is to match units into sets based on covariate values, compute the effect contrast within each matched set, and estimate the effect by the (weighted) average of the contrasts across sets. However, matching may be difficult when the space of possible covariate values is large or if there are many covariates. \textcite{Forastiere:2021} address this problem in their proposed method by instead matching based on a defined joint propensity score~$\psi(z;g;x)$ that factorizes into a neighbourhood propensity score~$\lambda(g;z;\bfx^g)$ (probability of being exposed to neighbourhood treatment $g$ given individual treatment $z$ and relevant covariates $\bfx^g$) and an individual propensity score~$\phi(z;\bfx^z)$ (probability of being assigned treatment $z$ given relevant covariates $\bfx^z$). Note that $\bfX^g$ and $\bfX^z$ do not necessarily correspond to $\Xneigh$ and $\Xind$, respectively, as they may not be disjoint. The steps for their propensity-based method are as follows:
 \begin{enumerate}
 
 \item
@@ -89,11 +94,11 @@ Estimate the dose-response function by averaging over the estimated potential ou
 \end{enumerate}
 \textcite{Forastiere:2021} show that their estimators for the treatment and spillover effects are unbiased under three assumptions, the first two of which form the Stable Unit Treatment on Neighbourhood Value Assumption (SUTNVA, a generalization of SUTVA that relaxes the no interference assumption to allow interference of immediate neighbours) and the third being an unconfoundedness assumption that says the treatment assignment mechanism is conditionally independent of the outcomes for the given set of covariates.
 
-\subsection{Comparison to the literature}
+\subsection{In context of the literature}
 
 The literature that examines the similar problem of causal inference in observational data under general forms of interference is still relatively new. We summarize the common approaches in this literature and discuss how the work by \textcite{Forastiere:2021} fits in. We also briefly highlight other work in the related literature.
 
-\subsubsection{Other approaches under the same context}
+\subsubsection{Similar contexts}
 
 As noted by \citeauthor{Forastiere:2021}, the majority of the works dealing with the same context involve either inverse probability-weighted (IPW) estimators \parencite{Liu:2016} or targeted maximum likelihood estimators (TMLE) \parencite{VanDerLaan:2014,Sofrygin:2017,Ogburn:2017} for the causal treatment effect. The main advantage of the method proposed by \textcite{Forastiere:2021} over these two approaches is the weaker assumptions that it requires.
 \\
@@ -104,7 +109,7 @@ IPW estimators are weighted averages of the outcomes where the weights are defin
 TMLEs are obtained by maximizing the likelihood of the outcomes defined on a structural equation model. Similar to the IPW estimators, TMLE typically involves a randomization assumption \parencite{VanDerLaan:2014} on the model where the conditional joint distribution of the treatment assignments factorizes into independent conditionals given the covariates for all units, and similarly for the conditional joint distribution of the outcomes given the covariates and the treatment assignments. In comparison, the unconfoundedness assumption in the method proposed by \textcite{Forastiere:2021} makes a weaker assumption where the outcome and treatment assignment of each unit is conditionally independent given only the covariates of that unit. The significance of these assumptions again circle back to the argument of disregarding homophily and/or other venues of confounding. It is notable that extensions of TMLE that allow for limited forms of homophily were later introduced \parencite{Ogburn:2017}.
 \\
 
-More recently, approaches that can be described as extensions of \textcite{Forastiere:2021}'s method have been proposed. \textcite{Jackson:2020} proposed estimators based on propensity score matching but which also explicitly account for homophily by modeling neighbourhood treatment assignments as an incomplete information game. \textcite{Sanchez:2021} questioned the justification of the unconfoundedness assumption with respect to the constructed propensity score (which may be high-dimensional and challenging to estimate accurately), and proposed a two-step method where a defined network propensity score is first estimated and then used as inverse weights to match units.
+More recently, approaches that can be described as extensions of \textcite{Forastiere:2021}'s method have been proposed. \textcite{Jackson:2020} proposed estimators based on propensity score matching but which also explicitly account for homophily by modeling neighbourhood treatment assignments as an incomplete information game. \textcite{Sanchez:2021} questioned the justification of the unconfoundedness assumption with respect to the constructed propensity score (which would need to be estimated for every unit in the network and may be challenging to estimate accurately), and proposed a two-step method where a defined network propensity score is first estimated and then used as inverse weights to match units.
 
 \subsubsection{Other contexts}
 
@@ -118,13 +123,20 @@ A small number of works consider more specific and niche contexts. For example, 
 %Outside of the observational setting, there are many works that study causal inference in randomized studies with potential interference. These works generally examine study designs that allow for treatment effect estimation in the presence of interference under varying contexts \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}
 
 
-\section{Potential bias of naive estimator when unconfoundedness holds}\label{sec:example}
+\section{Potential bias of naive estimator}\label{sec:example}
 
-In this section, we describe a simple example that illustrates the relevance of Theorem~2.A, Corollary~2 and Corollary~3 in the paper by \textcite{Forastiere:2021}. Specifically, we show how for a simple network under certain assumptions, an unbiased naive estimator for the treatment effect that assumes SUTVA will be biased with the bias depending on the treatment assignment mechanism and the presence of unmeasured confounders.
-% may be biased depending on the exact treatment assignment mechanism.
-\\
+In this section, we describe a simple example that illustrates the relevance of Theorem~2.A, Corollary~2 and Corollary~3 in the paper by \textcite{Forastiere:2021}. Specifically, we show for a simple network that
+\begin{enumerate}
 
-Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by $i\in\bbN$ for the pair and $j\in\{1,2\}$ for the unit within a pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ be whether a unit's paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some covariate available for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=\frac{1}{2}$. Let $Y_{ij}\in\bbR$ be the outcome measured for each unit. Other details, such as the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion. Figure~\ref{fig:example} shows an example network.
+\item
+if the unconfoundedness assumption holds but the individual and neighbourhood treatments are not conditionally independent for a given set of covariates, then an unbiased naive estimator of the treatment effect that assumes SUTVA will be biased due to interference effects, and
+
+\item
+if the individual and neighbourhood treatments are conditionally independent but the unconfoundedness assumption does not hold for a given set of covariates, then an unbiased SUTVA estimator will be biased due to the unmeasured confounders.
+
+\end{enumerate}
+
+Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by $i\in\bbN$ for the pair and $j\in\{1,2\}$ for the unit within a pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ be whether a unit's paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some measured covariate for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=\frac{1}{2}$. Let $Y_{ij}\in\bbR$ be the outcome measured for each unit. Other details, such as the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion. Figure~\ref{fig:example} shows an example network.
 \\
 
 \begin{figure}[ht]
@@ -168,13 +180,13 @@ In the second setting, suppose that the treatment assignment follows
 where $\mathbbm{1}[\argdot]$ is the indicator function. This assignment corresponds to a type of homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ in this setting as the probability of a unit being treated also depends on its counterpart. An example study corresponding to this setting may be one similar to the first but involving spouses rather than friends, where spouses coming from similar backgrounds may find it easier to discuss finances (at a more intimate level).
 \fi
 
-\subsection{Setting~1: bias of naive estimator due to correlated individual and neighbourhood treatments}
+\subsection{Setting~1: bias due to interference}
 
 In our first setting, suppose that the treatment assignment follows
 \[
 \P(Z_{ij}=1|X_{i1},X_{i2}) = \frac{3}{4}\mathbbm{1}\left[X_{i1}=X_{i2}\right] + \frac{1}{4}\mathbbm{1}\left[X_{i1}\neq X_{i2}\right]
 \]
-where $\mathbbm{1}[\argdot]$ is the indicator function, and suppose that $Y_{ij}(z,g)\sim N(c_zz+c_gg,1)$ for some constants $c_z,c_g\in\bbR$. This treatment assignment corresponds to a type of homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ as the probability of a unit being treated also depends on its counterpart. On the other hand, the unconfoundedness assumption holds for the outcome~$Y_{ij}(z,g)$ given $X_{ij}$ (or any other covariates) as the outcome only depends on the observed values of the treatments $z$ and $g$. Therefore, by Corollary~2, an effect estimator that is unbiased under SUTVA will be biased in the presence of neighbourhood interference. \todo A hypothetical study that corresponds to this setting may be one where the paired units correspond to a pair of spouses with potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters~($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$. The homophily context arises from the assumption that spouses who come from similar backgrounds will find it easier to discuss finances (at a more intimate level).
+where $\mathbbm{1}[\argdot]$ is the indicator function, and suppose that $Y_{ij}(z,g)\sim N(c_zz+c_gg,\sigma^2)$ for some constants $c_z,c_g\in\bbR$. This treatment assignment corresponds to a type of homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ as the probability of a unit being treated also depends on its counterpart. On the other hand, the unconfoundedness assumption holds for the outcome~$Y_{ij}(z,g)$ given $X_{ij}$ (or any other covariates) as the outcome only depends on the observed values of the treatments $z$ and $g$. Therefore, by Corollary~2, an effect estimator that is unbiased under SUTVA will be biased in the presence of neighbourhood interference. A hypothetical study that corresponds to this setting may be one where the paired units correspond to a pair of spouses with potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters~($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$. The homophily context arises from the assumption that spouses who come from similar backgrounds will find it easier to discuss finances. The interference context comes from the assumption that one may learn from others talk about their financial management.
 %An example study corresponding to this setting may be one similar to the first but involving spouses rather than friends, where spouses coming from similar backgrounds may find it easier to discuss finances (at a more intimate level).
 \\
 
@@ -188,8 +200,10 @@ The overall treatment effect $\tau$ in this setting is given by
 \]
 Using Theorem~2.A, the naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
 \begin{align*}
-\tau_{X}^\text{obs} &= \frac{5}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0\right]\right) \\
-&\quad + \frac{3}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1\right]\right) \\
+\tau_{X}^\text{obs} &= \sum_{g,x,x'\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g\right]\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\right. \\
+&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g\right]\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=0|X_{ij}=x,X_{ik}=x')\right)\P(X_{ij}=x) \\
+%&= \frac{5}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0\right]\right) \\
+%&\quad + \frac{3}{8}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0\right]-\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1\right]\right) \\
 &= c_z + \frac{1}{4}c_g \;.
 \end{align*}
 It then follows that the bias of an unbiased estimator for $\tau_{X}^\text{obs}$ is $\tau_{X}^\text{obs} - \tau = \frac{1}{4}c_g$, i.e., the bias due to interference. Therefore, an unbiased SUTVA estimator is biased for the treatment effect when the individual and neighbourhood treatments are not conditionally independent for the given set of covariates in the presence of interference.
@@ -197,7 +211,7 @@ It then follows that the bias of an unbiased estimator for $\tau_{X}^\text{obs}$
 
 The derivation for the overall treatment effect $\tau$, the estimator $\tau_{X}^\text{obs}$ and the bias $\tau_{X}^\text{obs}-\tau$ can be found in Appendix~\ref{apx:setting1}.
 
-\subsection{Setting~2: bias of naive estimator due to unmeasured confounders}
+\subsection{Setting~2: bias due to unmeasured confounders}
 
 In our second setting,
 \iffalse
@@ -219,7 +233,7 @@ Further suppose that there is some unmeasured confounder $U_{ij}\in\{0,1\}$ for 
 \[
 \P(U_{ij}=1|Z_{ij}) = \frac{1}{4} + \frac{1}{2}Z_{ij}\;,
 \]
-and suppose that $Y_{ij}(z,g)|U_{ij}\sim N(c_zz+c_uU_{ij},1)$ for some constants $c_z,c_u\in\bbR$. Because $Z_{ij}$ only depends on $X_{ij}$ in this setting, $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$. However, because the outcome $Y_{ij}(z,g)$ now depends on $U_{ij}$, the unconfoundedness assumption no longer holds given only $X_{ij}$. Therefore, by Corollary~3, an effect estimator that is unbiased under SUTVA will be biased due to the unmeasured confounder $U_{ij}$. \todo A hypothetical study corresponding to this setting may be one where the paired units correspond to a pair of friends from potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters ($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$.
+and suppose that $Y_{ij}(z,g)|U_{ij}\sim N(c_zz+c_uU_{ij},\sigma^2)$ for some constants $c_z,c_u\in\bbR$. Because $Z_{ij}$ only depends on $X_{ij}$ in this setting, $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$. However, because the outcome $Y_{ij}(z,g)$ now depends on $U_{ij}$, the unconfoundedness assumption no longer holds given only $X_{ij}$. Therefore, by Corollary~3, an effect estimator that is unbiased under SUTVA will be biased due to the unmeasured confounder $U_{ij}$. A hypothetical study corresponding to this setting may be one similar to the example in setting one except where the paired units are friends rather than spouses, and so it is assumed that financial discussions are less intimate and therefore have minimal interference effects. In addition, unbeknownst to the researcher, those who are comfortable discussing financial matters ($Z_{ij}$) are more likely to make financial investments ($U_{ij}$), which also effects their financial management $Y_{ij}$.
 \\
 
 %In our first setting, the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$ are conditionally independent given $X_{ij}$. By Corollary~1, an effect estimator that is unbiased under SUTVA will still be unbiased under the assumptions of our setting.
@@ -227,7 +241,7 @@ and suppose that $Y_{ij}(z,g)|U_{ij}\sim N(c_zz+c_uU_{ij},1)$ for some constants
 
 The overall treatment effect $\tau$ in this setting is given by
 \[
-\tau = \frac{1}{2}\sum_{u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right) = c_z \;.
+\tau = \sum_{u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right)\P(U_{ij}=u) = c_z \;.
 \]
 The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
 \begin{align*}
@@ -266,7 +280,7 @@ Therefore, an unbiased estimator of the naive effect estimator is also unbiased 
 \fi
 
 
-\section{Reproducing simulation study results}
+\section{Reproducing simulation study findings} \label{sec:replication}
 
 In this section, we aim to reproduce the general findings of the simulation study conducted by \textcite{Forastiere:2021}. Note that the complete Add Health dataset that \citeauthor{Forastiere:2021} work with is publicly inaccessible, and so we instead work with the Twitch Social Network dataset \parencite{Rozemberczki:2021} that is comparable in size. Twitch is an American live streaming service that focuses on video game streaming. The dataset contains several networks of streamers and their mutual friendships that were collected in May~2018. We consider a hypothetical study where we are interested in understanding the effect of streamer self-promotions and advertising (the individual treatment) on the number of subscribers (users who follow a particular streamer; the outcome). It is reasonable to assume that there is interference at play where promoting one's self would inadvertently promote the streamer's network due to the site's recommendation algorithms that suggest similar streams to a viewer.
 \\
@@ -387,7 +401,7 @@ Our findings are generally consistent with the results of \textcite{Forastiere:2
 
 
 
-\section{Extending the simulation study}
+\section{Extending the simulation study} \label{sec:extension}
 
 In this section, we extend our simulation study from Section~\ref{sec:observedbias} to the other estimators considered in Table~2 of the work by \textcite{Forastiere:2021}. These estimators include
 \begin{enumerate}
@@ -432,7 +446,7 @@ In the case of sum neighbourhood treatments, the results are similar to the prop
 
 
 
-\section{Critical appraisal and concluding remarks}
+\section{Critical appraisal and concluding remarks} \label{sec:critique}
 
 We conclude this report with a critical appraisal of the paper and proposed method by \textcite{Forastiere:2021}. The main contributions of the paper include a potential outcome formulation of the causal interference problem and a propensity score-based estimator for observational data that adjusts for possible interference. The formulation is useful as it provides a framework under which properties (e.g., bias) of estimators that ignore interference can be derived and quantified. Based on our simulation study, the proposed estimator appears to fulfill its purpose in being able to adjust for interference effects (when assumptions hold) as evident by the results in Table~\ref{tab:table2}. We note that the results were obtained with minimal tuning of our logistic and negative binomial models (due to the nature of the simulation study), and so we expect that this estimator would perform even better in practice with proper diagnostics and tuning of model fit.
 \\
@@ -460,7 +474,7 @@ As discussed by \textcite{Forastiere:2021}, other limitations of their proposed 
 
 
 
-\section{Derivations of effects, estimators and biases in example network}\label{apx:example}
+\section{Technical derivations from example} \label{apx:example}
 
 This appendix section contains derivations of the overall treatment effects, estimators and their biases discussed in Section~\ref{sec:example}.
 
@@ -508,7 +522,7 @@ where the first equality follows from Theorem~2.A and the unconfoundedness assum
 with the first equality following from Bayes' theorem and the assumption that $X_{i1}\condind X_{i2}$.
 \\
 
-The bias of the naive estimator can be verified using Equation~11 from Corollary~2 in the work by \textcite{Forastiere:2021}, which gives
+The bias of the naive estimator can be verified using Equation~11 from Corollary~2, which gives
 \begin{align*}
 \tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=1,X_{ij}=x\right]-\E\left[Y_{ij}|Z_{ij}=z,G_{ij}=0,X_{ij}=x\right]\right) \\
 &\quad \times\left(\P(G_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(G_{ij}=1|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
@@ -559,33 +573,41 @@ where the second equality follows from the same reasoning in the derivation of $
 \fi
 
 
-\subsection{Derivation of overall treatment effect and estimator in Setting~2}\label{apx:setting2}
+\subsection{Setting~2}\label{apx:setting2}
 
-\todo In Setting~2, the overall treatment effect $\tau$ is given by
+In Setting~2, the overall treatment effect $\tau$ is given by
 \begin{align*}
 \tau &= \sum_{g\in\{0,1\}} \left(\E\left[Y_{ij}(1,g)\right] - \E\left[Y_{ij}(0,g)\right]\right)\P(G_{ij}=g) \\
-&= \frac{1}{2}\sum_{g,x,u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x,U_{ij}=u\right]\right) \\
-&\quad \times \P(U_{ij}=u|X_{ij}=x)\P(X_{ij}=x) \\
-&= \frac{1}{2}\sum_{u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=u|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x) \\
-&= \frac{1}{2}\left(\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=0\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=0|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x) \right. \\
-& \quad+ \left.\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=1\right]\right)\sum_{x,z\in\{0,1\}}\P(U_{ij}=1|Z_{ij}=z)\P(Z_{ij}=z|X_{ij}=x)\right) \\
-&= \frac{1}{2}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,U_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=1\right]\right) \\
+&= \sum_{g,x,u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x,U_{ij}=u\right]\right) \\
+&\quad \times \P(U_{ij}=u,X_{ij}=x)\P(G_{ij}=g) \\
+&= \sum_{u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right) \sum_{x\in\{0,1\}}\P(U_{ij}=u,X_{ij}=x) \\
+&= \sum_{u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right)\P(U_{ij}=u) \\
+&= \frac{1}{2}\sum_{u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right) \\
 &= c_z
 \end{align*}
-\todo where the second equality follows from independence of $X_{i1}$ and $X_{i2}$, fourth equality from marginalization. \begin{align*}
+the second equality follows from independence of $X_{i1}$ and $X_{i2}$.
+\\
+
+The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA is given by
+\begin{align*}
 \tau_{X}^\text{obs} &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x\right]\right)\P(X_{ij}=x) \\
-&= \frac{1}{2}\sum_{x,u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=1) - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=0)\right) \\
-&= \sum_{u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=1) - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=0)\right) \\
+&= \E\left[Y_{ij}|Z_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0\right] \\
+&= \sum_{u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=1)  - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=0)\right) \\
 &= \frac{1}{4}c_z - 0 + \cdot\frac{3}{4}(c_z+c_u) - \frac{1}{4}c_u \\
 &= c_z + \frac{1}{2}c_u
 \end{align*}
-following the same reasoning as in the derivation for $\tau$. Corollary~3:
+where the second equality follows from model assumptions.
+\\
+
+The bias of the naive estimator can be verified using Equation~14 from Corollary~3, which gives
 \begin{align*}
-\tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=0\right]\right)\left(\P(U_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(U_{ij}=1|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
+\tau_{X}^\text{obs} - \tau &= \sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,X_{ij}=x,U_{ij}=0\right]\right) \\
+&\quad \times\left(\P(U_{ij}=1|Z_{ij}=1,X_{ij}=x)-\P(U_{ij}=1|Z_{ij}=0,X_{ij}=x)\right)\P(X_{ij}=x) \\
 &= \left(\E\left[Y_{ij}|Z_{ij}=z,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,U_{ij}=0\right]\right)\left(\P(U_{ij}=1|Z_{ij}=1)-\P(U_{ij}=1|Z_{ij}=0)\right) \\
 &= \frac{1}{2}\left(\E\left[Y_{ij}|Z_{ij}=z,U_{ij}=1\right]-\E\left[Y_{ij}|Z_{ij}=z,U_{ij}=0\right]\right) \\
 &=\frac{1}{2}c_u
 \end{align*}
+where the second equality follows from model assumptions.
 
 
 \iffalse
