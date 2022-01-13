@@ -92,6 +92,8 @@ bias_C2I = function(dat, beta)
       bias_xx = 0
       for (g in unique(dat$G))
       {
+        if (g==0) {next}
+        
         # Compute empirical probabilities
         Pg_1xx = sum(dat$G[i_1xx]==g) / n_1xx
         Pg_0xx = sum(dat$G[i_0xx]==g) / n_0xx
@@ -120,6 +122,7 @@ bias_C2N = function(dat, beta)
         i_xxN = dat$game1==x1 & dat$game2==x2 & dat$N==N
         dat_xxN = dat[i_xxN,] # Save subsetted data for performance
         i_1xxN = dat_xxN$Z==1
+        i_0xxN = dat_xxN$Z==0
 
         for (n1 in unique(dat_xxN$Ngame1))
         {
@@ -130,12 +133,13 @@ bias_C2N = function(dat, beta)
             if (n_xxnnN==0) {next}
             i_1xxnnN = i_xxnnN & i_1xxN
             n_1xxnnN = sum(i_1xxnnN)
-            i_0xxnnN = i_xxnnN & !i_1xxN
+            i_0xxnnN = i_xxnnN & i_0xxN
             n_0xxnnN = n_xxnnN - n_1xxnnN
 
             bias_xxnnN = 0
             for (g in unique(dat_xxN$G[i_xxnnN]))
             {
+              if (g==0) {next}
               i_gxxN = dat_xxN$G==g
 
               # Compute empirical probabilities
@@ -154,6 +158,155 @@ bias_C2N = function(dat, beta)
     }
   }
   return(bias/nrow(dat))
+}
+
+
+bias_C2N_noN = function(dat, beta)
+{
+  bias = 0
+  # Subset by (game1, game2, N, Ngame1, Ngame2)
+  for (x1 in 0:1)
+  {
+    for (x2 in 0:1)
+    {
+      i_xx = dat$game1==x1 & dat$game2==x2
+      dat_xx = dat[i_xx,] # Save subsetted data for performance
+      i_1xx = dat_xx$Z==1
+      i_0xx = dat_xx$Z==0
+      
+      for (n1 in unique(dat_xx$Ngame1))
+      {
+        for (n2 in unique(dat_xx$Ngame2))
+        {
+          i_xxnn = dat_xx$Ngame1==n1 & dat_xx$Ngame2==n2
+          n_xxnn = sum(i_xxnn)
+          if (n_xxnn==0) {next}
+          i_1xxnn = i_xxnn & i_1xx
+          n_1xxnn = sum(i_1xxnn)
+          i_0xxnn = i_xxnn & i_0xx
+          n_0xxnn = n_xxnn - n_1xxnn
+          
+          bias_xxnn = 0
+          for (g in unique(dat_xx$G[i_xxnn]))
+          {
+            if (g==0) {next}
+            i_gxx = dat_xx$G==g
+            
+            # Compute empirical probabilities
+            p = 0
+            if (n_1xxnn>0) {p = p+sum(i_1xxnn & i_gxx)/n_1xxnn}
+            if (n_0xxnn>0) {p = p-sum(i_0xxnn & i_gxx)/n_0xxnn}
+            
+            # Take g'=0
+            bias_xxnn = bias_xxnn +
+              (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*p
+          }
+          bias = bias + bias_xxnn*n_xxnn
+        }
+      }
+    }
+  }
+  return(bias/nrow(dat))
+}
+
+bias_C2N_onlyN = function(dat, beta)
+{
+  bias = 0
+  # Subset by (game1, game2, N, Ngame1, Ngame2)
+  for (x1 in 0:1)
+  {
+    for (x2 in 0:1)
+    {
+      for (N in unique(dat$N[dat$game1==x1 & dat$game2==x2]))
+      {
+        i_xxN = dat$game1==x1 & dat$game2==x2 & dat$N==N
+        dat_xxN = dat[i_xxN,] # Save subsetted data for performance
+        i_1xxN = dat_xxN$Z==1
+        i_0xxN = dat_xxN$Z==0
+        n_1xxN = sum(i_1xxN)
+        n_0xxN = sum(i_0xxN)
+        
+        bias_xxN = 0
+        for (g in unique(dat_xxN$G))
+        {
+          if (g==0) {next}
+          i_gxxN = dat_xxN$G==g
+          
+          # Compute empirical probabilities
+          p = 0
+          if (n_1xxN>0) {p = p+sum(i_1xxN & i_gxxN)/n_1xxN}
+          if (n_0xxN>0) {p = p-sum(i_0xxN & i_gxxN)/n_0xxN}
+          
+          # Take g'=0
+          bias_xxN = bias_xxN +
+            (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*p
+        }
+        bias = bias + bias_xxN*nrow(dat_xxN)
+      }
+    }
+  }
+  return(bias/nrow(dat))
+}
+
+# TODO
+bias_C2N_contr = function(dat, beta)
+{
+  classes = data.frame(game1=integer(),
+                       game2=integer(),
+                       Ngame1=double(),
+                       Ngame2=double(),
+                       N=integer(),
+                       G=double(),
+                       nZ1=integer(),
+                       nZ0=integer(),
+                       bias=double())
+  # Subset by (game1, game2, N, Ngame1, Ngame2)
+  for (x1 in 0:1)
+  {
+    for (x2 in 0:1)
+    {
+      for (N in unique(dat$N[dat$game1==x1 & dat$game2==x2]))
+      {
+        i_xxN = dat$game1==x1 & dat$game2==x2 & dat$N==N
+        dat_xxN = dat[i_xxN,] # Save subsetted data for performance
+        i_1xxN = dat_xxN$Z==1
+        i_0xxN = !i_1xxN
+        
+        for (n1 in unique(dat_xxN$Ngame1))
+        {
+          for (n2 in unique(dat_xxN$Ngame2))
+          {
+            i_xxnnN = dat_xxN$Ngame1==n1 & dat_xxN$Ngame2==n2
+            n_xxnnN = sum(i_xxnnN)
+            if (n_xxnnN==0) {next}
+            i_1xxnnN = i_xxnnN & i_1xxN
+            n_1xxnnN = sum(i_1xxnnN)
+            i_0xxnnN = i_xxnnN & i_0xxN
+            n_0xxnnN = n_xxnnN - n_1xxnnN
+            
+            for (g in unique(dat_xxN$G[i_xxnnN]))
+            {
+              #if (g==0) {next}
+              i_gxxN = dat_xxN$G==g
+              i_1gxxnnN = i_1xxnnN & i_gxxN
+              i_0gxxnnN = i_0xxnnN & i_gxxN
+              
+              # Compute empirical probabilities
+              p = 0
+              if (n_1xxnnN>0) {p = p+sum(i_1gxxnnN)/n_1xxnnN}
+              if (n_0xxnnN>0) {p = p-sum(i_0gxxnnN)/n_0xxnnN}
+              
+              # Take g'=0
+              classes = rbind(classes, c(x1,x2,n1,n2,N,g,sum(i_1gxxnnN),sum(i_0gxxnnN),
+                                         (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*p*n_xxnnN/nrow(dat)))
+            }
+          }
+        }
+      }
+    }
+  }
+  colnames(classes) = c("game1","game2","Ngame1","Ngame2","N","G","nZ1","nZ0","bias")
+  return(classes)
 }
 
 

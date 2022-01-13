@@ -1,6 +1,5 @@
 # Simulation parameters
 sum_exposure = F
-
 if (sum_exposure)
 {
   # Sum
@@ -10,9 +9,8 @@ if (sum_exposure)
   spillover = c(4, 6, 8)
 }
 
-sims = 500
-
-save_results = T
+sims = 1
+save_results = F
 
 
 # Initialization
@@ -57,14 +55,9 @@ colnames(dat) = c("id", "game1", "game2")
 edge_csv = read.csv("Data/musae_ENGB_edges.csv", header=T) + 1
 dat_edMat = sparseMatrix(i=edge_csv$from, j=edge_csv$to, symmetric=T)
 
-# TODO
 # Add neighbourhood features
-# Mean
 dat$Ngame1 = as.vector(dat_edMat %*% dat$game1) / rowSums(dat_edMat)
 dat$Ngame2 = as.vector(dat_edMat %*% dat$game2) / rowSums(dat_edMat)
-# Sum
-#dat$Ngame1 = as.vector(dat_edMat %*% dat$game1)
-#dat$Ngame2 = as.vector(dat_edMat %*% dat$game2)
 dat$N = rowSums(dat_edMat)
 
 # Clean up large files
@@ -119,6 +112,16 @@ if (save_results)
     write.table(res_tab1, "Results/table1_prop.txt", quote=F, row.names=F)
   }
 }
+
+# Investigation of unexpectedly large biases
+# bias_contr = bias_C2N_contr(sim, 8)
+# bias_contr = bias_contr %>%
+#   group_by(game1,game2,Ngame1,Ngame2,N) %>%
+#   summarize(nZ1=sum(nZ1),
+#             nZ0=sum(nZ0),
+#             bias=sum(bias))
+# head(arrange(bias_contr,desc(bias)), 5)
+# head(arrange(bias_contr,bias), 5)
 
 
 
