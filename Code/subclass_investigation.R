@@ -4,14 +4,14 @@ sum_exposure = F
 if (sum_exposure)
 {
   # Sum
-  spillover = 0.4
+  spillover = 0.8
 } else {
   # Mean
-  spillover = 4
+  spillover = 8
 }
 
-sims = 10
-subclasses = 1:10
+sims = 50
+subclasses = 2:10
 
 
 # Initialization
@@ -56,14 +56,9 @@ colnames(dat) = c("id", "game1", "game2")
 edge_csv = read.csv("Data/musae_ENGB_edges.csv", header=T) + 1
 dat_edMat = sparseMatrix(i=edge_csv$from, j=edge_csv$to, symmetric=T)
 
-# TODO
 # Add neighbourhood features
-# Mean
 dat$Ngame1 = as.vector(dat_edMat %*% dat$game1) / rowSums(dat_edMat)
 dat$Ngame2 = as.vector(dat_edMat %*% dat$game2) / rowSums(dat_edMat)
-# Sum
-#dat$Ngame1 = as.vector(dat_edMat %*% dat$game1)
-#dat$Ngame2 = as.vector(dat_edMat %*% dat$game2)
 dat$N = rowSums(dat_edMat)
 
 # Clean up large files
@@ -96,16 +91,16 @@ for (n in 1:sims)
     sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat)
   }
   
+  # Simulate outcomes
+  sim$Y = rnorm(nrow(sim), outcome_mean(sim$Z,sim$G,sim$game1,sim$game2,b))
+  
+  # Compute expected treatment effect for each node
+  tau = mean(outcome_mean(1,sim$G,sim$game1,sim$game2,spillover) -
+               outcome_mean(0,sim$G,sim$game1,sim$game2,spillover))
+  
   for (i in 1:length(subclasses))
   {
     j = subclasses[i]
-    
-    # Simulate outcomes
-    sim$Y = rnorm(nrow(sim), outcome_mean(sim$Z,sim$G,sim$game1,sim$game2,b))
-    
-    # Compute expected treatment effect for each node
-    tau = mean(outcome_mean(1,sim$G,sim$game1,sim$game2,spillover) -
-                 outcome_mean(0,sim$G,sim$game1,sim$game2,spillover))
     
     # Compute error of subclass estimators
     sub_ind_err[n,i] = subcl_est(sim, subcl_ind(sim,j)) - tau
@@ -119,16 +114,12 @@ for (n in 1:sims)
 
 # Compute bias and RMSE
 res_tab = data.frame(subclass=subclasses,
-                     bias_sub_ind=colMeans(sub_ind_err),
-                     rmse_sub_ind=sqrt(colMeans(sub_ind_err^2)),
-                     bias_sub_all=colMeans(sub_all_err),
-                     rmse_sub_all=sqrt(colMeans(sub_all_err^2)),
-                     bias_sub_gps=colMeans(sub_gps_err),
-                     rmse_sub_gps=sqrt(colMeans(sub_gps_err^2)))
+                     estimator=rep(c("Ind","All","GPS"),each=length(subclasses)),
+                     bias=c(colMeans(sub_ind_err),colMeans(sub_all_err),colMeans(sub_gps_err)),
+                     rmse=c(sqrt(colMeans(sub_ind_err^2)),sqrt(colMeans(sub_all_err^2)),sqrt(colMeans(sub_gps_err^2))))
 
-res_tab[-1,] %>%
-  ggplot(aes(x=subclass)) +
-  geom_line(aes(y=rmse_sub_ind), color="red", size=1) +
-  geom_line(aes(y=rmse_sub_all), color="blue", size=1) +
-  geom_line(aes(y=rmse_sub_gps), color="darkgreen", size=1) +
+res_tab %>%
+  ggplot(aes()) +
+  geom_line(aes(x=subclass, y=rmse, color=estimator), size=1) +
+  labs(x="Subclasses", y="RMSE", color="Estimator") +
   theme_bw()

@@ -9,7 +9,7 @@ if (sum_exposure)
   spillover = c(4, 6, 8)
 }
 
-sims = 1
+sims = 500
 save_results = F
 
 
@@ -87,6 +87,31 @@ if (sum_exposure)
   sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat)
 }
 
+# Check covariate balance
+i_z1 = sim$Z==1
+i_z0 = !i_z1
+std_diff(sim$game1[i_z1], sim$game1[i_z0])
+std_diff(sim$game2[i_z1], sim$game2[i_z0])
+std_diff(sim$Ngame1[i_z1], sim$Ngame1[i_z0], F)
+std_diff(sim$Ngame2[i_z1], sim$Ngame2[i_z0], F)
+std_diff(sim$N[i_z1], sim$N[i_z0], F)
+std_diff(sim$G[i_z1], sim$G[i_z0], F)
+if (sum_exposure) {
+  # Median 3 used as threshold
+  i_gg = sim$G>=3
+  i_gl = sim$G<3
+} else {
+  i_gg = sim$G>=0.5
+  i_gl = sim$G<0.5
+}
+std_diff(sim$game1[i_gg], sim$game1[i_gl])
+std_diff(sim$game2[i_gg], sim$game2[i_gl])
+std_diff(sim$Ngame1[i_gg], sim$Ngame1[i_gl], F)
+std_diff(sim$Ngame2[i_gg], sim$Ngame2[i_gl], F)
+std_diff(sim$N[i_gg], sim$N[i_gl], F)
+std_diff(sim$Z[i_gg], sim$Z[i_gl])
+
+# Compute theoretical biases
 for (b in spillover)
 {
   # Bias when not adjusting for covariates

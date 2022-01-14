@@ -714,3 +714,94 @@ bias_c2_xn = bias_C2_Xn(sim, interf)
 # Extension: G as sum rather than mean?
 #nbr_prop00_fit = glm.nb(G~Z+Ngame1*Ngame2*N, data=sim[i00,])
 #summary(nbr_prop00_fit)
+
+
+
+
+
+bias_C2N_noN = function(dat, beta)
+{
+  bias = 0
+  # Subset by (game1, game2, N, Ngame1, Ngame2)
+  for (x1 in 0:1)
+  {
+    for (x2 in 0:1)
+    {
+      i_xx = dat$game1==x1 & dat$game2==x2
+      dat_xx = dat[i_xx,] # Save subsetted data for performance
+      i_1xx = dat_xx$Z==1
+      i_0xx = dat_xx$Z==0
+      
+      for (n1 in unique(dat_xx$Ngame1))
+      {
+        for (n2 in unique(dat_xx$Ngame2))
+        {
+          i_xxnn = dat_xx$Ngame1==n1 & dat_xx$Ngame2==n2
+          n_xxnn = sum(i_xxnn)
+          if (n_xxnn==0) {next}
+          i_1xxnn = i_xxnn & i_1xx
+          n_1xxnn = sum(i_1xxnn)
+          i_0xxnn = i_xxnn & i_0xx
+          n_0xxnn = n_xxnn - n_1xxnn
+          
+          bias_xxnn = 0
+          for (g in unique(dat_xx$G[i_xxnn]))
+          {
+            if (g==0) {next}
+            i_gxx = dat_xx$G==g
+            
+            # Compute empirical probabilities
+            p = 0
+            if (n_1xxnn>0) {p = p+sum(i_1xxnn & i_gxx)/n_1xxnn}
+            if (n_0xxnn>0) {p = p-sum(i_0xxnn & i_gxx)/n_0xxnn}
+            
+            # Take g'=0
+            bias_xxnn = bias_xxnn +
+              (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*p
+          }
+          bias = bias + bias_xxnn*n_xxnn
+        }
+      }
+    }
+  }
+  return(bias/nrow(dat))
+}
+
+bias_C2N_onlyN = function(dat, beta)
+{
+  bias = 0
+  # Subset by (game1, game2, N, Ngame1, Ngame2)
+  for (x1 in 0:1)
+  {
+    for (x2 in 0:1)
+    {
+      for (N in unique(dat$N[dat$game1==x1 & dat$game2==x2]))
+      {
+        i_xxN = dat$game1==x1 & dat$game2==x2 & dat$N==N
+        dat_xxN = dat[i_xxN,] # Save subsetted data for performance
+        i_1xxN = dat_xxN$Z==1
+        i_0xxN = dat_xxN$Z==0
+        n_1xxN = sum(i_1xxN)
+        n_0xxN = sum(i_0xxN)
+        
+        bias_xxN = 0
+        for (g in unique(dat_xxN$G))
+        {
+          if (g==0) {next}
+          i_gxxN = dat_xxN$G==g
+          
+          # Compute empirical probabilities
+          p = 0
+          if (n_1xxN>0) {p = p+sum(i_1xxN & i_gxxN)/n_1xxN}
+          if (n_0xxN>0) {p = p-sum(i_0xxN & i_gxxN)/n_0xxN}
+          
+          # Take g'=0
+          bias_xxN = bias_xxN +
+            (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*p
+        }
+        bias = bias + bias_xxN*nrow(dat_xxN)
+      }
+    }
+  }
+  return(bias/nrow(dat))
+}

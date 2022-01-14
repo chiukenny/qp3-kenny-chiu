@@ -28,7 +28,7 @@
 \textcite{Forastiere:2021} examine the problem of performing causal inference on observational network data in the presence of interference. \citeauthor{Forastiere:2021} formulate the problem in terms of a potential outcome framework under which the biases of treatment effect estimators that assume SUTVA can be derived, and they propose a propensity score-based estimator that is able to produce unbiased estimates under certain assumptions. In this report, we review the work by \textcite{Forastiere:2021}, present toy examples that illustrate their theoretical results, and replicate part of their simulation study on a different dataset.
 \\
 
-This report is organized as follows: Section~\ref{sec:notation} introduces the notation used in this report; Section~\ref{sec:summary} summarizes their proposed methodology in the context of the literature; Section~\ref{sec:example} presents examples that illustrate the relevance of their theoretical results; Sections~\ref{sec:replication} and \ref{sec:extension} discusses our attempts at replicating part of their simulation study on a different dataset; and Section~\ref{sec:critique} concludes the report with a critique of their work. Appendix~\ref{apx:example} includes our technical derivations from Section~\ref{sec:example}, and Appendix~\ref{apx:simulation} contains additional information about the dataset and our simulations from Sections~\ref{sec:replication} and \ref{sec:extension}.
+This report is organized as follows: Section~\ref{sec:notation} introduces the notation used in this report; Section~\ref{sec:summary} summarizes their proposed methodology in the context of the literature; Section~\ref{sec:example} presents examples that illustrate the relevance of their theoretical results; Sections~\ref{sec:simulation} and \ref{sec:extension} discusses our attempts at replicating part of their simulation study on a different dataset; and Section~\ref{sec:critique} concludes the report with a critique of their work. Appendix~\ref{apx:example} includes our technical derivations from Section~\ref{sec:example}, and Appendix~\ref{apx:simulation} contains additional information about the dataset and our simulations from Sections~\ref{sec:simulation} and \ref{sec:extension}.
 
 
 \section{Notation} \label{sec:notation}
@@ -280,7 +280,7 @@ Therefore, an unbiased estimator of the naive effect estimator is also unbiased 
 \fi
 
 
-\section{Reproducing simulation study findings} \label{sec:replication}
+\section{Reproducing simulation study findings} \label{sec:simulation}
 
 In this section, we aim to reproduce the general findings of the simulation study conducted by \textcite{Forastiere:2021}. Note that the complete Add Health dataset that \citeauthor{Forastiere:2021} work with is publicly inaccessible, and so we instead work with the Twitch Social Network dataset \parencite{Rozemberczki:2021} that is comparable in size. Twitch is an American live streaming service that focuses on video game streaming. The dataset contains several networks of streamers and their mutual friendships that were collected in May~2018. We consider a hypothetical study where we are interested in understanding the effect of streamer self-promotions and advertising (the individual treatment) on the number of subscribers (users who follow a particular streamer; the outcome). It is reasonable to assume that there is interference at play where promoting one's self would inadvertently promote the streamer's network due to the site's recommendation algorithms that suggest similar streams to a viewer.
 \\
@@ -689,6 +689,7 @@ where the second equality follows from the model assumptions where $G_{ij}\condi
 
 \section{Additional details of simulation study} \label{apx:simulation}
 
+This appendix sections contains additional details from the simulation study in Sections~\ref{sec:simulation} and \ref{sec:extension}.
 
 \subsection{Twitch dataset details} \label{apx:twitch}
 \todo
@@ -720,21 +721,23 @@ Distribution of degrees:
 
 \subsection{Covariate balance} \label{apx:covbal}
 
+Standardized differences \parencite{Austin:2011}: 
+
 In one simulated dataset:
 
 \begin{table}[H]
 \centering
 \begin{tabular}{@{}lrrr@{}}
 \toprule
-Variable & $\bar{X}_{Z=1}$ & $\bar{X}_{Z=0}$ & Standardized Diff. \\
+Variable & $\bar{X}_{Z=1}$ & $\bar{X}_{Z=0}$ & Stand. Diff. \\
 \midrule
-game1 & 0.683 & 0.326 &  \\
-game2 & 0.763 & 0.176 &  \\
-Neighbours' game1 & 0.486 & 0.466 & \\
-Neighbours' game2 & 0.620 & 0.586 & \\
-Degree & 10.757 & 8.717 & \\
-Proportion $G_i$ & 0.604 & 0.569 & \\
-Sum $G_i$ & 6.979 & 5.365 & \\
+game1 & 0.683 & 0.326 & 0.763 \\
+game2 & 0.763 & 0.176 & 1.454 \\
+Ngame1 & 0.486 & 0.466 & 0.061 \\
+Ngame2 & 0.620 & 0.586 & 0.114 \\
+Degree & 10.757 & 8.717 & 0.088 \\
+Proportion $G_i$ & 0.604 & 0.569 & 0.118 \\
+Sum $G_i$ & 6.979 & 5.365 & 0.106 \\
 \bottomrule
 \end{tabular}
 \caption{Covariate balance across individual treatment arms.}
@@ -760,14 +763,14 @@ Distribution of sum $G_i$'s:
 \centering
 \begin{tabular}{@{}lrrrrrr@{}}
 \toprule
-Variable & $\bar{X}_{G\geq0.5}$ & $\bar{X}_{G<0.5}$ & Standardized Diff. & $\bar{X}_{G\geq3}$ & $\bar{X}_{G<3}$ & Standardized Diff. \\
+Variable & $\bar{X}_{G\geq0.5}$ & $\bar{X}_{G<0.5}$ & Stand. Diff. & $\bar{X}_{G\geq3}$ & $\bar{X}_{G<3}$ & Stand. Diff. \\
 \midrule
-game1 & 0.558 & 0.471 & & 0.723 & 0.334 & \\
-game2 & 0.542 & 0.461 & & 0.555 & 0.483 & \\
-Neighbours' game1 & 0.553 & 0.267 & & 0.564 & 0.385 & \\
-Neighbours' game2 & 0.669 & 0.430 & & 0.631 & 0.580 & \\
-Degree & 11.694 & 4.897 & & 16.905 & 2.432 & \\
-$Z_i$ & 0.608 & 0.526 & & 0.677 & 0.490 & \\
+game1 & 0.558 & 0.471 & 0.175 & 0.723 & 0.334 & 0.846 \\
+game2 & 0.542 & 0.461 & 0.162 & 0.555 & 0.483 & 0.144 \\
+Ngame1 & 0.553 & 0.267 & 0.938 & 0.564 & 0.385 & 0.559 \\
+Ngame2 & 0.669 & 0.430 & 0.818 & 0.631 & 0.580 & 0.174 \\
+Degree & 11.694 & 4.897 & 0.371 & 16.905 & 2.432 & 0.701 \\
+$Z_i$ & 0.608 & 0.526 & 0.167 & 0.677 & 0.490 & 0.385 \\
 \bottomrule
 \end{tabular}
 \caption{Covariate balance across dichotomized neighbourhood treatment arms.}
