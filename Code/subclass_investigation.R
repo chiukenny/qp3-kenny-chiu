@@ -1,5 +1,5 @@
 # Simulation parameters
-sum_exposure = F
+sum_exposure = T
 
 if (sum_exposure)
 {
@@ -10,7 +10,7 @@ if (sum_exposure)
   spillover = 8
 }
 
-sims = 50
+sims = 25
 subclasses = 2:10
 
 

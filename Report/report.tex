@@ -288,7 +288,7 @@ In this section, we aim to reproduce the general findings of the simulation stud
 We specifically work with the EN subnetwork of the Twitch dataset, which includes a sample of streamers who stream in English. The network includes 7126 streamers and 35,324 mutual friendship relationships. A total of 3169 binary features (e.g., games liked and played, location, streaming habits, etc.) are collected from each streamer. However, the individual features are unnamed. For the purposes of this study, we only consider feature \verb|224| and feature \verb|569| due to their distribution (the second and third most represented features in the dataset, respectively). We view these features as covariates representing whether a streamer plays a particular \verb|game1| and \verb|game2|. We note that one major difference between the Twitch dataset and the Add Health dataset is that the degree of each unit is limited to at most 10 in the Add Health dataset while there is no contextual limit in the Twitch dataset. More details about the Twitch dataset are provided in Appendix~\ref{apx:twitch}.
 \\
 
-In the following sections, we describe our efforts to translate the simulation procedure and (partial) findings of Tables~1 and 2 in the work by \textcite{Forastiere:2021} to our Twitch data. Under various individual and neighbourhood treatment generation scenarios, Table~1 compares the theoretical bias of estimators that adjust for different sets of covariates, while Table~2 compares the observed bias and RMSE of several estimators on simulated data. In our work, we focus specifically on Scenario~1 where the unconfoundedness assumption holds given the individual-level covariates.
+In the following sections, we describe our efforts to translate the simulation procedure and (partial) findings of Tables~1 and 2 in the work by \textcite{Forastiere:2021} to our Twitch data. Under various individual and neighbourhood treatment generation scenarios, Table~1 compares the theoretical bias of estimators that adjust for different sets of covariates, while Table~2 compares the observed bias and RMSE of two estimators on simulated data. In our work, we focus specifically on Scenario~1 where the unconfoundedness assumption holds given the individual-level covariates.
 
 \subsection{Treatment and outcome generation models} \label{sec:models}
 
@@ -341,7 +341,10 @@ High (0.8) & 4.085 & -0.289 & 1.472 \\
 \label{tab:table1}
 \end{table}
 
-Our findings for the estimator that does not adjust for covariates and for the estimator that adjusts for the individual covariates $\Xind_i$ are consistent with what is reported in Table~1 in the work of \textcite{Forastiere:2021}. For the estimator that adjusts for both individual and neighbourhood covariates $\bfX^z_i$, we report biases that are larger than expected (i.e., significantly larger than the biases for the individual-adjusted estimator). Our investigation suggests that these larger values are arising due to poor estimates of the theoretical probabilities in Equation~11, which themselves are caused by severe imbalances in treated and untreated units when looking at a particular joint level of the covariates. Table~\ref{tab:bias} shows the ten joint levels---as well as the number of treated and untreated units with those levels---that contributed the largest positive and negative values to the theoretical bias of the estimator that adjusts for $\bfX_i^z$ for the dataset simulated with proportion $G_i$ and high interference in Table~\ref{tab:table1}. There are a total of 2384 distinct observed joint levels on this simulated dataset despite there being only 7126 units. Hence, it is expected that for a particular level that heavily skews towards one treatment status, the other treatment status will generally be underrepresented in this relatively small dataset.
+Our findings for proportion and sum neighbourhood treatments are similar. Our findings for the estimator that does not adjust for covariates and for the estimator that adjusts for the individual covariates $\Xind_i$ are consistent with what is reported in Table~1 in the work of \textcite{Forastiere:2021}.
+\\
+
+For the estimator that adjusts for both individual and neighbourhood covariates $\bfX^z_i$, we report biases that are larger than expected (the biases for the estimators that adjusts for individual and for all covariates should be the same in theory). Our investigation suggests that these larger values are arising due to poor estimates of the theoretical probabilities in Equation~11, which themselves are caused by severe imbalances in treated and untreated units when looking at a particular joint level of the covariates. Table~\ref{tab:bias} shows the ten joint levels---as well as the number of treated and untreated units with those levels---that contributed the largest positive and negative values to the theoretical bias of the estimator that adjusts for $\bfX_i^z$ for the dataset simulated with proportion $G_i$ and high interference in Table~\ref{tab:table1}. There are a total of 2384 distinct observed joint levels on this simulated dataset despite there being only 7126 units. Hence, for a particular level that heavily skews towards one treatment status, the other treatment status will generally be underrepresented or absent in this relatively small dataset. \citeauthor{Forastiere:2021} likely did not encounter this problem due to the restricted maximum degree (and therefore the limited possible values of $G_i$) in the Add Health data, which is also larger in size. It may also be the case that \citeauthor{Forastiere:2021} used the same computation for both the individual and all covariate-adjusted estimators as their reported biases are identical.
 
 \begin{table}[ht]
 \centering
@@ -363,7 +366,7 @@ game1 & game2 & Ngame1 & Ngame2 & $N_i$ & $n_{Z=1}$ & $n_{Z=0}$ & bias contrib. 
 0 & 0 & 1 & 0.5 & 2 & 1 & 37 & -0.0110 \\
 \bottomrule
 \end{tabular}
-\caption{The ten joint levels of game1, game2, Ngame1, Ngame2, and $N_i$ that contributed the largest (in magnitude) five positive and five negative values to the theoretical bias (Equation~11) of the estimator that adjusts for $\bfX^z_i$ for one dataset simulated with proportion $G_i$ and high interference. The theoretical bias of 1.083 reported in Table~\ref{tab:table1} is obtained by summing the bias contribution column over all 2384 distinct joint levels.}
+\caption{The ten joint levels of game1, game2, Ngame1, Ngame2, and $N_i$ that contributed the largest (in magnitude) five positive and five negative values to the theoretical bias (Equation~11) of the estimator that adjusts for $\bfX^z_i$ for one dataset simulated with proportion $G_i$ and high interference. The columns $n_{Z=1}$ and $n_{Z=0}$ show the number of treated and untreated units that have the joint level. The theoretical bias of 1.083 reported in Table~\ref{tab:table1} is obtained by summing the bias contribution column over all 2384 distinct joint levels.}
 \label{tab:bias}
 \end{table}
 
@@ -428,7 +431,7 @@ High (0.8) & 4.280 & 4.289 & 0.479 & 0.664 & 0.395 & 0.402 & 0.006 & 0.563 & -0.
 \label{tab:table2}
 \end{table}
 
-Our findings are generally consistent with the results of \textcite{Forastiere:2021} reported in Table~2 (Unadjusted and Regression $\sim Z_i,\Xind_i$ estimators under Scenario~1) where a greater interference effect leads to a greater RMSE. The bias of the regression estimator is smaller than that of the unadjusted estimator but is still non-trivial, and is presumably due to the misspecification of the linear model.
+For both proportion and sum neighbourhood treatments, our findings are generally consistent with the results of \textcite{Forastiere:2021} reported in Table~2 (Unadjusted and Regression $\sim Z_i,\Xind_i$ estimators under Scenario~1) where a greater interference effect leads to a greater RMSE. The bias of the regression estimator is smaller than that of the unadjusted estimator but is still non-trivial, and is presumably due to the misspecification of the linear model.
 
 
 
@@ -459,7 +462,7 @@ Let $\bar{Y}^{(j)}$ denote an average computed over subclass $B_j$. Compute the 
 \end{enumerate}
 
 \item
-a second subclassification estimator $\tau_\text{sub}(\bfX^z_i)$ where the subclasses are defined based on a propensity score that adjusts for all covariates. The estimation procedure is the same as the first subclassification estimator, except that $\bfX^z_i$ is used instead of $\Xind_i$ and that we take $J=5$ in our simulations following the recommendations of \textcite{Rosenbaum:1984}; and
+a second subclassification estimator $\tau_\text{sub}(\bfX^z_i)$ where the subclasses are defined based on a propensity score that adjusts for all covariates. The estimation procedure is the same as the first subclassification estimator, except that $\bfX^z_i$ is used instead of $\Xind_i$ and that we take $J=5$ in our simulations following the recommendations of \textcite{Rosenbaum:1984} (also see our investigation in Appendix~\ref{apx:subclass}); and
 
 \item
 the estimator $\tau_\text{GPS}$ proposed by \textcite{Forastiere:2021} with the estimation procedure outline in Section~\ref{sec:method}. For proportion neighbourhood treatments, logistic regression models are used for both the individual and neighbourhood propensity scores (the latter in which $N_i$ are used as weights). For sum neighbourhood treatments, a negative binomial model is used to estimate the neighbourhood propensity scores\footnote{In some instances, a particular subclass would end up with very few units and the model would fail to be fit. The units in this subclass would generally be the ones with the largest degrees in the network. In these cases, we took the estimated neighbourhood propensity scores to be 0.}. We again take $J=5$ for the number of subclasses.
@@ -468,16 +471,13 @@ the estimator $\tau_\text{GPS}$ proposed by \textcite{Forastiere:2021} with the 
 Note that where applicable, we take $V_g=\calN$ in the case of proportion neighbourhood treatment for convenience of computation. Table~\ref{tab:table2} (estimators 3--6) shows the bias and RMSE of the above estimators. In the case of proportion neighbourhood treatments, our obtained biases and RMSEs are consistent with that reported by \textcite{Forastiere:2021}. The regression estimators have relatively larger biases and RMSE due to misspecification. The subclassification estimators based on individual propensity scores have smaller biases that are comparable to the analytical bias of an unbiased SUTVA estimator that adjusts for $\Xind_i$ reported in Table~\ref{tab:table1}. The estimator proposed by \citeauthor{Forastiere:2021} based on individual and neighbourhood propensity scores achieves the smallest RMSE compared to the other estimators that ignore the effect of interference.
 \\
 
-In the case of sum neighbourhood treatments, the results are similar to the proportion case except for the subclassification estimators based on individual propensity scores. The RMSE of these estimators are relatively larger compared to the other estimators in this case. It is also worth noting that the estimator proposed by \citeauthor{Forastiere:2021} still achieves the smallest RMSE out of all the compared estimators.
-\\
-
-\todo: investigate why; effect of $J$?
+In the case of sum neighbourhood treatments, the results are similar to the proportion case except for the subclassification estimators based on individual propensity scores. The RMSE of these estimators are relatively larger compared to the other estimators in this case. Note that the propensity score models and estimates are unchanged from the proportion neighbourhood treatment case, and so these larger RMSEs are a direct result of interference effects. Specifically, the outlier units with relatively large degrees are likely the main contributors to the bias. It is also worth noting that the estimator proposed by \citeauthor{Forastiere:2021} still achieves the smallest RMSE out of all the compared estimators.
 
 
 
 \section{Critical appraisal and concluding remarks} \label{sec:critique}
 
-We conclude this report with a critical appraisal of the paper and proposed method by \textcite{Forastiere:2021}. The main contributions of the paper include a potential outcome formulation of the causal interference problem and a propensity score-based estimator for observational data that adjusts for possible interference. The formulation is useful as it provides a framework under which properties (e.g., bias) of estimators that ignore interference can be derived and quantified. Based on our simulation study, the proposed estimator appears to fulfill its purpose in being able to adjust for interference effects (when assumptions hold) as evident by the results in Table~\ref{tab:table2}. We note that the results were obtained with minimal tuning of our logistic and negative binomial models (due to the nature of the simulation study), and so we expect that this estimator would perform even better in practice with proper diagnostics and tuning of model fit.
+We conclude this report with a critical appraisal of the paper and proposed method by \textcite{Forastiere:2021}. The main contributions of the paper include a potential outcome formulation of the causal interference problem and a propensity score-based estimator for observational data that adjusts for possible interference. The formulation is useful as it provides a framework under which properties (e.g., bias) of estimators that ignore interference can be derived and quantified. Based on our simulation study, the proposed estimator appears to fulfill its purpose in being able to adjust for interference effects (when assumptions hold) as evident by the results in Table~\ref{tab:table2}. We note that our results were obtained with minimal tuning of our logistic and negative binomial models (due to the nature of the simulation study), and so we expect that this estimator would perform even better in practice with proper diagnostics and tuning of model fit.
 \\
 
 One practical consideration that seems to be missing in the paper by \textcite{Forastiere:2021} is the computational performance of the procedure to compute the estimator. The complexity notably scales with both the number of units and the number of distinct values of the neighbourhood treatment in the network. For the Add Health dataset that \citeauthor{Forastiere:2021} worked with, the latter was less of an issue as every unit was limited to having at most ten neighbours. For the Twitch dataset considered in this report, units could have many neighbours and so the number of distinct neighbourhood treatments was not trivial. With such datasets, it may be reasonable to expect that the max degree in the network scales with the total number of units, and so the computational complexity of the procedure is overall closer to quadratic in the number of units in the network. For large networks with millions of units, the procedure would likely be infeasible without further modifications.
@@ -486,7 +486,7 @@ One practical consideration that seems to be missing in the paper by \textcite{F
 As discussed by \textcite{Forastiere:2021}, other limitations of their proposed method include its reliance on fully knowing the network structure and assuming it is fixed, and its dependence on models for the propensity scores that are likely to be misspecified. \textcite{Sanchez:2021} also questions the unconfoundedness assumption with respect to the propensity score. In practice, the unconfoundedness assumption holding with respect to a set of covariates may already be challenging to verify. Further assuming that unconfoundedness holds with respect to a (factorized) propensity score constructed on top of that set of covariates adds another layer of assumption that is difficult to justify.
 \\
 
-\todo: inconsistent results in simulation study?
+In conclusion, \textcite{Forastiere:2021} present a formulation of the interference problem in observational data under which the properties of various estimators can be derived. Their proposed effect estimator shows promising results when the assumed conditions hold. The assumptions the estimator makes are also relatively weaker compared to that of other methods in the literature. However, there are practical concerns such as computational performance in large datasets that are not fully addressed in the original paper.
 
 
 \newpage
@@ -777,6 +777,19 @@ $Z_i$ & 0.608 & 0.526 & 0.167 & 0.677 & 0.490 & 0.385 \\
 \end{table}
 
 \todo: add histogram of log $N_i$ and $G_i$?
+
+
+\subsection{Number of subclasses investigation} \label{apx:subclass}
+
+We conducted a small investigation into the effect of the number of subclasses on the RMSE of the individual and all covariate-adjusted estimators and of the GPS estimator \parencite{Forastiere:2021}. Figure~\ref{fig:subclass} shows the effect of the number of subclasses on the mean RMSE over 25 datasets simulated with high interference and either proportion neighbourhood treatments (left) and sum neighbourhood treatments (right). The same 25 datasets were used across numbers of subclasses in each plot. Our results suggest that while the five subclass recommendation by \textcite{Rosenbaum:1984} does not necessarily lead to the smallest RMSE, the RMSE of most estimators do not change significantly with more than five subclasses (the one exception being the estimator that adjusts for all covariates in the sum neighbourhood treatment case). It is also interesting that increasing the number of subclasses does not necessarily reduce the RMSE, notably with the all-covariates and the GPS estimators where the RMSE spikes at four subclasses.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[trim={0.2cm 0 2.5cm 0},clip]{Images/subclasses_prop.png}
+\includegraphics[trim={0.55cm 0 0.2cm 0},clip]{Images/subclasses_sum.png}
+\caption{RMSE as the number of subclasses changed for three treatment effect estimators. The left plot shows the mean RMSE over 25 datasets simulated with proportion neighbourhood treatment and the right for those with sum neighbourhood treatments. The RMSE of the all-covariates and the GPS estimators follow similar trajectories in the left plot.}
+\label{fig:subclass}
+\end{figure}
 
 
 \end{document}
