@@ -65,12 +65,21 @@ remove(dat_json)
 remove(dat_mat)
 remove(edge_csv)
 
+# Check dataset statistics
+# table(dat$game1, dat$game2)
+# summary(dat$N)
+# ggplot(dat, aes(x=log(N))) +
+#   geom_histogram(bins=15, color="darkblue", fill="lightblue") +
+#   scale_y_continuous(limits=c(0,1200), expand=c(0,0)) +
+#   labs(x="log(Degree)", y="Count") + 
+#   theme_bw()
+
 
 
 # Simulation: Table 1 - Scenario 1
 # ---------------------------------------------------------
 
-res_tab1 = data.frame(beta=integer(),
+res_tab1 = data.frame(gamma=integer(),
                       bias_none=double(),
                       bias_ind=double(),
                       bias_all=double())
@@ -87,29 +96,46 @@ if (sum_exposure)
   sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat)
 }
 
-# Check covariate balance
-i_z1 = sim$Z==1
-i_z0 = !i_z1
-std_diff(sim$game1[i_z1], sim$game1[i_z0])
-std_diff(sim$game2[i_z1], sim$game2[i_z0])
-std_diff(sim$Ngame1[i_z1], sim$Ngame1[i_z0], F)
-std_diff(sim$Ngame2[i_z1], sim$Ngame2[i_z0], F)
-std_diff(sim$N[i_z1], sim$N[i_z0], F)
-std_diff(sim$G[i_z1], sim$G[i_z0], F)
-if (sum_exposure) {
-  # Median 3 used as threshold
-  i_gg = sim$G>=3
-  i_gl = sim$G<3
+# Check simulation statistics
+summary(sim$G)
+if (sum_exposure)
+{
+  ggplot(sim, aes(x=log(G+1))) +
+    geom_histogram(bins=15, color="darkblue", fill="lightblue") +
+    scale_y_continuous(limits=c(0,2650), expand=c(0,0)) +
+    labs(x="log(Sum G + 1)", y="Count") + 
+    theme_bw()
 } else {
-  i_gg = sim$G>=0.5
-  i_gl = sim$G<0.5
+  ggplot(sim, aes(x=G)) +
+    geom_histogram(bins=15, color="darkblue", fill="lightblue") +
+    scale_y_continuous(limits=c(0,1275), expand=c(0,0)) +
+    labs(x="Proportion G", y="Count") + 
+    theme_bw()
 }
-std_diff(sim$game1[i_gg], sim$game1[i_gl])
-std_diff(sim$game2[i_gg], sim$game2[i_gl])
-std_diff(sim$Ngame1[i_gg], sim$Ngame1[i_gl], F)
-std_diff(sim$Ngame2[i_gg], sim$Ngame2[i_gl], F)
-std_diff(sim$N[i_gg], sim$N[i_gl], F)
-std_diff(sim$Z[i_gg], sim$Z[i_gl])
+
+# Check covariate balance
+# i_z1 = sim$Z==1
+# i_z0 = !i_z1
+# std_diff(sim$game1[i_z1], sim$game1[i_z0])
+# std_diff(sim$game2[i_z1], sim$game2[i_z0])
+# std_diff(sim$Ngame1[i_z1], sim$Ngame1[i_z0], F)
+# std_diff(sim$Ngame2[i_z1], sim$Ngame2[i_z0], F)
+# std_diff(sim$N[i_z1], sim$N[i_z0], F)
+# std_diff(sim$G[i_z1], sim$G[i_z0], F)
+# if (sum_exposure) {
+#   # Median 3 used as threshold
+#   i_gg = sim$G>=3
+#   i_gl = sim$G<3
+# } else {
+#   i_gg = sim$G>=0.5
+#   i_gl = sim$G<0.5
+# }
+# std_diff(sim$game1[i_gg], sim$game1[i_gl])
+# std_diff(sim$game2[i_gg], sim$game2[i_gl])
+# std_diff(sim$Ngame1[i_gg], sim$Ngame1[i_gl], F)
+# std_diff(sim$Ngame2[i_gg], sim$Ngame2[i_gl], F)
+# std_diff(sim$N[i_gg], sim$N[i_gl], F)
+# std_diff(sim$Z[i_gg], sim$Z[i_gl])
 
 # Compute theoretical biases
 for (b in spillover)
@@ -125,7 +151,7 @@ for (b in spillover)
   
   res_tab1 = rbind(res_tab1, c(b,bias_t2b,bias_c2i,bias_c2n))
 }
-colnames(res_tab1) = c("beta","bias_none","bias_ind","bias_all")
+colnames(res_tab1) = c("gamma","bias_none","bias_ind","bias_all")
 
 # Save results
 if (save_results)
@@ -186,7 +212,7 @@ for (n in 1:sims)
     
     # Compute expected treatment effect for each node
     tau = mean(outcome_mean(1,sim$G,sim$game1,sim$game2,b) -
-      outcome_mean(0,sim$G,sim$game1,sim$game2,b))
+                 outcome_mean(0,sim$G,sim$game1,sim$game2,b))
     
     # Compute error of naive estimator
     naive_est = mean(sim$Y[which(sim$Z==1)]) - mean(sim$Y[which(sim$Z==0)])
@@ -207,7 +233,7 @@ for (n in 1:sims)
 #)
 
 # Compute bias and RMSE
-res_tab2 = data.frame(beta = spillover,
+res_tab2 = data.frame(gamma = spillover,
                       bias_naive = colMeans(naive_err),
                       rmse_naive = sqrt(colMeans(naive_err^2)),
                       bias_reg = colMeans(reg_err),

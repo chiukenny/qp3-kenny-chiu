@@ -13,10 +13,10 @@ ind_prop = function(x1, x2)
 }
 
 # Compute outcome mean (model for main effects simulations)
-outcome_mean = function(z, g, x1, x2, beta)
+outcome_mean = function(z, g, x1, x2, gamma)
 {
   prop = ind_prop(x1, x2)
-  return(5 + 6*(prop>=0.7) + 10*z - 3*z*(prop>=0.7) + beta*g)
+  return(5 + 6*(prop>=0.7) + 10*z - 3*z*(prop>=0.7) + gamma*g)
 }
 
 # TODO
@@ -45,7 +45,7 @@ std_diff = function(v1, v0, binary=T)
 #   - PY_X: (proportional) probability of Y given X
 
 # Compute bias (Theorem 2B, eqn.12)
-bias_T2B = function(dat, beta)
+bias_T2B = function(dat, gamma)
 {
   n = nrow(dat)
   i_1 = dat$Z==1
@@ -77,8 +77,8 @@ bias_T2B = function(dat, beta)
         
         # Take g'=0, u'=(0,0)
         bias = bias +
-          (outcome_mean(1,g,u1,u2,beta)-outcome_mean(1,0,0,0,beta))*(Pug_1-Pug) -
-          (outcome_mean(0,g,u1,u2,beta)-outcome_mean(0,0,0,0,beta))*(Pug_0-Pug)
+          (outcome_mean(1,g,u1,u2,gamma)-outcome_mean(1,0,0,0,gamma))*(Pug_1-Pug) -
+          (outcome_mean(0,g,u1,u2,gamma)-outcome_mean(0,0,0,0,gamma))*(Pug_0-Pug)
       }
     }
   }
@@ -86,7 +86,7 @@ bias_T2B = function(dat, beta)
 }
 
 # Compute bias given individual covariates (Corollary 2, eqn.11)
-bias_C2I = function(dat, beta)
+bias_C2I = function(dat, gamma)
 {
   i_1 = dat$Z==1
   i_0 = !i_1
@@ -115,7 +115,7 @@ bias_C2I = function(dat, beta)
         
         # Take g'=0
         bias_xx = bias_xx +
-          (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*(Pg_1xx-Pg_0xx)
+          (outcome_mean(0,g,x1,x2,gamma)-outcome_mean(0,0,x1,x2,gamma))*(Pg_1xx-Pg_0xx)
       }
       bias = bias + bias_xx*n_xx
     }
@@ -124,7 +124,7 @@ bias_C2I = function(dat, beta)
 }
 
 # Compute bias given individual and neighbourhood covariates (Corollary 2, eqn.11)
-bias_C2N = function(dat, beta)
+bias_C2N = function(dat, gamma)
 {
   bias = 0
   # Subset by (game1, game2, N, Ngame1, Ngame2)
@@ -138,7 +138,7 @@ bias_C2N = function(dat, beta)
         dat_xxN = dat[i_xxN,] # Save subsetted data for performance
         i_1xxN = dat_xxN$Z==1
         i_0xxN = !i_1xxN
-
+        
         for (n1 in unique(dat_xxN$Ngame1))
         {
           for (n2 in unique(dat_xxN$Ngame2))
@@ -150,21 +150,21 @@ bias_C2N = function(dat, beta)
             n_1xxnnN = sum(i_1xxnnN)
             i_0xxnnN = i_xxnnN & i_0xxN
             n_0xxnnN = n_xxnnN - n_1xxnnN
-
+            
             bias_xxnnN = 0
             for (g in unique(dat_xxN$G[i_xxnnN]))
             {
               if (g==0) {next}
               i_gxxN = dat_xxN$G==g
-
+              
               # Compute empirical probabilities
               p = 0
               if (n_1xxnnN>0) {p = p+sum(i_1xxnnN & i_gxxN)/n_1xxnnN}
               if (n_0xxnnN>0) {p = p-sum(i_0xxnnN & i_gxxN)/n_0xxnnN}
-
+              
               # Take g'=0
               bias_xxnnN = bias_xxnnN +
-                (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*p
+                (outcome_mean(0,g,x1,x2,gamma)-outcome_mean(0,0,x1,x2,gamma))*p
             }
             bias = bias + bias_xxnnN*n_xxnnN
           }
@@ -176,7 +176,7 @@ bias_C2N = function(dat, beta)
 }
 
 # TODO
-bias_C2N_contr = function(dat, beta)
+bias_C2N_contr = function(dat, gamma)
 {
   classes = data.frame(game1=integer(),
                        game2=integer(),
@@ -225,7 +225,7 @@ bias_C2N_contr = function(dat, beta)
               
               # Take g'=0
               classes = rbind(classes, c(x1,x2,n1,n2,N,g,sum(i_1gxxnnN),sum(i_0gxxnnN),
-                                         (outcome_mean(0,g,x1,x2,beta)-outcome_mean(0,0,x1,x2,beta))*p*n_xxnnN/nrow(dat)))
+                                         (outcome_mean(0,g,x1,x2,gamma)-outcome_mean(0,0,x1,x2,gamma))*p*n_xxnnN/nrow(dat)))
             }
           }
         }

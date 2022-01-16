@@ -4,7 +4,7 @@
 
 \usepackage{tikz}
 
-\title{Causal inference on observational network data\\\vspace{0.5em}\large{STAT 548 Qualifying Paper}}
+\title{Estimating treatment effects from observational network data\\\vspace{0.5em}\large{STAT 548 Qualifying Paper}}
 \author{Kenny Chiu}
 \date{\today}
 
@@ -17,7 +17,7 @@
 \vspace{2em}
 
 \begin{abstract}
-\textcite{Forastiere:2021} examine the problem of performing causal inference on observational network data in the presence of interference. We review their proposed method and discuss its place in the literature. We present toy examples that illustrate the relevance of their theoretical results. We replicate part of their simulation study on a different dataset (the Twitch social network dataset), obtain findings mostly consistent with theirs, and discuss the possible reasons for the few inconsistent results. We also provide a critique of their method and their paper.
+\textcite{Forastiere:2021} examine the problem of estimating causal treatment effects from observational network data in the presence of interference. We review their proposed method and discuss its place in the literature. We present simple examples that illustrate the relevance of their theoretical results. We replicate part of their simulation study on a different dataset (the Twitch social network dataset), obtain findings mostly consistent with theirs, and discuss the possible reasons for the few inconsistent results. We also provide a critique of their work.
 \end{abstract}
 
 \vspace{2em}
@@ -25,7 +25,7 @@
 
 \section{Introduction}
 
-\textcite{Forastiere:2021} examine the problem of performing causal inference on observational network data in the presence of interference. \citeauthor{Forastiere:2021} formulate the problem in terms of a potential outcome framework under which the biases of treatment effect estimators that assume SUTVA can be derived, and they propose a propensity score-based estimator that is able to produce unbiased estimates under certain assumptions. In this report, we review the work by \textcite{Forastiere:2021}, present toy examples that illustrate their theoretical results, and replicate part of their simulation study on a different dataset.
+\textcite{Forastiere:2021} examine the problem of estimating causal treatment effects from observational network data in the presence of interference. The problem is formulated under a potential outcome framework in which they propose a propensity score-based estimator for the treatment effect that is unbiased under certain assumptions. \citeauthor{Forastiere:2021} also derive the biases of naive estimators that ignore interference under their framework. In this report, we review the work by \textcite{Forastiere:2021}, present simple examples that illustrate their theoretical results, and replicate part of their simulation study on a different dataset.
 \\
 
 This report is organized as follows: Section~\ref{sec:notation} introduces the notation used in this report; Section~\ref{sec:summary} summarizes their proposed methodology in the context of the literature; Section~\ref{sec:example} presents examples that illustrate the relevance of their theoretical results; Sections~\ref{sec:simulation} and \ref{sec:extension} discusses our attempts at replicating part of their simulation study on a different dataset; and Section~\ref{sec:critique} concludes the report with a critique of their work. Appendix~\ref{apx:example} includes our technical derivations from Section~\ref{sec:example}, and Appendix~\ref{apx:simulation} contains additional information about the dataset and our simulations from Sections~\ref{sec:simulation} and \ref{sec:extension}.
@@ -33,26 +33,35 @@ This report is organized as follows: Section~\ref{sec:notation} introduces the n
 
 \section{Notation} \label{sec:notation}
 
-Throughout this report, we closely follow the notation used by \textcite{Forastiere:2021}. Let $G=(\calN,\calE)$ be an undirected network where $\calN$ is a set of $N$ units (nodes) and $\calE$ is a set of edges $(i,j)$. A partition~$(i,\Ni,\Nmi)$ of $\calN$ describes unit~$i$'s neighbourhood~$\calN_i$ (the set of $N_i$ units connected to unit $i$) and the set~$\calN_{-i}$ of all other units that are not $i$ and are not in $\calN_i$. Let $Z_i\in\{0,1\}$ be the treatment assigned to unit $i$ and $Y_i\in\calY$ the observed outcome of unit $i$. Denote the treatment and outcome vector for the population~$\calN$ as $\bfZ$ and $\bfY$, respectively, and the corresponding vectors for partition~$(i,\Ni,\Nmi)$ as $(Z_i,\ZNi,\ZNmi)$ and $(Y_i,\YNi,\YNmi)$. Let $G_i=g_i(\ZNi)\in\calG_i$ be some known and well-specified summary~$g_i$ of the treatments in unit~$i$'s neighbourhood, and denote the vector of neighbourhood treatments for the population as $\bfG$. Depending on the size of a unit's neighbourhood, the space $\calG_i$ may differ between units. Let $V_g=\{i\in\calN:g\in\calG_i\}$ denote the subset containing $v_g$ units that have $g$ as a possible value for the neighbourhood treatment. Let $\bfX_i\in\calX$ be a vector of covariates for unit~$i$ that partitions into individual-level characteristics $\Xind_i\in\calX^\text{ind}$ and neighbourhood-level/aggregated individual-level characteristics $\Xneigh_i\in\calX^\text{neigh}$.
+Throughout this report, we closely follow the notation used by \textcite{Forastiere:2021}. Let $G=(\calN,\calE)$ be an undirected network where $\calN$ is a set of $N$ units (nodes) and $\calE=\{\{i,j\}: i,j\in\calN\}$ is a set of edges. For a unit $i\in\calN$, a partition~$(i,\Ni,\Nmi)$ of $\calN$ describes unit~$i$'s neighbourhood~$\calN_i$ (the set of $N_i$ units connected to unit $i$) and the set~$\calN_{-i}$ of all other units that are not $i$ and that are not in $\calN_i$. Let $Z_i\in\{0,1\}$ be the treatment assigned to unit $i$ and $Y_i\in\calY$ the observed outcome of unit $i$.
+Denote the treatment vector for the population~$\calN$ as $\bfZ$ and the corresponding vectors for partition~$(i,\Ni,\Nmi)$ as $(Z_i,\ZNi,\ZNmi)$.
+%Denote the treatment and outcome vector for the population~$\calN$ as $\bfZ$ and $\bfY$, respectively, and the corresponding vectors for partition~$(i,\Ni,\Nmi)$ as $(Z_i,\ZNi,\ZNmi)$ and $(Y_i,\YNi,\YNmi)$.
+Let $G_i=g_i(\ZNi)\in\calG_i$ be some known and well-specified summary~$g_i$ of the treatments in unit~$i$'s neighbourhood.
+%, and denote the vector of neighbourhood treatments for the population as $\bfG$
+Depending on the size of a unit's neighbourhood, the space $\calG_i$ may differ between units. Let $V_g=\{i\in\calN:g\in\calG_i\}$ denote the subset containing $v_g$ units that have $g$ as a possible value for the neighbourhood treatment. Let $\bfX_i\in\calX$ be a vector of covariates for unit~$i$ that partitions into individual-level characteristics $\Xind_i\in\calX^\text{ind}$ and neighbourhood-level/aggregated individual-level characteristics $\Xneigh_i\in\calX^\text{neigh}$.
+\\
+
+We use $\E[\argdot]$ and $\P(\argdot)$ to denote expectations and probabilities, respectively. Note that in the context of a given network, these quantities should be viewed from the ``super-population'' perspective \parencite{Imbens:2015} and are defined in terms of averages over the finite network. Otherwise, expectations and probabilities are interpreted the conventional way. We leave it up to the context to distinguish which interpretation is used throughout this report.
 
 
 \section{Review of proposed methodology} \label{sec:summary}
 
-\todo In this section, we explain the method proposed by \textcite{Forastiere:2021} and discuss its relevance in the context of the related literature. We also discuss its advantages over other methods used in similar contexts.
+In this section, we explain the method proposed by \textcite{Forastiere:2021} and discuss its relevance in the context of the related literature. We also discuss its advantages over other methods used in similar contexts.
 
 \subsection{Setting, objective and method}\label{sec:method}
 
-\textcite{Forastiere:2021} examine the problem of performing causal inference of treatment effects from observational network data under interference. The setting is challenging for causal inference because
+\textcite{Forastiere:2021} focus on the problem of estimating treatment effects from observational network data under interference. The setting is challenging for causal inference because
 \begin{enumerate}
 \item
-the assignment mechanism of treatments is unknown with observational data and so estimated effects may be non-causal in the presence of unmeasured confounders, and
+the assignment mechanism of treatments is unknown with observational data and so estimated effects may be biased in the presence of unmeasured confounders, and
 \item
-naive inference methods that ignore interference may produce biased estimates.
+conventional inference methods typically ignore the effect of interference, which may also lead to biased estimates.
 \end{enumerate}
-In the randomized controlled trial literature, these issues can generally be dealt with by designing the study in such a way that the influence of confounders is minimized and that inference methods that account for interference can be used \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}. In the observational setting, these considerations need to be addressed by the inference method in the analysis phase. \citeauthor{Forastiere:2021} consider a setting involving a binary treatment (e.g., intervention and control) and where the interference on a unit is limited to that of its immediate neighbouring units. They propose a method to estimate the causal treatment and spillover (interference) effects that yield unbiased estimates under certain assumptions.
+In the randomized controlled trial literature, these issues can generally be dealt with by designing the study in such a way that the influence of confounders is minimized and that inference methods that do account for interference can be used \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}. In the observational setting, these considerations need to be addressed by the inference method in the analysis phase. \citeauthor{Forastiere:2021} specifically focus on the setting involving a binary treatment (e.g., an intervention and a control) and where the interference on a unit comes from only its treated neighbours. They formulate the inference problem under a potential outcome framework, and they propose an estimation procedure that yields unbiased treatment and spillover (interference) effect estimates under certain assumptions.
 \\
 
-Under the potential outcome framework, the general procedure for estimating effects is to match units into sets based on covariate values, compute the effect contrast within each matched set, and estimate the effect by the (weighted) average of the contrasts across sets. However, matching may be difficult when the space of possible covariate values is large or if there are many covariates. \textcite{Forastiere:2021} address this problem in their proposed method by instead matching based on a defined joint propensity score~$\psi(z;g;x)$ that factorizes into a neighbourhood propensity score~$\lambda(g;z;\bfx^g)$ (probability of being exposed to neighbourhood treatment $g$ given individual treatment $z$ and relevant covariates $\bfx^g$) and an individual propensity score~$\phi(z;\bfx^z)$ (probability of being assigned treatment $z$ given relevant covariates $\bfx^z$). Note that $\bfX^g$ and $\bfX^z$ do not necessarily correspond to $\Xneigh$ and $\Xind$, respectively, as they may not be disjoint. The steps for their propensity-based method are as follows:
+%Their procedure for estimating effects is based on matching units into sets based on covariate values, compute the effect contrast within each matched set, and estimate the effect by the (weighted) average of the contrasts across sets. However, matching may be difficult when the space of possible covariate values is large or if there are many covariates.
+The procedure proposed by \textcite{Forastiere:2021} involves partitioning units into subclasses according to a joint propensity score~$\psi(z;g;x)$ that they also define. The joint propensity score factorizes into a neighbourhood propensity score~$\lambda(g;z;\bfx^g)$ (probability of being exposed to neighbourhood treatment $g$ given individual treatment $z$ and relevant covariates $\bfx^g$) and an individual propensity score~$\phi(z;\bfx^z)$ (probability of being assigned treatment $z$ given relevant covariates $\bfx^z$), which they exploit in order to avoid adjusting for all covariates at once and needing to work in a higher-dimensional space. Note that $\bfX^g$ and $\bfX^z$ do not necessarily correspond to $\Xneigh$ and $\Xind$, respectively, as they may not be disjoint. The steps for their propensity score-based estimation procedure are as follows:
 \begin{enumerate}
 
 \item
@@ -85,7 +94,7 @@ Estimate the dose-response function by averaging over the estimated potential ou
 \]
 
 \item
-\textbf{Estimate} the treatment effects $\tau(g)$, overall treatment effect $\tau$, spillover effects $\delta(g;z)$, and overall spillover effects $\Delta(z)$ by
+\textbf{Estimate} the treatment effects $\tau(g)$, overall treatment effect $\tau$, spillover effects $\delta(g;z)$ and overall spillover effects $\Delta(z)$ using the estimated ADRF by
 \begin{align*}
 \hat{\tau}(g) &= \hat{\mu}(1,g;V_g) - \hat{\mu}(0,g;V_g) \;, & \hat{\tau}&=\sum_{g\in\calG}\hat{\tau}(g)\P(G_i=g) \;, \\
 \hat{\delta}(g;z) &= \hat{\mu}(z,g;V_g) - \hat{\mu}(z,0;V_g) \;, & \hat{\Delta}(z) &= \sum_{g\in\calG}\hat{\delta}(g;z)\P(G_i=g)\;.
@@ -96,30 +105,30 @@ Estimate the dose-response function by averaging over the estimated potential ou
 
 \subsection{In context of the literature}
 
-The literature that examines the similar problem of causal inference in observational data under general forms of interference is still relatively new. We summarize the common approaches in this literature and discuss how the work by \textcite{Forastiere:2021} fits in. We also briefly highlight other work in the related literature.
+The body of literature that involves estimating causal treatment effects from observational data under general forms of interference is still relatively new. We summarize the common approaches in this literature and discuss how the work by \textcite{Forastiere:2021} fits in. We also briefly highlight other work that examine similar problems under different but closely related contexts.
 
 \subsubsection{Similar contexts}
 
-As noted by \citeauthor{Forastiere:2021}, the majority of the works dealing with the same context involve either inverse probability-weighted (IPW) estimators \parencite{Liu:2016} or targeted maximum likelihood estimators (TMLE) \parencite{VanDerLaan:2014,Sofrygin:2017,Ogburn:2017} for the causal treatment effect. The main advantage of the method proposed by \textcite{Forastiere:2021} over these two approaches is the weaker assumptions that it requires.
+As noted by \textcite{Forastiere:2021}, the majority of works that look at similar problems under the same context involve either inverse probability-weighted (IPW) estimators \parencite{Liu:2016} or targeted maximum likelihood estimators (TMLE) \parencite{VanDerLaan:2014,Sofrygin:2017,Ogburn:2017} for the causal treatment effect. The main advantage of the method proposed by \citeauthor{Forastiere:2021} over these two approaches is the weaker assumptions that it requires.
 \\
 
-IPW estimators are weighted averages of the outcomes where the weights are defined with respect to a hypothetical allocation strategy (an assumed distribution over the neighbouring treatments) and a known or correctly modelled generalized propensity score. The Bernoulli allocation strategy \parencite{Tchetgen:2012} is commonly used, which assumes that each unit in the neighbourhood is treated independently with probability $\alpha$ and that a unit's assignment is independent of its neighbours' assignment. This assumption rules out homophily---the tendency for units with similar characteristics to form ties---which is generally a strong and unrealistic assumption to make \parencite{Shalizi:2011}. In contrast, the estimators proposed by \textcite{Forastiere:2021} only use the observed neighbourhood treatments, and therefore no assumptions that explicitly rule out homophily are made (though the issue may still manifest as an unmeasured confounder if the unconfoundedness assumption does not hold for the given set of covariates). Both the IPW estimators and the estimators proposed by \textcite{Forastiere:2021} rely on being able to correctly model the joint propensity score.
+IPW estimators are weighted averages of the outcomes where the weights are defined with respect to a hypothetical allocation strategy (an assumed distribution over the neighbourhood treatments) and a known or correctly modelled generalized propensity score. The Bernoulli allocation strategy \parencite{Tchetgen:2012} is commonly used, which assumes that each unit in the neighbourhood is treated independently with probability $\alpha$ and that a unit's assignment is independent of its neighbours' assignment. This assumption rules out homophily---the tendency for units with similar characteristics to form ties---which is a strong assumption that is said to be unrealistic \parencite{Shalizi:2011}. In contrast, the estimators proposed by \textcite{Forastiere:2021} only use the observed neighbourhood treatments, and therefore no assumptions that explicitly rule out homophily are made (though the issue may still manifest as an unmeasured confounder if the unconfoundedness assumption does not hold for the given set of covariates). Both the IPW estimators and the estimators proposed by \citeauthor{Forastiere:2021} rely on being able to correctly model the joint propensity score.
 \\
 
-TMLEs are obtained by maximizing the likelihood of the outcomes defined on a structural equation model. Similar to the IPW estimators, TMLE typically involves a randomization assumption \parencite{VanDerLaan:2014} on the model where the conditional joint distribution of the treatment assignments factorizes into independent conditionals given the covariates for all units, and similarly for the conditional joint distribution of the outcomes given the covariates and the treatment assignments. In comparison, the unconfoundedness assumption in the method proposed by \textcite{Forastiere:2021} makes a weaker assumption where the outcome and treatment assignment of each unit is conditionally independent given only the covariates of that unit. The significance of these assumptions again circle back to the argument of disregarding homophily and/or other venues of confounding. It is notable that extensions of TMLE that allow for limited forms of homophily were later introduced \parencite{Ogburn:2017}.
+TMLEs are obtained by maximizing the likelihood of the outcomes defined on a structural equation model. Similar to the IPW estimators, TMLE generally involves a randomization assumption \parencite{VanDerLaan:2014} on the model where the conditional joint distribution of the treatment assignments factorizes into independent conditionals given the covariates for all units, and similarly for the conditional joint distribution of the outcomes given the covariates and the treatment assignments. In comparison, the unconfoundedness assumption in the method proposed by \textcite{Forastiere:2021} makes a weaker assumption where the outcome and treatment assignment of each unit is conditionally independent given only the covariates of that unit. The significance of these assumptions again circle back to the argument of disregarding homophily and/or other venues of confounding. It is notable that extensions of TMLE that allow for limited forms of homophily were later introduced \parencite{Ogburn:2017}.
 \\
 
-More recently, approaches that can be described as extensions of \textcite{Forastiere:2021}'s method have been proposed. \textcite{Jackson:2020} proposed estimators based on propensity score matching but which also explicitly account for homophily by modeling neighbourhood treatment assignments as an incomplete information game. \textcite{Sanchez:2021} questioned the justification of the unconfoundedness assumption with respect to the constructed propensity score (which would need to be estimated for every unit in the network and may be challenging to estimate accurately), and proposed a two-step method where a defined network propensity score is first estimated and then used as inverse weights to match units.
+More recently, approaches that can be described as extensions of the method by \textcite{Forastiere:2021} have been proposed. \textcite{Jackson:2020} proposed estimators based on propensity score matching but which also explicitly account for homophily by modeling neighbourhood treatment assignments as an incomplete information game. \textcite{Sanchez:2021} questioned the justification of the unconfoundedness assumption with respect to the constructed propensity score (which would need to be estimated for every unit in the network and may be challenging to estimate accurately) and proposed a two-step method where a network propensity score is estimated and then used to as inverse weights to match units.
 
 \subsubsection{Other contexts}
 
-We briefly highlight other works in the literature that consider a slightly different setting of the causal inference problem in observational data under interference. The difference in settings makes it difficult to directly compare the proposed approaches to that of \textcite{Forastiere:2021}.
+We briefly highlight other works in the literature that look at similar problems under different but closely related contexts. The difference in settings makes it difficult to directly compare these approaches to that proposed by \textcite{Forastiere:2021}.
 \\
 
-A large body of the literature examine the inference problem under the assumption of partial interference where units are partitioned into groups with no spillover effects between groups. The focus on partial interference settings seems to be primarily due to momentum of earlier works \parencite[e.g.,][]{Sobel:2006,Hudgens:2008} that looked at causal inference in randomized studies with interference, in which group-randomization tends to be more practical. Examples of recent work that assume partial interference include the work by \textcite{Liu:2019}, \textcite{Barkley:2020}, and \textcite{Qu:2021}. IPW estimators are commonly used in the partial interference setting as they were originally introduced for grouped observational data \parencite{Tchetgen:2012}.
+A large body of the literature examine the inference problem under the assumption of partial interference where units are partitioned into groups with no spillover effects between groups. The focus on partial interference settings seems to be primarily due to momentum of earlier works \parencite[e.g.,][]{Sobel:2006,Hudgens:2008} that looked at inference in randomized control studies with interference in which group-randomization tends to be more practical. Examples of recent work that assume partial interference include the work by \textcite{Liu:2019}, \textcite{Barkley:2020}, and \textcite{Qu:2021}. IPW estimators are commonly used in the partial interference setting as they were originally introduced for grouped observational data \parencite{Tchetgen:2012}.
 \\
 
-A small number of works consider more specific and niche contexts. For example, \textcite{Toulis:2018} explore the problem of treatment entanglement (where treatment assignments are assumed to satisfy certain restrictions) and proposes a propensity score-based estimator. \textcite{Zigler:2021} focus on the problem of bipartite causal inference with interference (where the treatment is applied to one unit and the outcome is measured on another) and proposes a IPW estimator.
+A small number of works consider more specific and niche contexts. For example, \textcite{Toulis:2018} explore the problem of treatment entanglement (where treatment assignments are assumed to satisfy certain restrictions) and proposes a propensity score-based estimator. \textcite{Zigler:2021} focus on the problem of bipartite causal inference with interference (where the treatment is applied to one unit and the outcome is measured on another) and propose a IPW estimator for this setting.
 %Outside of the observational setting, there are many works that study causal inference in randomized studies with potential interference. These works generally examine study designs that allow for treatment effect estimation in the presence of interference under varying contexts \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}
 
 
@@ -129,14 +138,14 @@ In this section, we describe a simple example that illustrates the relevance of 
 \begin{enumerate}
 
 \item
-if the unconfoundedness assumption holds but the individual and neighbourhood treatments are not conditionally independent for a given set of covariates, then an unbiased naive estimator of the treatment effect that assumes SUTVA will be biased due to interference effects, and
+if the unconfoundedness assumption holds but the individual and neighbourhood treatments are not conditionally independent for a given set of covariates, then an unbiased naive estimator that assumes SUTVA for the treatment effect will be biased due to interference effects, and
 
 \item
-if the individual and neighbourhood treatments are conditionally independent but the unconfoundedness assumption does not hold for a given set of covariates, then an unbiased SUTVA estimator will be biased due to the unmeasured confounders.
+if the individual and neighbourhood treatments are conditionally independent but the unconfoundedness assumption does not hold for a given set of covariates, then an unbiased SUTVA estimator will be biased due to unmeasured confounders.
 
 \end{enumerate}
 
-Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by $i\in\bbN$ for the pair and $j\in\{1,2\}$ for the unit within a pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ be whether a unit's paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some measured covariate for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=\frac{1}{2}$. Let $Y_{ij}\in\bbR$ be the outcome measured for each unit. Other details, such as the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion. Figure~\ref{fig:example} shows an example network.
+Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (has an edge) with exactly one other unit. For simplicity, we index a unit by its pair $i\in\bbN$ and its position $j\in\{1,2\}$ within the pair. Denote $Z_{ij}\in\{0,1\}$ as the treatment assignment of unit $j$ in pair $i$. Let the neighbourhood treatment~$G_{ij}$ denote whether unit $(ij)$'s paired counterpart is treated. Therefore, $\calG_{ij}=\{0,1\}$ for all units in the network and $V_g=\calN$ for all $g\in\{0,1\}$. For convenience of notation, we drop the dependence on $V_g$ where applicable. Let $\bfX_{ij}=X_{ij}\in\{0,1\}$ be some measured covariate for each unit, and assume that the covariates of the units in the network are generated independently with $\P(X_{ij}=1)=\P(X_{ij}=0)=\frac{1}{2}$. Let $Y_{ij}\in\bbR$ be the outcome measured for each unit. Other details, such as the size of $\calN$, are assumed but left unspecified due to being irrelevant for the discussion. Figure~\ref{fig:example} shows an example network.
 \\
 
 \begin{figure}[ht]
@@ -156,29 +165,11 @@ Consider some undirected network $G=(\calN,\calE)$ where every unit is paired (h
 \node[] [right of=n1] (d3) {\footnotesize$\bullet\bullet\bullet$};
 \node[] [right of=n2] (d4) {\footnotesize$\bullet\bullet\bullet$};
 \end{tikzpicture}
-\caption{Example network of paired units with their observed individual treatment $Z_{ij}$, neighbourhood treatment $G_{ij}$, covariate $X_{ij}$, and outcome $Y_{ij}$.}
+\caption{Example network of paired units with their observed individual treatment $Z_{ij}$, neighbourhood treatment $G_{ij}$, covariate $X_{ij}$ and outcome $Y_{ij}$.}
 \label{fig:example}
 \end{figure}
 
-We examine the bias of a naive estimator on this network under two settings. In both settings, we assume that Assumption~1 (no multiple versions of treatment) and Assumption~2 (neighbourhood interference) of \textcite{Forastiere:2021} hold. Derivations of the quantities presented in this section can be found in Appendix~\ref{apx:example}.
-% Hence, the assumptions of Corollary~2 are satisfied in the first setting, and the assumptions of Corollary~3 are satisfied in the second setting.
-
-\iffalse
-In the first setting, suppose that the treatment assignment mechanism follows
-\[
-\P(Z_{ij}=1|X_{ij}) = \frac{1}{4} + \frac{1}{2}X_{ij} \;,
-\]
-i.e., the probability of being treated is greater when a unit has a 1-value for the covariate.
-%the covariate $X_{ij}$ exactly determines the treatment status of a unit, i.e., $Z_{ij} = X_{ij}$.
-Because $X_{ij}$ are generated independently, it follows that $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$ in this setting (they are independent unconditionally regardless of $X_{ij}$). An example study corresponding to this setting may be one where the paired units correspond to a pair of friends from potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters ($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$.
-\\
-
-In the second setting, suppose that the treatment assignment follows
-\[
-\P(Z_{ij}=1|X_{i1},X_{i2}) = \frac{3}{4}\mathbbm{1}\left[X_{i1}=X_{i2}\right] + \frac{1}{4}\mathbbm{1}\left[X_{i1}\neq X_{i2}\right]
-\]
-where $\mathbbm{1}[\argdot]$ is the indicator function. This assignment corresponds to a type of homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ in this setting as the probability of a unit being treated also depends on its counterpart. An example study corresponding to this setting may be one similar to the first but involving spouses rather than friends, where spouses coming from similar backgrounds may find it easier to discuss finances (at a more intimate level).
-\fi
+We examine the bias of a naive estimator on this network under two settings. In both settings, we assume that Assumption~1 (no multiple versions of treatment) and Assumption~2 (neighbourhood interference) stated by \textcite{Forastiere:2021} hold. Derivations of the quantities presented in this section can be found in Appendix~\ref{apx:example}.
 
 \subsection{Setting~1: bias due to interference}
 
@@ -186,19 +177,19 @@ In our first setting, suppose that the treatment assignment follows
 \[
 \P(Z_{ij}=1|X_{i1},X_{i2}) = \frac{3}{4}\mathbbm{1}\left[X_{i1}=X_{i2}\right] + \frac{1}{4}\mathbbm{1}\left[X_{i1}\neq X_{i2}\right]
 \]
-where $\mathbbm{1}[\argdot]$ is the indicator function, and suppose that $Y_{ij}(z,g)\sim N(c_zz+c_gg,\sigma^2)$ for some constants $c_z,c_g\in\bbR$. This treatment assignment corresponds to a type of homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ as the probability of a unit being treated also depends on its counterpart. On the other hand, the unconfoundedness assumption holds for the outcome~$Y_{ij}(z,g)$ given $X_{ij}$ (or any other covariates) as the outcome only depends on the observed values of the treatments $z$ and $g$. Therefore, by Corollary~2, an effect estimator that is unbiased under SUTVA will be biased in the presence of neighbourhood interference. A hypothetical study that corresponds to this setting may be one where the paired units correspond to a pair of spouses with potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters~($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$. The homophily context arises from the assumption that spouses who come from similar backgrounds will find it easier to discuss finances. The interference context comes from the assumption that one may learn from others talk about their financial management.
-%An example study corresponding to this setting may be one similar to the first but involving spouses rather than friends, where spouses coming from similar backgrounds may find it easier to discuss finances (at a more intimate level).
+where $\mathbbm{1}[\argdot]$ is the indicator function, and suppose that $Y_{ij}(z,g)\sim N(c_zz+c_gg,\sigma^2)$ for some constants $c_z,c_g\in\bbR$. This treatment assignment corresponds to a homophily situation where the units in a pair are more likely to be treated if they share the same value of the covariate. Thus, $Z_{ij}$ and $G_{ij}$ are not conditionally independent given $X_{ij}$ as the probability of a unit being treated also depends on its counterpart. On the other hand, the unconfoundedness assumption holds for the outcome~$Y_{ij}(z,g)$ given $X_{ij}$ (or any other covariates) as the outcome only depends on the observed values of the treatments $z$ and $g$. Therefore, we have
+\[
+Z_{ij}\centernot\condind G_{ij}|X_{ij} \qquad \text{and} \qquad Y_{ij}(z,g)\condind Z_{ij},G_{ij}|X_{ij}
+\]
+and so by Corollary~2, an effect estimator that is unbiased under SUTVA will be biased in the presence of neighbourhood interference. A hypothetical study that corresponds to this setting may be one where the paired units correspond to a pair of spouses with potentially different socioeconomic backgrounds $X_{ij}$, and it is of interest to determine whether being comfortable discussing financial matters~($Z_{ij}$) has an effect on some measure of their own financial management $Y_{ij}$. The homophily context arises from the assumption that spouses who come from similar backgrounds will find it easier to discuss finances. The interference context comes from the assumption that one may learn better management by hearing others talk about their experiences or strategies.
 \\
 
-%In our first setting, the covariate $X_{ij}$ alone is insufficient for the conditional independence of the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$. By Corollary~2, an effect estimator that is unbiased under SUTVA will be biased due to the association between the individual and neighbourhood treatments.
-%\\
-
-%The overall treatment effect $\tau$ in this setting is the same as the one given in the first setting.
 The overall treatment effect $\tau$ in this setting is given by
-\[
-\tau = \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g\right] = c_z \;.
-\]
-Using Theorem~2.A, the naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
+\begin{align*}
+\tau &= \E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g\right] \\
+&= c_z \;.
+\end{align*}
+By Theorem~2.A, the conventional covariate-adjusted estimator $\tau_{X}^\text{obs}$ that assumes SUTVA from the literature is well-defined under the potential outcome framework and estimates the quantity
 \begin{align*}
 \tau_{X}^\text{obs} &= \sum_{g,x,x'\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g\right]\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\right. \\
 &\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g\right]\P(G_{ij}=g|X_{ij}=x,X_{ik}=x')\P(Z_{ij}=0|X_{ij}=x,X_{ik}=x')\right)\P(X_{ij}=x) \\
@@ -233,16 +224,18 @@ Further suppose that there is some unmeasured confounder $U_{ij}\in\{0,1\}$ for 
 \[
 \P(U_{ij}=1|Z_{ij}) = \frac{1}{4} + \frac{1}{2}Z_{ij}\;,
 \]
-and suppose that $Y_{ij}(z,g)|U_{ij}\sim N(c_zz+c_uU_{ij},\sigma^2)$ for some constants $c_z,c_u\in\bbR$. Because $Z_{ij}$ only depends on $X_{ij}$ in this setting, $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$. However, because the outcome $Y_{ij}(z,g)$ now depends on $U_{ij}$, the unconfoundedness assumption no longer holds given only $X_{ij}$. Therefore, by Corollary~3, an effect estimator that is unbiased under SUTVA will be biased due to the unmeasured confounder $U_{ij}$. A hypothetical study corresponding to this setting may be one similar to the example in setting one except where the paired units are friends rather than spouses, and so it is assumed that financial discussions are less intimate and therefore have minimal interference effects. In addition, unbeknownst to the researcher, those who are comfortable discussing financial matters ($Z_{ij}$) are more likely to make financial investments ($U_{ij}$), which also effects their financial management $Y_{ij}$.
+and suppose that $Y_{ij}(z,g)|U_{ij}\sim N(c_zz+c_uU_{ij},\sigma^2)$ for some constants $c_z,c_u\in\bbR$. Because $Z_{ij}$ only depends on $X_{ij}$ in this setting, $Z_{ij}$ and $G_{ij}$ are conditionally independent given $X_{ij}$. However, because the outcome $Y_{ij}(z,g)$ now depends on $U_{ij}$, the unconfoundedness assumption no longer holds given only $X_{ij}$. Therefore, we have
+\[
+Z_{ij}\condind G_{ij}|X_{ij} \qquad \text{and} \qquad Y_{ij}(z,g)\condind Z_{ij},G_{ij}|U_{ij}
+\]
+and so by Corollary~3, an effect estimator that is unbiased under SUTVA will be biased due to the unmeasured confounder $U_{ij}$. A hypothetical study corresponding to this setting may be one similar to the example in setting one except where the paired units are friends rather than spouses, and so it is assumed that financial discussions are less intimate and therefore have minimal interference effects. In addition, not accounted for by the researcher, those who are comfortable discussing financial matters ($Z_{ij}$) are more likely to make financial investments ($U_{ij}$), which also effects their financial management $Y_{ij}$.
 \\
 
-%In our first setting, the individual treatment $Z_{ij}$ and neighbourhood treatment $G_{ij}$ are conditionally independent given $X_{ij}$. By Corollary~1, an effect estimator that is unbiased under SUTVA will still be unbiased under the assumptions of our setting.
-%\\
-
 The overall treatment effect $\tau$ in this setting is given by
-\[
-\tau = \sum_{u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right)\P(U_{ij}=u) = c_z \;.
-\]
+\begin{align*}
+\tau &= \sum_{u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right)\P(U_{ij}=u) \\
+&= c_z \;.
+\end{align*}
 The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the quantity
 \begin{align*}
 \tau_{X}^\text{obs} &= \sum_{u\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=1) - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\P(U_{ij}=u|Z_{ij}=0)\right) \\
@@ -282,50 +275,49 @@ Therefore, an unbiased estimator of the naive effect estimator is also unbiased 
 
 \section{Reproducing simulation study findings} \label{sec:simulation}
 
-In this section, we aim to reproduce the general findings of the simulation study conducted by \textcite{Forastiere:2021}. Note that the complete Add Health dataset that \citeauthor{Forastiere:2021} work with is publicly inaccessible, and so we instead work with the Twitch Social Network dataset \parencite{Rozemberczki:2021} that is comparable in size. Twitch is an American live streaming service that focuses on video game streaming. The dataset contains several networks of streamers and their mutual friendships that were collected in May~2018. We consider a hypothetical study where we are interested in understanding the effect of streamer self-promotions and advertising (the individual treatment) on the number of subscribers (users who follow a particular streamer; the outcome). It is reasonable to assume that there is interference at play where promoting one's self would inadvertently promote the streamer's network due to the site's recommendation algorithms that suggest similar streams to a viewer.
+In this section, we aim to reproduce the general findings of the simulation study conducted by \textcite{Forastiere:2021}. Note that the complete Add Health dataset that \citeauthor{Forastiere:2021} work with is publicly inaccessible, and so we instead work with the Twitch Social Network dataset \parencite{Rozemberczki:2021} that is comparable in size. Twitch is an American live streaming website that focuses on video game streaming. The full dataset contains several networks of streamers and their mutual friendship relationships that were collected in May~2018. We consider a hypothetical study where we are interested in understanding the effect of streamer self-promotions and advertising (the individual treatment) on the number of subscribers (users who follow a particular streamer; the outcome). It is reasonable to assume that there is interference at play where promoting one's self would inadvertently promote the streamer's network due to the site's recommendation algorithms that suggest similar streams to a viewer.
 \\
 
-We specifically work with the EN subnetwork of the Twitch dataset, which includes a sample of streamers who stream in English. The network includes 7126 streamers and 35,324 mutual friendship relationships. A total of 3169 binary features (e.g., games liked and played, location, streaming habits, etc.) are collected from each streamer. However, the individual features are unnamed. For the purposes of this study, we only consider feature \verb|224| and feature \verb|569| due to their distribution (the second and third most represented features in the dataset, respectively). We view these features as covariates representing whether a streamer plays a particular \verb|game1| and \verb|game2|. We note that one major difference between the Twitch dataset and the Add Health dataset is that the degree of each unit is limited to at most 10 in the Add Health dataset while there is no contextual limit in the Twitch dataset. More details about the Twitch dataset are provided in Appendix~\ref{apx:twitch}.
+We consider only the EN subnetwork of the full Twitch dataset, which includes a sample of streamers who stream in English. The network consists of 7126 streamers and 35,324 mutual friendships. A total of 3169 binary features (e.g., games liked and played, location, streaming habits, etc.) are collected from each streamer. However, the individual features are unnamed. For the purposes of this study, we consider only feature \verb|224| and feature \verb|569| due to their distribution (the second and third most represented features in the dataset, respectively). We pretend these features are covariates representing whether a streamer plays a particular \verb|game1| and \verb|game2|. We note that one major difference between the Twitch dataset and the Add Health dataset is that the degree of each unit is limited to at most ten in the Add Health dataset while there is no contextual limit in the Twitch dataset. More details about the Twitch dataset are provided in Appendix~\ref{apx:twitch}.
 \\
 
-In the following sections, we describe our efforts to translate the simulation procedure and (partial) findings of Tables~1 and 2 in the work by \textcite{Forastiere:2021} to our Twitch data. Under various individual and neighbourhood treatment generation scenarios, Table~1 compares the theoretical bias of estimators that adjust for different sets of covariates, while Table~2 compares the observed bias and RMSE of two estimators on simulated data. In our work, we focus specifically on Scenario~1 where the unconfoundedness assumption holds given the individual-level covariates.
+In the following sections, we describe our efforts to translate the simulation procedure and (partial) findings of Tables~1 and 2 in the work by \textcite{Forastiere:2021} to our Twitch dataset. Under various individual and neighbourhood treatment generation scenarios, Table~1 compares the theoretical bias of estimators that adjust for different sets of covariates, while Table~2 compares the observed bias and RMSE of several estimators on simulated data. In our work, we focus specifically on Scenario~1 where the unconfoundedness assumption holds given the individual-level covariates.
 
 \subsection{Treatment and outcome generation models} \label{sec:models}
 
-To study the bias of estimators, we simulate both the treatment $Z$ (self-promotions) and the outcome $Y$ (number of subscribers) based on the individual covariates $\Xind=(X^\text{game1},X^\text{game2})$ (streams game~1 and streams game~2). Our treatment generation model is given by
+To study the bias of different estimators, we simulate both the individual treatment~$Z$ and the outcome~$Y$ based on the individual covariates $\Xind=(X^\text{game1},X^\text{game2})$. Our treatment generation model is given by
 \[
 \text{logit}(P(Z_i=1)) = \text{logit}(\phi(1;\Xind_i)) = -3 + 3X_i^\text{game1} + 4X_i^\text{game2} \;.
 \]
-Because $Z_i$ is generated only based on the individual covariates $\Xind_i$, it follows that the unconfoundedness assumption holds given $\Xind_i$. For the neighbourhood treatment $G$, we consider both the proportion (following \citeauthor{Forastiere:2021}) and the sum of treated neighbours (which may make more sense in our context) in our simulations. Additional details about the simulated treatments can be found in Appendix~\ref{apx:covbal}.
+Because $Z_i$ is generated based on only $\Xind_i$, it follows that the unconfoundedness assumption holds given $\Xind_i$. For the neighbourhood treatment $G_i$ in our simulations, we consider both the proportion of treated neighbours (following \textcite{Forastiere:2021}) and the number of treated neighbours (which may make more sense in our context as there should be a greater effect the more marketing there is). Additional details about the simulated treatments can be found in Appendix~\ref{apx:covbal}.
 \\
 
 Our outcome generation model is given by
 \begin{align*}
 Y_i(z,g)|\Xind_i &\sim N\left(\mu(z,g,\Xind_i),1\right) \;, \\
-\mu(z,g,\Xind_i) &= 5 + 6\mathbbm{1}[\phi(1;\Xind_i)\geq 0.7] + 10z - 3z\mathbbm{1}[\phi(1;\Xind_i)\geq0.7] + \beta g
+\mu(z,g,\Xind_i) &= 5 + 6\mathbbm{1}[\phi(1;\Xind_i)\geq 0.7] + 10z - 3z\mathbbm{1}[\phi(1;\Xind_i)\geq0.7] + \gamma g
 \end{align*}
-where $\beta\in\{4,6,8\}$ (or $\{0.4,0.6,0.8\}$ for sum-neighbourhood treatment) is the low, medium and high spillover effect, respectively, for proportion-neighbourhood treatment. It follows that the treatment effect $\tau(g;
-\Xind)$ and overall treatment effect $\tau$ are then
+where $\gamma\in\{4,6,8\}$ is the low, medium and high interference effect, respectively, for proportion neighbourhood treatment (for sum neighbourhood treatment, we take $\gamma\in\{0.4,0.6,0.8\}$). It follows that the treatment effect~$\tau(g;
+\Xind)$ and overall treatment effect~$\tau$ are then
 \begin{align*}
 \tau(g;\Xind_i) &= \mu(1,g,\Xind_i) - \mu(0,g,\Xind_i) = 10 - 3\mathbbm{1}[\phi(1;\Xind_i)\geq0.7] \;, \\
 \tau &= \sum_{x\in\calX^\text{ind}}\tau(g;x)\P(\Xind=x) \;.
 \end{align*}
-We remind the reader about the ``super-population'' perspective \parencite{Imbens:2015} under which expectations and probabilities are interpreted as averages over a finite network of interest. Therefore, $\tau$ is computable given a network of nodes with their covariates $\Xind$.
 
 \subsection{Theoretical bias of estimators}
 
-We examine the bias of estimators that assume SUTVA and that adjust for differing sets of covariates. Following \textcite{Forastiere:2021}, we consider the covariate sets $\bfX_i=\{\emptyset,\Xind_i,\bfX_i^z=\Xind_i\cup\Xneigh_i\}$ where
+We examine the theoretical bias of estimators that assume SUTVA and that adjust for differing sets of covariates. Following \textcite{Forastiere:2021}, we consider the covariate sets $\bfX_i=\{\emptyset,\Xind_i,\bfX_i^z=\Xind_i\cup\Xneigh_i\}$ where
 \[
 \Xneigh_i=\left(\text{Ngame1}=\frac{\sum_{k\in\calN_i}\text{game1}_k}{N_i},\text{Ngame2}=\frac{\sum_{k\in\calN_i}\text{game2}_k}{N_i},N_i\right) \;.
 \]
-When no covariates are adjusted ($\bfX_i=\emptyset$), Equation~(12) in Theorem~2.B. in the work by \textcite{Forastiere:2021} is used to compute the bias. For the other two covariate sets, Equation~(11) in Corollary~2 is used. Table~\ref{tab:table1} shows the computed biases for both proportion- and sum-neighbourhood treatments on one simulated dataset.
+When no covariates are adjusted for ($\bfX_i=\emptyset$), we use Equation~12 from Theorem~2.B in the work by \textcite{Forastiere:2021} to compute the bias. For the other two covariate sets, we use Equation~11 from Corollary~2. Table~\ref{tab:table1} shows the computed biases for both proportion and sum neighbourhood treatments on one simulated dataset (the same dataset is used across estimators, and the dataset was regenerated for each interference level). Our results for proportion and sum neighbourhood treatments are similar. Our findings for the estimator that does not adjust for covariates and for the estimator that adjusts for $\Xind_i$ are consistent with what is reported in Table~1 in the work of \textcite{Forastiere:2021}.
 \\
 
 \begin{table}[ht]
 \centering
 \begin{tabular}{@{}rrrr@{}}
 \toprule
-Interference $(\beta)$ & Bias$(\emptyset)$ & Bias$(\Xind_i)$ & Bias$(\bfX_i^z)$ \\
+Interference $(\gamma)$ & Bias$(\emptyset)$ & Bias$(\Xind_i)$ & Bias$(\bfX_i^z)$ \\
 \midrule
 \multicolumn{4}{@{}l}{Proportion $G_i$} \\[0.25em]
 Low (4) & 2.937 & 0.057 & 0.541 \\
@@ -337,14 +329,11 @@ Medium (0.6) & 3.763 & -0.217 & 1.104 \\
 High (0.8) & 4.085 & -0.289 & 1.472 \\
 \bottomrule
 \end{tabular}
-\caption{Bias of covariate-adjusted SUTVA estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) on one simulated dataset.}
+\caption{Bias of covariate-adjusted SUTVA estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$. Each bias is computed from one simulated dataset.}
 \label{tab:table1}
 \end{table}
 
-Our findings for proportion and sum neighbourhood treatments are similar. Our findings for the estimator that does not adjust for covariates and for the estimator that adjusts for the individual covariates $\Xind_i$ are consistent with what is reported in Table~1 in the work of \textcite{Forastiere:2021}.
-\\
-
-For the estimator that adjusts for both individual and neighbourhood covariates $\bfX^z_i$, we report biases that are larger than expected (the biases for the estimators that adjusts for individual and for all covariates should be the same in theory). Our investigation suggests that these larger values are arising due to poor estimates of the theoretical probabilities in Equation~11, which themselves are caused by severe imbalances in treated and untreated units when looking at a particular joint level of the covariates. Table~\ref{tab:bias} shows the ten joint levels---as well as the number of treated and untreated units with those levels---that contributed the largest positive and negative values to the theoretical bias of the estimator that adjusts for $\bfX_i^z$ for the dataset simulated with proportion $G_i$ and high interference in Table~\ref{tab:table1}. There are a total of 2384 distinct observed joint levels on this simulated dataset despite there being only 7126 units. Hence, for a particular level that heavily skews towards one treatment status, the other treatment status will generally be underrepresented or absent in this relatively small dataset. \citeauthor{Forastiere:2021} likely did not encounter this problem due to the restricted maximum degree (and therefore the limited possible values of $G_i$) in the Add Health data, which is also larger in size. It may also be the case that \citeauthor{Forastiere:2021} used the same computation for both the individual and all covariate-adjusted estimators as their reported biases are identical.
+For the estimator that adjusts for $\bfX^z_i$, we report biases that are larger than expected (the bias should be the same as the one that adjusts for $\Xind_i$ in theory). Our investigation suggests that these larger values are arising due to poor estimates of the theoretical probabilities in Equation~11, which themselves are caused by severe imbalances in treated and untreated units when looking at a particular joint level of the covariates. Table~\ref{tab:bias} shows the ten joint levels---as well as the number of treated and untreated units with those levels---that contributed the largest positive and negative values to the bias of the estimator that adjusts for $\bfX_i^z$ for the dataset simulated with high proportion interference in Table~\ref{tab:table1}. There are a total of 2384 distinct observed joint levels on this simulated dataset despite there being only 7126 units. Hence, for a particular level that heavily skews towards one treatment status, the other treatment status will generally be underrepresented or absent in this relatively small dataset. \citeauthor{Forastiere:2021} likely did not encounter this problem due to the restricted maximum degree (and therefore the limited possible values of $G_i$) in the Add Health data, which is also larger in size. It may also be the case that \citeauthor{Forastiere:2021} used the same computation for both the $\Xind_i$ and $\bfX_i^z$-adjusted estimators as their reported biases are identical.
 
 \begin{table}[ht]
 \centering
@@ -366,14 +355,14 @@ game1 & game2 & Ngame1 & Ngame2 & $N_i$ & $n_{Z=1}$ & $n_{Z=0}$ & bias contrib. 
 0 & 0 & 1 & 0.5 & 2 & 1 & 37 & -0.0110 \\
 \bottomrule
 \end{tabular}
-\caption{The ten joint levels of game1, game2, Ngame1, Ngame2, and $N_i$ that contributed the largest (in magnitude) five positive and five negative values to the theoretical bias (Equation~11) of the estimator that adjusts for $\bfX^z_i$ for one dataset simulated with proportion $G_i$ and high interference. The columns $n_{Z=1}$ and $n_{Z=0}$ show the number of treated and untreated units that have the joint level. The theoretical bias of 1.083 reported in Table~\ref{tab:table1} is obtained by summing the bias contribution column over all 2384 distinct joint levels.}
+\caption{The ten joint levels of game1, game2, Ngame1, Ngame2 and $N_i$ that contributed the largest (in magnitude) five positive and five negative values to the theoretical bias (Equation~11) of the $\bfX^z_i$-adjusted estimator for one dataset simulated with high proportion interference. The columns $n_{Z=1}$ and $n_{Z=0}$ show the number of treated and untreated units that have the joint level. The theoretical bias of 1.083 reported in Table~\ref{tab:table1} is obtained by summing the bias contribution column over all 2384 distinct joint levels.}
 \label{tab:bias}
 \end{table}
 
 
 \subsection{Observed bias and RMSE of estimators}\label{sec:observedbias}
 
-We examine the observed bias and RMSE of two estimators of $\tau$ that assume SUTVA on simulated datasets. The naive unadjusted estimator is the simple contrast between treated and untreated units given by
+We examine the observed bias and RMSE of two estimators that assume SUTVA for the treatment effect~$\tau$ on simulated datasets. The naive unadjusted estimator computes the simple contrast between treated and untreated units given by
 \[
 \tau_\text{naive} = \bar{Y}_{Z=1} - \bar{Y}_{Z=0}
 \]
@@ -381,7 +370,7 @@ where $\bar{Y}_{\argdot}$ is the mean outcome across units with $\argdot$. The r
 \[
 \E[Y|Z_i,\Xind_i] = \beta_0 + \tau_\text{reg}Z_i + \beta_1X_i^\text{game1} + \beta_2X_i^\text{game2}
 \]
-where $\beta_j$ are the other parameters of the model. The observed bias for one simulated dataset is computed as the differences between estimates $\hat{\tau}_\text{naive}$ and $\hat{\tau}_\text{reg}$ and the expected value $\tau$, which is computed using the formula provided in Section~$\ref{sec:models}$. Table~\ref{tab:table2} (estimators 1--2) reports the mean computed biases and RMSE for the two estimators over 500 simulated datasets. In each simulation, the individual and neighbourhood treatments are re-generated, and the same simulated treatments are used for all estimators and interference levels (only the outcomes are re-generated between interference levels).
+where $\beta_j$ are the other parameters in the model. The observed bias is computed as the differences between estimates $\hat{\tau}_\text{naive}$ and $\hat{\tau}_\text{reg}$ and the expected value $\tau$, which is computed using the formula provided in Section~$\ref{sec:models}$. Table~\ref{tab:table2} (estimators 1--2) reports the mean computed biases and RMSE for the two estimators over 500 simulated datasets. The individual and neighbourhood treatments are re-generated for each simulated dataset, and the same 500 simulated datasets are used for all estimators. The same generated treatments are also used across interference levels, though the outcomes are re-generated between levels.
 \\
 
 \iffalse
@@ -391,7 +380,7 @@ where $\beta_j$ are the other parameters of the model. The observed bias for one
 \toprule
 & & \multicolumn{2}{c}{$\tau_\text{naive}$} & \multicolumn{2}{c}{$\tau_\text{reg}$} \\
 \cmidrule(r){3-4} \cmidrule(l){5-6}
-$G_i$ exposure type & Interference $(\beta)$ & Bias & RMSE & Bias & RMSE \\
+$G_i$ exposure type & Interference $(\gamma)$ & Bias & RMSE & Bias & RMSE \\
 \midrule
 \multirow{3}{*}{Proportion} & Low (4) & 2.915 & 2.916 & 0.414 & 0.418 \\
 & Medium (6) & 2.958 & 2.958 & 0.411 & 0.418 \\
@@ -414,7 +403,7 @@ $G_i$ exposure type & Interference $(\beta)$ & Bias & RMSE & Bias & RMSE \\
 & & & \multicolumn{2}{c}{$\tau_\text{reg}$} & \multicolumn{2}{c}{$\tau_\text{reg}$} & \multicolumn{2}{c}{$\tau_\text{sub}$} & \multicolumn{2}{c}{$\tau_\text{sub}$}  \\
 Interference & \multicolumn{2}{c}{$\tau_\text{naive}$} & \multicolumn{2}{c}{$\sim Z_i,\Xind_i$} & \multicolumn{2}{c}{$\sim Z_i,\bfX^z_i$} & \multicolumn{2}{c}{$\hat{\phi}(1;\Xind_i)$} & \multicolumn{2}{c}{$\hat{\phi}(1;\bfX^z_i)$} & \multicolumn{2}{c}{$\tau_\text{GPS}$} \\
 \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9} \cmidrule(lr){10-11} \cmidrule(lr){12-13}
-\multicolumn{1}{c}{$(\beta)$} & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE \\
+\multicolumn{1}{c}{$(\gamma)$} & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE & Bias & RMSE \\
 \midrule
 \multicolumn{13}{@{}l}{Proportion $G_i$} \\[0.25em]
 Low (4) & 2.915 & 2.916 & 0.414 & 0.418 & 0.417 & 0.420 & 0.036 & 0.158 & 0.002 & 0.085 & 0.003 & 0.055 \\
@@ -427,11 +416,11 @@ High (0.8) & 4.280 & 4.289 & 0.479 & 0.664 & 0.395 & 0.402 & 0.006 & 0.563 & -0.
 \bottomrule
 \end{tabular}
 }
-\caption{Mean bias and RMSE of estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) over 500 simulated datasets.}
+\caption{Mean bias and RMSE of estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ over 500 simulated datasets.}
 \label{tab:table2}
 \end{table}
 
-For both proportion and sum neighbourhood treatments, our findings are generally consistent with the results of \textcite{Forastiere:2021} reported in Table~2 (Unadjusted and Regression $\sim Z_i,\Xind_i$ estimators under Scenario~1) where a greater interference effect leads to a greater RMSE. The bias of the regression estimator is smaller than that of the unadjusted estimator but is still non-trivial, and is presumably due to the misspecification of the linear model.
+For both proportion and sum neighbourhood treatments, our findings are generally consistent with the results of \textcite{Forastiere:2021} reported in Table~2 (Unadjusted and Regression $\sim Z_i,\Xind_i$ estimators under Scenario~1) where a greater interference effect leads to a greater RMSE. The bias of the regression estimator is smaller than that of the unadjusted estimator, though it is still non-trivial and is presumably due to the misspecification of the linear model.
 
 
 
@@ -541,7 +530,7 @@ The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA is given by
 &= \frac{5}{8}(c_z+c_g) + \frac{3}{8}(c_z-c_g) \\
 &= c_z + \frac{1}{4}c_g
 \end{align*}
-where the first equality follows from Theorem~2.A and the unconfoundedness assumption, the second follows from model assumptions, and the third from iterated conditioning on the counterpart unit $X_{ik}$ of $X_{ij}$, $j\neq k$, and the fact that $Z_{ij}\condind G_{ij}|X_{i1},X_{i2}$.  The fourth equality follows from Bayes' theorem manipulation where
+where the first equality follows from Theorem 2.A, consistency and the unconfoundedness assumption. The second equality follows from model assumptions, and the third from iterated conditioning on the counterpart unit $X_{ik}$ of $X_{ij}$, $j\neq k$, and the fact that $Z_{ij}\condind G_{ij}|X_{i1},X_{i2}$. The fourth equality follows from Bayes' theorem manipulation where
 \begin{align*}
 \P(X_{ik}=x'|Z_{ij}=1,X_{ij}=x) &= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=x)} \\
 &= \frac{\P(Z_{ij}=1|X_{ij}=x,X_{ik}=x')\P(X_{ik}=x')}{\P(Z_{ij}=1|X_{ij}=X_{ik})P(X_{ik}=x) + \P(Z_{ij}=1|X_{ij}\neq X_{ik})P(X_{ik}=x')} \\
@@ -689,12 +678,12 @@ where the second equality follows from the model assumptions where $G_{ij}\condi
 
 \section{Additional details of simulation study} \label{apx:simulation}
 
-This appendix sections contains additional details from the simulation study in Sections~\ref{sec:simulation} and \ref{sec:extension}.
+This appendix section contains additional details from the simulation study in Sections~\ref{sec:simulation} and \ref{sec:extension}.
 
 \subsection{Twitch dataset details} \label{apx:twitch}
-\todo
 
-Distribution of features \verb|224| and \verb|569|:
+Table~\ref{tab:features} shows the distribution of features \verb|224| (game1) and \verb|569| (game2) in the Twitch dataset.
+\\
 
 \begin{table}[H]
 \centering
@@ -709,21 +698,40 @@ game1 & 0 & 1 & Total \\
 Total & 3416 (48\%) & 3710 (52\%) & 7216 \\
 \bottomrule
 \end{tabular}
+\caption{Distribution of game1 and game2 in the Twitch dataset.}
+\label{tab:features}
 \end{table}
 
-Distribution of degrees:
-\begin{verbatim}
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  1.000   2.000   5.000   9.914  11.000 720.000
-  
- SD = 22.19026
-\end{verbatim}
+Figure~\ref{fig:degree} shows the distribution of the log degree in the Twitch dataset. The degrees range from 1 to 720 with a median of 5, a mean of 9.9 and a standard deviation of 22.2. The first and third quartiles are 2 and 11, respectively.
 
-\subsection{Covariate balance} \label{apx:covbal}
+\begin{figure}[H]
+\centering
+\includegraphics{Images/degree_dist.png}
+\caption{Distribution of log degree in the Twitch dataset.}
+\label{fig:degree}
+\end{figure}
 
-Standardized differences \parencite{Austin:2011}: 
+\subsection{Simulated treatment details} \label{apx:covbal}
 
-In one simulated dataset:
+Figure~\ref{fig:neighbourhood} shows the distribution of proportion and log sum neighbourhood treatments in one simulated dataset. For proportion $G_i$, the mean and median are 0.59 and 0.63, respectively. The standard deviation is 0.30, and the first and third quartiles are 0.44 and 0.80, respectively. For sum $G_i$, the values range from 0 to 489 with a median of 3, a mean of 6.3, and a standard deviation of 14.7. The first and third quartiles are 1 and 7, respectively.
+
+\begin{figure}[H]
+\centering
+\includegraphics{Images/prop_g_dist.png}
+\includegraphics[trim={0.6cm 0 0 0},clip]{Images/sum_g_dist.png}
+\caption{Distribution of proportion and log sum neighbourhood treatments in one simulated dataset. Note that for the sum plot, 1 was added to every $G_i$ before taking the log due to the presence of zeros.}
+\label{fig:neighbourhood}
+\end{figure}
+
+Tables~\ref{tab:indcovbal} and \ref{tab:nbrcovbal} show the covariate balance across treatment arms in one simulated dataset. The standardized difference \parencite{Austin:2011} is computed as
+\[
+\text{Stand. Diff.} = \frac{\bar{X}_{Z=1} - \bar{X}_{Z=0}}{\sqrt{\frac{s^2_{Z=1}+s^2_{Z=0}}{2}}}
+\]
+for continuous variables (all but game1, game2, and $Z_i$) where $s^2$ is the variance for the corresponding group, and otherwise computed as
+\[
+\text{Stand. Diff.} = \frac{\bar{X}_{Z=1} - \bar{X}_{Z=0}}{\sqrt{\frac{\bar{X}_{Z=1}(1-\bar{X}_{Z=1})+\bar{X}_{Z=0}(1-\bar{X}_{Z=0})}{2}}}
+\]
+for binary variables. Some works in the literature interpret a standardized difference of less than 0.1 (10\%) as the covariate being balanced across treatment arms \parencite{Normand:2001}.
 
 \begin{table}[H]
 \centering
@@ -741,27 +749,12 @@ Sum $G_i$ & 6.979 & 5.365 & 0.106 \\
 \bottomrule
 \end{tabular}
 \caption{Covariate balance across individual treatment arms.}
+\label{tab:indcovbal}
 \end{table}
-
-Distribution of proportion $G_i$'s:
-\begin{verbatim}
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
- 0.0000  0.4444  0.6250  0.5896  0.7989  1.0000
- 
- SD = 0.298948
-\end{verbatim}
-
-Distribution of sum $G_i$'s:
-\begin{verbatim}
-   Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-  0.000   1.000   3.000   6.312   7.000 489.000 
-  
- SD = 14.73202
-\end{verbatim}
 
 \begin{table}[H]
 \centering
-\begin{tabular}{@{}lrrrrrr@{}}
+\begin{tabular}{@{}l@{\hskip 3em}rrr@{\hskip 3em}rrr@{}}
 \toprule
 Variable & $\bar{X}_{G\geq0.5}$ & $\bar{X}_{G<0.5}$ & Stand. Diff. & $\bar{X}_{G\geq3}$ & $\bar{X}_{G<3}$ & Stand. Diff. \\
 \midrule
@@ -773,11 +766,9 @@ Degree & 11.694 & 4.897 & 0.371 & 16.905 & 2.432 & 0.701 \\
 $Z_i$ & 0.608 & 0.526 & 0.167 & 0.677 & 0.490 & 0.385 \\
 \bottomrule
 \end{tabular}
-\caption{Covariate balance across dichotomized neighbourhood treatment arms.}
+\caption{Covariate balance across dichotomized neighbourhood treatment arms. For sum $G_i$, the median 3 was taken as the threshold.}
+\label{tab:nbrcovbal}
 \end{table}
-
-\todo: add histogram of log $N_i$ and $G_i$?
-
 
 \subsection{Number of subclasses investigation} \label{apx:subclass}
 
@@ -793,124 +784,3 @@ We conducted a small investigation into the effect of the number of subclasses o
 
 
 \end{document}
-
-
-
-The work by \textcite{Forastiere:2021} fits into the niche literature that looks at performing causal inference on observational network data in the presence of interference. \textcite{Forastiere:2021} formulate the network interference problem under the potential outcome framework (\todo cite), and propose a procedure to estimate causal treatment and spillover effects (as defined under their formulation) based on a joint propensity score that they define for network data. Their proposed propensity-adjusted estimators are unbiased under three assumptions, two of which form the Stable Unit Treatment on Neighbourhood Value Assumption (SUTNVA, a generalization of SUTVA that relaxes the no interference assumption to allow interference from directly connected nodes) and the third being an unconfoundedness assumption that says the treatment assignment mechanism is conditionally independent of the outcomes for some set of covariates. In addition, \textcite{Forastiere:2021} also derive the bias of SUTVA-assuming estimators when SUTVA does not hold or when the unconfoundedness assumption does not hold for the given set of covariates. The problem formulation, the proposed estimation procedure (based on a defined joint propensity score), and the derived bias of the naive estimator are the main contributions of \citeauthor{Forastiere:2021}.
-
-\item
-$\calN=\{1,2,3,4\}$, $\calE=\{(1,2),(3,4)\}$
-
-\item
-$\calY=\bbR$, $Z_i\in\{0,1\}$, $\calX=\{0,1\}$, $\calG_i=\{0,1\}$ for all $i$ (has treated friend), $V_g=\calN$ for all $g$
-
-\item
-If unconfoundedness assumption holds:
-\begin{align*}
-Y_i(z,g)|X_i &\sim N(\mu(z,g,X_i),1) \\
-\mu(z,g,X_i) &= 6X_i + 3z + g
-\end{align*}
-Make deterministic:
-\[
-Y_i(z,g)|X_i = \mu(z,g,X_i) = 6X_i+3z+g
-\]
-
-\item
-Corollary~1 holds:
-\[
-\textrm{logit}(P(Z_i=1)) = \log(0.5) + \log(4)X_i
-\]
-Make deterministic:
-
-\item
-Corollary~2 holds:
-\[
-\textrm{logit}(P(Z_i=1)) = \log(0.5) + \log(4)X_i + \log(2)\sum_{(i,j)\in\calE}X_j
-\]
-
-
-\item
-Consider network where all units are in pairs.
-
-$\calY=\bbR$, $Z_i\in\{0,1\}$, $\calX=\{0,1\}$, $\calG_i=\{0,1\}$ for all $i$ (has treated friend), $V_g=\calN$ for all $g$. $\P(X=1)=0.5$.
-
-Corollary~1 setting: $Z_i=\mathbbm{1}(X_i=1)$ ($Z_i$ and $G_i$ entirely independent).
-
-Corollary~2 setting: $Z_i=\sim X_i\otimes X_i'$ ($Z_i$ and $G_i$ not conditionally independent given $X_i$; only possible combinations are $(Z_i=1,G_i=1)$ and $(Z_i=0,G_i=0)$).
-
-Show unbiasedness/biasedness of naive estimator (not accounting for spillover) based on averaging
-
-
-\item
-Setting 1:
-\begin{align*}
-\tau(1) &= \mu(1,1) - \mu(0,1) \\
-\tau(0) &= \mu(1,0) - \mu(0,0) \\
-\tau &= 0.5(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)) \\
-\end{align*}
-\begin{align*}
-\tau_{X^*}^\text{obs} &= 0.5(\E[Y|Z=1,X=0] - \E[Y|Z=0,X=0] + \E[Y|Z=1,X=1] - \E[Y|Z=0,X=1]) \\
-&= \E[Y|Z=1] - \E[Y|Z=0] \\
-&= \E[Y|Z=1,G=1]P(G=1|Z=1) + \E[Y|Z=1,G=0]P(G=0|Z=1) - \E[Y|Z=0,G=1]P(G=1|Z=0) - \E[Y|Z=0,G=0]P(G=0|Z=0) \\
-&= 0.5(\E[Y|Z=1,G=1] + \E[Y|Z=1,G=0] - \E[Y|Z=0,G=1] - \E[Y|Z=0,G=0])
-\end{align*}
-
-\iffalse
-\begin{align*}
-\tau_{X}^\text{obs} &= \left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=0\right]\right)\P(X_{ij}=0) \\
-&\quad + \left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=1\right]\right)\P(X_{ij}=1) \\
-&= \E\left[Y_{ij}|Z_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0\right] \\
-&= \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=0\right]\right)\P(G_{ij}=0) \\
-&\quad + \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=1\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=1\right]\right)\P(G_{ij}=1) \\
-&= 0.5\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right)
-
-&= \frac{1}{2}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=0,G_{ij}=0\right]\P(G_{ij}=0) + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=0,G_{ij}=1\right]\P(G_{ij}=1)\right. \\
-&\quad - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=0,G_{ij}=0\right]\P(G_{ij}=0) - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=0,G_{ij}=1\right]\P(G_{ij}=1) \\
-&\quad + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=1,G_{ij}=0\right]\P(G_{ij}=0) + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=1,G_{ij}=1\right]\P(G_{ij}=1) \\
-&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=1,G_{ij}=0\right]\P(G_{ij}=0) - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=1,G_{ij}=1\right]\P(G_{ij}=1)\right) \\
-\end{align*}
-\fi
-
-\begin{itemize}
-
-\item
-Setting 2:
-\begin{align*}
-\tau(1) &= \mu(1,1) \\
-\tau(0) &= - \mu(0,0) \\
-\tau &= 0.5(\mu(1,1) - \mu(0,0))
-\end{align*}
-\begin{align*}
-\tau_{X^*}^\text{obs} &= 0.5(\E[Y|Z=1,X=0] - \E[Y|Z=0,X=0] + \E[Y|Z=1,X=1] - \E[Y|Z=0,X=1]) \\
-&= \E[Y|Z=1] - \E[Y|Z=0] \\
-&= \E[Y|Z=1,G=1]P(G=1|Z=1) + \E[Y|Z=1,G=0]P(G=0|Z=1) - \E[Y|Z=0,G=1]P(G=1|Z=0) - \E[Y|Z=0,G=0]P(G=0|Z=0) \\
-&= \E[Y|Z=1,G=1] - \E[Y|Z=0,G=0]
-\end{align*}
-\begin{align*}
-&\tau_{X^*}^\text{obs} \\
-&= (\E[Y(1,1)|X=1]P(G=1|Z=1,X=1) - \E[Y(0,1)|X=1]P(G=1|Z=0,X=1))P(X=1) \\
-& + (\E[Y(1,0)|X=1]P(G=0|Z=1,X=1) - \E[Y(0,0)|X=1]P(G=0|Z=0,X=1))P(X=1) \\
-& + (\E[Y(1,1)|X=0]P(G=1|Z=1,X=0) - \E[Y(0,1)|X=0]P(G=1|Z=0,X=0))P(X=0) \\
-& + (\E[Y(1,0)|X=0]P(G=0|Z=1,X=0) - \E[Y(0,0)|X=0]P(G=0|Z=0,X=0))P(X=0) \\
-&= 0.5\E[Y(1,1)|X=1] - 0.5\E[Y(0,0)|X=1] + 0.5\E[Y(1,1)|X=0] - 0.5\E[Y(0,0)|X=0] \\
-&= \E[Y(1,1)] - \E[Y(0,0)]
-\end{align*}
-\begin{align*}
-&\tau_{X^*}^\text{obs} - \tau \\
-&=(\E[Y|Z=1,G=1,X=1]-\E[Y|Z=1,G=0,X=1])(P(G=1|Z=1,X=1)-P(G=1|X=1))P(X=1) \\
-&- (\E[Y|Z=0,G=1,X=1]-\E[Y|Z=0,G=0,X=1])(P(G=1|Z=0,X=1)-P(G=1|X=1))P(X=1) \\
-&+ (\E[Y|Z=1,G=1,X=0]-\E[Y|Z=1,G=0,X=0])(P(G=1|Z=1,X=0)-P(G=1|X=0))P(X=0) \\
-&- (\E[Y|Z=0,G=1,X=0]-\E[Y|Z=0,G=0,X=0])(P(G=1|Z=0,X=0)-P(G=1|X=0))P(X=0) \\
-&= 0.25\E[Y|Z=1,G=1,X=1] - 0.25\E[Y|Z=0,G=0,X=1] + 0.25\E[Y|Z=1,G=1,X=0] - 0.25\E[Y|Z=0,G=0,X=0] \\
-&= 0.5\E[Y|Z=1,G=1] - 0.5\E[Y|Z=0,G=0]
-\end{align*}
-
-\end{itemize}
-
-
-
-\begin{align*}
-\delta(g;z) &= \mu(z,g,\Xind_i) - \mu(z,0,\Xind_i) = \beta g \\
-\Delta(z) &= \delta\E[G_i] \qquad \forall z\in\{0,1\} \\
-\mu(z,g,u) - \mu(z,0,u') &= 6(\mathbbm{1}[\phi(1;u)\geq 0.7]-\mathbbm{1}[\phi(1;u')\geq 0.7]) - 3z(\mathbbm{1}[\phi(1;u)\geq0.7] - \mathbbm{1}[\phi(1;u')\geq0.7]) + \beta g
-\end{align*}
