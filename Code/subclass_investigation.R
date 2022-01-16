@@ -1,17 +1,25 @@
-# Simulation parameters
-sum_exposure = T
+# This file contains the code for investigating the effect of number
+# of subclasses on the bias of the subclassification estimators (Appendix B.3).
+#
+# Configuration and simulation parameters below should be set before running.
+# ---------------------------------------------------------
 
+# Configuration parameters
+sum_exposure = F   # Use sum (T) or proportion (F) neighbourhood treatments
+
+# Simulation parameters
+sims = 25          # Number of datasets to simulate
+subclasses = 2:10  # Number of subclasses to consider
+
+# Interference effect
 if (sum_exposure)
 {
-  # Sum
+  # Sum neighbourhood treatment
   spillover = 0.8
 } else {
-  # Mean
+  # Proportion neighbourhood treatment
   spillover = 8
 }
-
-sims = 25
-subclasses = 2:10
 
 
 # Initialization
@@ -67,6 +75,7 @@ remove(dat_mat)
 remove(edge_csv)
 
 
+
 # Simulation
 # ---------------------------------------------------------
 
@@ -74,7 +83,6 @@ sub_ind_err = matrix(0, sims, length(subclasses))
 sub_all_err = matrix(0, sims, length(subclasses))
 sub_gps_err = matrix(0, sims, length(subclasses))
 
-system.time(
 for (n in 1:sims)
 {
   # Use same network across methods in each simulation
@@ -94,7 +102,7 @@ for (n in 1:sims)
   # Simulate outcomes
   sim$Y = rnorm(nrow(sim), outcome_mean(sim$Z,sim$G,sim$game1,sim$game2,b))
   
-  # Compute expected treatment effect for each node
+  # Compute expected treatment effect for each unit
   tau = mean(outcome_mean(1,sim$G,sim$game1,sim$game2,spillover) -
                outcome_mean(0,sim$G,sim$game1,sim$game2,spillover))
   
@@ -106,18 +114,18 @@ for (n in 1:sims)
     sub_ind_err[n,i] = subcl_est(sim, subcl_ind(sim,j)) - tau
     sub_all_err[n,i] = subcl_est(sim, subcl_all(sim,j)) - tau
     
-    # Compute error of Forastiere (2021) proposed estimator
+    # Compute error of individual+GPS estimator (Forastiere, 2021)
     sub_gps_err[n,i] = subcl_gps(sim,j,sum_exposure=sum_exposure) - tau
   }
 }
-)
 
-# Compute bias and RMSE
+# Compute RMSE
 res_tab = data.frame(subclass=subclasses,
-                     estimator=rep(c("Ind","All","GPS"),each=length(subclasses)),
-                     bias=c(colMeans(sub_ind_err),colMeans(sub_all_err),colMeans(sub_gps_err)),
-                     rmse=c(sqrt(colMeans(sub_ind_err^2)),sqrt(colMeans(sub_all_err^2)),sqrt(colMeans(sub_gps_err^2))))
-
+                     estimator=rep(c("Ind","All","GPS"),
+                                   each=length(subclasses)),
+                     rmse=c(sqrt(colMeans(sub_ind_err^2)),
+                            sqrt(colMeans(sub_all_err^2)),
+                            sqrt(colMeans(sub_gps_err^2))))
 res_tab %>%
   ggplot(aes()) +
   geom_line(aes(x=subclass, y=rmse, color=estimator), size=1) +

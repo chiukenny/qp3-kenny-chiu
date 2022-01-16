@@ -1,4 +1,10 @@
+# This file contains self-defined functions that are used
+# in the simulation study.
+# ---------------------------------------------------------
+
 library(MASS)
+
+
 
 # Helper functions
 # ---------------------------------------------------------
@@ -6,21 +12,26 @@ library(MASS)
 # Compute expit
 expit = function(x) {1 / (1+exp(-x))}
 
-# Compute individual propensity score (Scenario 1)
-ind_prop = function(x1, x2)
-{
-  return(expit(-3 + 3*x1 + 4*x2))
-}
+# Compute individual propensity score
+ind_prop = function(x1, x2) {expit(-3 + 3*x1 + 4*x2)}
 
-# Compute outcome mean (model for main effects simulations)
+# Compute expected outcome based on model
 outcome_mean = function(z, g, x1, x2, gamma)
 {
   prop = ind_prop(x1, x2)
   return(5 + 6*(prop>=0.7) + 10*z - 3*z*(prop>=0.7) + gamma*g)
 }
 
-# TODO
-# Compute means and standardized difference
+# Predicts negative binomial responses given fitted model and new data
+predict_nb = function(fit, dat)
+{
+  if (is.null(fit)) {return(rep(0,nrow(dat)))}
+  return(dnbinom(dat$N,
+                 mu=predict(fit,newdata=dat,type="response"),
+                 size=dat$G))
+}
+
+# Compute means and standardized difference of two groups
 std_diff = function(v1, v0, binary=T)
 {
   mean1 = mean(v1)
@@ -31,7 +42,7 @@ std_diff = function(v1, v0, binary=T)
   } else {
     sdiff = (mean1-mean0) / sqrt((var(v1)+var(v0))/2)
   }
-  return(c(mean1,mean0,sdiff))
+  return(c(mean1, mean0, sdiff))
 }
 
 
@@ -39,12 +50,12 @@ std_diff = function(v1, v0, binary=T)
 # Bias functions
 # ---------------------------------------------------------
 
-# Variable names used in bias functions:
+# Variable naming:
 #   - i_X: indices of nodes that satisfy X
 #   - n_X: number of nodes that satisfy X
 #   - PY_X: (proportional) probability of Y given X
 
-# Compute bias (Theorem 2B, eqn.12)
+# Compute bias due to unmeasured confounders (Theorem 2B, eqn.12)
 bias_T2B = function(dat, gamma)
 {
   n = nrow(dat)
@@ -175,17 +186,13 @@ bias_C2N = function(dat, gamma)
   return(bias/nrow(dat))
 }
 
-# TODO
+# Compute bias contribution for each level of covariates (Corollary 2, eqn.11)
 bias_C2N_contr = function(dat, gamma)
 {
-  classes = data.frame(game1=integer(),
-                       game2=integer(),
-                       Ngame1=double(),
-                       Ngame2=double(),
-                       N=integer(),
-                       G=double(),
-                       nZ1=integer(),
-                       nZ0=integer(),
+  classes = data.frame(game1=integer(), game2=integer(),
+                       Ngame1=double(), Ngame2=double(),
+                       N=integer(),     G=double(),
+                       nZ1=integer(),   nZ0=integer(),
                        bias=double())
   # Subset by (game1, game2, N, Ngame1, Ngame2)
   for (x1 in 0:1)
@@ -213,7 +220,6 @@ bias_C2N_contr = function(dat, gamma)
             
             for (g in unique(dat_xxN$G[i_xxnnN]))
             {
-              #if (g==0) {next}
               i_gxxN = dat_xxN$G==g
               i_1gxxnnN = i_1xxnnN & i_gxxN
               i_0gxxnnN = i_0xxnnN & i_gxxN
@@ -224,8 +230,9 @@ bias_C2N_contr = function(dat, gamma)
               if (n_0xxnnN>0) {p = p-sum(i_0gxxnnN)/n_0xxnnN}
               
               # Take g'=0
-              classes = rbind(classes, c(x1,x2,n1,n2,N,g,sum(i_1gxxnnN),sum(i_0gxxnnN),
-                                         (outcome_mean(0,g,x1,x2,gamma)-outcome_mean(0,0,x1,x2,gamma))*p*n_xxnnN/nrow(dat)))
+              classes = rbind(classes,
+                              c(x1,x2,n1,n2,N,g,sum(i_1gxxnnN),sum(i_0gxxnnN),
+                                (outcome_mean(0,g,x1,x2,gamma)-outcome_mean(0,0,x1,x2,gamma))*p*n_xxnnN/nrow(dat)))
             }
           }
         }
@@ -241,12 +248,14 @@ bias_C2N_contr = function(dat, gamma)
 # Subclassification functions
 # ---------------------------------------------------------
 
-# Estimates treatment effect by classifying units into j roughly
-# equal sized subclasses based on individual covariates
+# Classifies units into j roughly equal sized subclasses
+# based on individual covariates
 subcl_ind = function(dat, j)
 {
   if (j > 1)
   {
+    # Estimate propensity score via logistic regression
+    # and subclassify according to propensity score
     classes = cut(glm(Z~game1+game2,data=dat,family=binomial)$fitted.values,
                   j, labels=F)
   } else {
@@ -255,12 +264,14 @@ subcl_ind = function(dat, j)
   return(classes)
 }
 
-# Estimates treatment effect by classifying units into j roughly
-# equal sized subclasses based on all covariates
+# Classifies units into j roughly equal sized subclasses
+# based on all covariates
 subcl_all = function(dat, j)
 {
   if (j > 1)
   {
+    # Estimate propensity score via logistic regression
+    # and subclassify according to propensity score
     classes = cut(glm(Z~game1+game2+Ngame1+Ngame2+N,
                       data=dat,family=binomial)$fitted.values,
                   j, labels=F)
@@ -270,12 +281,14 @@ subcl_all = function(dat, j)
   return(classes)
 }
 
+# Estimates treatment effect based on given subclasses
 subcl_est = function(dat, classes)
 {
   i_z = dat$Z==1
   tau_est = 0
   for (c in unique(classes))
   {
+    # Compute contrast within each subclass
     i_c = classes==c
     tau_c = 0
     Y_c1 = mean(dat$Y[i_c & i_z])
@@ -287,33 +300,23 @@ subcl_est = function(dat, classes)
   return(tau_est/nrow(dat))
 }
 
-predict_nb = function(fit, dat)
-{
-  if (is.null(fit)) {return(rep(0,nrow(dat)))}
-  return(dnbinom(dat$N,
-                 mu=predict(fit,newdata=dat,type="response"),
-                 size=dat$G))
-}
-
+# Estimates treatment effect based on individual and neighbourhood
+# propensity scores (Forastiere, 2021)
 subcl_gps = function(dat, j, sum_exposure=F)
 {
-  # Subclassification based on individual propensity
+  # Subclassify units based on individual propensity
   ind_classes = subcl_all(dat, j)
   
   n = nrow(dat)
-  
   obs_g = sort(unique(dat$G))
   n_g = length(obs_g)
   tau_g = rep(0, n_g)
   
+  # If sum neighbourhood treatments, compute size of V_g's
   if (sum_exposure)
   {
-    # Compute size of V_g's
     v_g = rep(0, n_g)
-    for (i in 1:n_g)
-    {
-      v_g[i] = sum(dat$N >= obs_g[i])
-    }
+    for (i in 1:n_g) {v_g[i] = sum(dat$N>=obs_g[i])}
   }
   
   for (c in unique(ind_classes))
@@ -323,7 +326,7 @@ subcl_gps = function(dat, j, sum_exposure=F)
     
     if (sum_exposure)
     {
-      # Fit a negative binomial model for neighbourhood treatment
+      # Fit a negative binomial model on neighbourhood treatment
       # Note: may throw error if there are too few units in subclass
       #       These subclasses typically correspond to units with
       #       large N. May be reasonable to assume any estimated
@@ -339,13 +342,13 @@ subcl_gps = function(dat, j, sum_exposure=F)
         g = obs_g[i]
         i_g = dat_c$N >= g
         n_cg = sum(i_g)
-        if (n_cg==0) {next}
+        if (n_cg==0) {break} # Remaining G values impossible for units in subclass
         dat_c$G = g
         
+        # Estimate neighbourhood propensity scores and outcomes
         dat_c$Z = 1
         dat_c$nbr_prop[i_g] = predict_nb(prop_fit,dat_c[i_g,])
         Y_c1g = mean(predict(lin_fit,newdata=dat_c[i_g,]))
-        
         dat_c$Z = 0
         dat_c$nbr_prop[i_g] = predict_nb(prop_fit,dat_c[i_g,])
         Y_c0g = mean(predict(lin_fit,newdata=dat_c[i_g,]))
@@ -353,8 +356,8 @@ subcl_gps = function(dat, j, sum_exposure=F)
         tau_g[i] = tau_g[i] + (Y_c1g-Y_c0g)*n_cg/v_g[i]
       }
     } else {
+      # Fit a logistic model on neighbourhood treatment
       # Note: assumes V_g = all units in subclass
-      # Fit a logistic model for neighbourhood treatment
       prop_fit = glm(G~Z+Ngame1+Ngame2+N, data=dat_c, family=binomial, weights=N)
       dat_c$nbr_prop = prop_fit$fitted.values
       lin_fit = lm(Y~Z+G+nbr_prop, data=dat_c)
@@ -364,10 +367,10 @@ subcl_gps = function(dat, j, sum_exposure=F)
         g = obs_g[i]
         dat_c$G = g
         
+        # Estimate neighbourhood propensity scores and outcomes
         dat_c$Z = 1
         dat_c$nbr_prop = predict(prop_fit, newdata=dat_c)
         Y_c1g = mean(predict(lin_fit,newdata=dat_c))
-        
         dat_c$Z = 0
         dat_c$nbr_prop = predict(prop_fit, newdata=dat_c)
         Y_c0g = mean(predict(lin_fit,newdata=dat_c))

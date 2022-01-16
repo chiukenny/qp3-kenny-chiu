@@ -1,16 +1,27 @@
+# This file contains the main code for running the simulation study
+# in Sections 5 and 6 of the report.
+#
+# Configuration and simulation parameters below should be set before running.
+# ---------------------------------------------------------
+
+# Configuration parameters
+sum_exposure = F  # Use sum (T) or proportion (F) neighbourhood treatments
+
 # Simulation parameters
-sum_exposure = F
+sims = 500        # Number of datasets to simulate
+save_results = F  # Save results for Tables 1, 2 and 3 in report
+run_appendix = F  # Run code for the appendix
+
+# Interference effects (low, med, high)
 if (sum_exposure)
 {
-  # Sum
+  # Sum neighbourhood treatment
   spillover = c(0.4, 0.6, 0.8)
 } else {
-  # Mean
+  # Proportion neighbourhood treatment
   spillover = c(4, 6, 8)
 }
 
-sims = 500
-save_results = F
 
 
 # Initialization
@@ -66,26 +77,24 @@ remove(dat_mat)
 remove(edge_csv)
 
 # Check dataset statistics
-# table(dat$game1, dat$game2)
-# summary(dat$N)
-# ggplot(dat, aes(x=log(N))) +
-#   geom_histogram(bins=15, color="darkblue", fill="lightblue") +
-#   scale_y_continuous(limits=c(0,1200), expand=c(0,0)) +
-#   labs(x="log(Degree)", y="Count") + 
-#   theme_bw()
+if (run_appendix)
+{
+  table(dat$game1, dat$game2)
+  summary(dat$N)
+  ggplot(dat, aes(x=log(N))) +
+    geom_histogram(bins=15, color="darkblue", fill="lightblue") +
+    scale_y_continuous(limits=c(0,1200), expand=c(0,0)) +
+    labs(x="log(Degree)", y="Count") +
+    theme_bw()
+}
 
 
 
 # Simulation: Table 1 - Scenario 1
 # ---------------------------------------------------------
 
-res_tab1 = data.frame(gamma=integer(),
-                      bias_none=double(),
-                      bias_ind=double(),
-                      bias_all=double())
-
-sim = dat
 # Simulate individual and neighbourhood treatments Z and G
+sim = dat
 sim$Z = rbernoulli(nrow(sim), ind_prop(sim$game1, sim$game2))*1
 if (sum_exposure)
 {
@@ -96,48 +105,57 @@ if (sum_exposure)
   sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat)
 }
 
-# Check simulation statistics
-summary(sim$G)
-if (sum_exposure)
+# Check simulations
+if (run_appendix)
 {
-  ggplot(sim, aes(x=log(G+1))) +
-    geom_histogram(bins=15, color="darkblue", fill="lightblue") +
-    scale_y_continuous(limits=c(0,2650), expand=c(0,0)) +
-    labs(x="log(Sum G + 1)", y="Count") + 
-    theme_bw()
-} else {
-  ggplot(sim, aes(x=G)) +
-    geom_histogram(bins=15, color="darkblue", fill="lightblue") +
-    scale_y_continuous(limits=c(0,1275), expand=c(0,0)) +
-    labs(x="Proportion G", y="Count") + 
-    theme_bw()
+  # Check simulation statistics
+  summary(sim$G)
+  if (sum_exposure)
+  {
+    ggplot(sim, aes(x=log(G+1))) +
+      geom_histogram(bins=15, color="darkblue", fill="lightblue") +
+      scale_y_continuous(limits=c(0,2650), expand=c(0,0)) +
+      labs(x="log(Sum G + 1)", y="Count") + 
+      theme_bw()
+  } else {
+    ggplot(sim, aes(x=G)) +
+      geom_histogram(bins=15, color="darkblue", fill="lightblue") +
+      scale_y_continuous(limits=c(0,1275), expand=c(0,0)) +
+      labs(x="Proportion G", y="Count") + 
+      theme_bw()
+  }
+  # Check covariate balance: individual treatment arms
+  i_z1 = sim$Z==1
+  i_z0 = !i_z1
+  std_diff(sim$game1[i_z1], sim$game1[i_z0])
+  std_diff(sim$game2[i_z1], sim$game2[i_z0])
+  std_diff(sim$Ngame1[i_z1], sim$Ngame1[i_z0], F)
+  std_diff(sim$Ngame2[i_z1], sim$Ngame2[i_z0], F)
+  std_diff(sim$N[i_z1], sim$N[i_z0], F)
+  std_diff(sim$G[i_z1], sim$G[i_z0], F)
+  # Check covariate balance: neighbourhood treatment arms
+  if (sum_exposure)
+  {
+    # Median 3 used as threshold
+    i_gg = sim$G>=3
+    i_gl = sim$G<3
+  } else {
+    i_gg = sim$G>=0.5
+    i_gl = sim$G<0.5
+  }
+  std_diff(sim$game1[i_gg], sim$game1[i_gl])
+  std_diff(sim$game2[i_gg], sim$game2[i_gl])
+  std_diff(sim$Ngame1[i_gg], sim$Ngame1[i_gl], F)
+  std_diff(sim$Ngame2[i_gg], sim$Ngame2[i_gl], F)
+  std_diff(sim$N[i_gg], sim$N[i_gl], F)
+  std_diff(sim$Z[i_gg], sim$Z[i_gl])
 }
 
-# Check covariate balance
-# i_z1 = sim$Z==1
-# i_z0 = !i_z1
-# std_diff(sim$game1[i_z1], sim$game1[i_z0])
-# std_diff(sim$game2[i_z1], sim$game2[i_z0])
-# std_diff(sim$Ngame1[i_z1], sim$Ngame1[i_z0], F)
-# std_diff(sim$Ngame2[i_z1], sim$Ngame2[i_z0], F)
-# std_diff(sim$N[i_z1], sim$N[i_z0], F)
-# std_diff(sim$G[i_z1], sim$G[i_z0], F)
-# if (sum_exposure) {
-#   # Median 3 used as threshold
-#   i_gg = sim$G>=3
-#   i_gl = sim$G<3
-# } else {
-#   i_gg = sim$G>=0.5
-#   i_gl = sim$G<0.5
-# }
-# std_diff(sim$game1[i_gg], sim$game1[i_gl])
-# std_diff(sim$game2[i_gg], sim$game2[i_gl])
-# std_diff(sim$Ngame1[i_gg], sim$Ngame1[i_gl], F)
-# std_diff(sim$Ngame2[i_gg], sim$Ngame2[i_gl], F)
-# std_diff(sim$N[i_gg], sim$N[i_gl], F)
-# std_diff(sim$Z[i_gg], sim$Z[i_gl])
-
 # Compute theoretical biases
+res_tab1 = data.frame(gamma=integer(),
+                      bias_none=double(),
+                      bias_ind=double(),
+                      bias_all=double())
 for (b in spillover)
 {
   # Bias when not adjusting for covariates
@@ -164,15 +182,19 @@ if (save_results)
   }
 }
 
-# Investigation of unexpectedly large biases
-# bias_contr = bias_C2N_contr(sim, 8)
-# bias_contr = bias_contr %>%
-#   group_by(game1,game2,Ngame1,Ngame2,N) %>%
-#   summarize(nZ1=sum(nZ1),
-#             nZ0=sum(nZ0),
-#             bias=sum(bias))
-# head(arrange(bias_contr,desc(bias)), 5)
-# head(arrange(bias_contr,bias), 5)
+# Investigate unexpectedly large biases
+bias_contr = bias_C2N_contr(sim,8) %>%
+  group_by(game1,game2,Ngame1,Ngame2,N) %>%
+  summarize(nZ1=sum(nZ1),
+            nZ0=sum(nZ0),
+            bias=sum(bias))
+if (save_results & !sum_exposure)
+{
+  write.table(head(arrange(bias_contr,desc(bias)),5),
+              "Results/table2_prop.txt", quote=F, row.names=F)
+  write.table(head(arrange(bias_contr,bias),5), "Results/table2_prop.txt",
+              quote=F, row.names=F, col.names=F, append=T)
+}
 
 
 
@@ -186,7 +208,6 @@ sub_ind_err = matrix(0, sims, length(spillover))
 sub_all_err = matrix(0, sims, length(spillover))
 sub_gps_err = matrix(0, sims, length(spillover))
 
-#system.time(
 for (n in 1:sims)
 {
   # Use same network across methods in each simulation
@@ -196,10 +217,8 @@ for (n in 1:sims)
   sim$Z = rbernoulli(nrow(sim), ind_prop(sim$game1, sim$game2))*1
   if (sum_exposure)
   {
-    # Sum
     sim$G = as.vector(dat_edMat %*% sim$Z)
   } else {
-    # Mean
     sim$G = as.vector(dat_edMat %*% sim$Z) / rowSums(dat_edMat)
   }
   
@@ -210,7 +229,7 @@ for (n in 1:sims)
     # Simulate outcomes
     sim$Y = rnorm(nrow(sim), outcome_mean(sim$Z,sim$G,sim$game1,sim$game2,b))
     
-    # Compute expected treatment effect for each node
+    # Compute expected treatment effect for each unit
     tau = mean(outcome_mean(1,sim$G,sim$game1,sim$game2,b) -
                  outcome_mean(0,sim$G,sim$game1,sim$game2,b))
     
@@ -226,14 +245,13 @@ for (n in 1:sims)
     sub_ind_err[n,j] = subcl_est(sim, subcl_ind(sim,4)) - tau
     sub_all_err[n,j] = subcl_est(sim, subcl_all(sim,5)) - tau
     
-    # Compute error of Forastiere (2021) proposed estimator
+    # Compute error of individual+GPS estimator (Forastiere, 2021)
     sub_gps_err[n,j] = subcl_gps(sim,5,sum_exposure=sum_exposure) - tau
   }
 }
-#)
 
 # Compute bias and RMSE
-res_tab2 = data.frame(gamma = spillover,
+res_tab3 = data.frame(gamma = spillover,
                       bias_naive = colMeans(naive_err),
                       rmse_naive = sqrt(colMeans(naive_err^2)),
                       bias_reg = colMeans(reg_err),
@@ -252,8 +270,8 @@ if (save_results)
 {
   if (sum_exposure)
   {
-    write.table(res_tab2, "Results/table2_sum.txt", quote=F, row.names=F)
+    write.table(res_tab3, "Results/table3_sum.txt", quote=F, row.names=F)
   } else {
-    write.table(res_tab2, "Results/table2_prop.txt", quote=F, row.names=F)
+    write.table(res_tab3, "Results/table3_prop.txt", quote=F, row.names=F)
   }
 }

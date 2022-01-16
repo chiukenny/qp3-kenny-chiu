@@ -17,7 +17,7 @@
 \vspace{2em}
 
 \begin{abstract}
-\textcite{Forastiere:2021} examine the problem of estimating causal treatment effects from observational network data in the presence of interference. We review their proposed method and discuss its place in the literature. We present simple examples that illustrate the relevance of their theoretical results. We replicate part of their simulation study on a different dataset (the Twitch social network dataset), obtain findings mostly consistent with theirs, and discuss the possible reasons for the few inconsistent results. We also provide a critique of their work.
+\textcite{Forastiere:2021} examine the problem of estimating causal treatment effects from observational network data in the presence of interference. We review their proposed method and discuss its place in the literature. We present simple examples that illustrate the relevance of their theoretical results. We replicate part of their simulation study on a different dataset (the Twitch Social Networks dataset), obtain findings mostly consistent with theirs, and discuss the possible reasons for the few inconsistent results. We also provide a critique of their work.
 \end{abstract}
 
 \vspace{2em}
@@ -41,7 +41,7 @@ Let $G_i=g_i(\ZNi)\in\calG_i$ be some known and well-specified summary~$g_i$ of 
 Depending on the size of a unit's neighbourhood, the space $\calG_i$ may differ between units. Let $V_g=\{i\in\calN:g\in\calG_i\}$ denote the subset containing $v_g$ units that have $g$ as a possible value for the neighbourhood treatment. Let $\bfX_i\in\calX$ be a vector of covariates for unit~$i$ that partitions into individual-level characteristics $\Xind_i\in\calX^\text{ind}$ and neighbourhood-level/aggregated individual-level characteristics $\Xneigh_i\in\calX^\text{neigh}$.
 \\
 
-We use $\E[\argdot]$ and $\P(\argdot)$ to denote expectations and probabilities, respectively. Note that in the context of a given network, these quantities should be viewed from the ``super-population'' perspective \parencite{Imbens:2015} and are defined in terms of averages over the finite network. Otherwise, expectations and probabilities are interpreted the conventional way. We leave it up to the context to distinguish which interpretation is used throughout this report.
+We use $\E[\argdot]$ and $\P(\argdot)$ to denote expectations and probabilities, respectively. In the context of an observed network, these quantities should be viewed from the ``super-population'' perspective \parencite{Imbens:2015} and are defined in terms of averages over the finite network. Otherwise, expectations and probabilities are interpreted the usual way. We leave it up to the context to distinguish which interpretation is used throughout this report.
 
 
 \section{Review of proposed methodology} \label{sec:summary}
@@ -61,7 +61,7 @@ In the randomized controlled trial literature, these issues can generally be dea
 \\
 
 %Their procedure for estimating effects is based on matching units into sets based on covariate values, compute the effect contrast within each matched set, and estimate the effect by the (weighted) average of the contrasts across sets. However, matching may be difficult when the space of possible covariate values is large or if there are many covariates.
-The procedure proposed by \textcite{Forastiere:2021} involves partitioning units into subclasses according to a joint propensity score~$\psi(z;g;x)$ that they also define. The joint propensity score factorizes into a neighbourhood propensity score~$\lambda(g;z;\bfx^g)$ (probability of being exposed to neighbourhood treatment $g$ given individual treatment $z$ and relevant covariates $\bfx^g$) and an individual propensity score~$\phi(z;\bfx^z)$ (probability of being assigned treatment $z$ given relevant covariates $\bfx^z$), which they exploit in order to avoid adjusting for all covariates at once and needing to work in a higher-dimensional space. Note that $\bfX^g$ and $\bfX^z$ do not necessarily correspond to $\Xneigh$ and $\Xind$, respectively, as they may not be disjoint. The steps for their propensity score-based estimation procedure are as follows:
+The procedure proposed by \textcite{Forastiere:2021} involves partitioning units into subclasses according to a joint propensity score~$\psi(z;g;x)$ that they also define. The joint propensity score factorizes into a neighbourhood propensity score~$\lambda(g;z;\bfx^g)$ (probability of being exposed to neighbourhood treatment $g$ given individual treatment $z$ and relevant covariates $\bfx^g$) and an individual propensity score~$\phi(z;\bfx^z)$ (probability of being assigned treatment $z$ given relevant covariates $\bfx^z$), which they exploit in order to break down the problem into subproblems with lower-dimensional spaces that are easier to work with. Note that $\bfX^g$ and $\bfX^z$ do not necessarily correspond to $\Xneigh$ and $\Xind$, respectively, as they may not be disjoint. The steps for their propensity score-based estimation procedure are as follows:
 \begin{enumerate}
 
 \item
@@ -103,7 +103,7 @@ Estimate the dose-response function by averaging over the estimated potential ou
 \end{enumerate}
 \textcite{Forastiere:2021} show that their estimators for the treatment and spillover effects are unbiased under three assumptions, the first two of which form the Stable Unit Treatment on Neighbourhood Value Assumption (SUTNVA, a generalization of SUTVA that relaxes the no interference assumption to allow interference of immediate neighbours) and the third being an unconfoundedness assumption that says the treatment assignment mechanism is conditionally independent of the outcomes for the given set of covariates.
 
-\subsection{In context of the literature}
+\subsection{Relevant literature}
 
 The body of literature that involves estimating causal treatment effects from observational data under general forms of interference is still relatively new. We summarize the common approaches in this literature and discuss how the work by \textcite{Forastiere:2021} fits in. We also briefly highlight other work that examine similar problems under different but closely related contexts.
 
@@ -129,7 +129,7 @@ A large body of the literature examine the inference problem under the assumptio
 \\
 
 A small number of works consider more specific and niche contexts. For example, \textcite{Toulis:2018} explore the problem of treatment entanglement (where treatment assignments are assumed to satisfy certain restrictions) and proposes a propensity score-based estimator. \textcite{Zigler:2021} focus on the problem of bipartite causal inference with interference (where the treatment is applied to one unit and the outcome is measured on another) and propose a IPW estimator for this setting.
-%Outside of the observational setting, there are many works that study causal inference in randomized studies with potential interference. These works generally examine study designs that allow for treatment effect estimation in the presence of interference under varying contexts \parencite[e.g.,][]{Saveski:2017,Jagadeesan:2020,Imai:2021,Doudchenko:2020}
+
 
 
 \section{Potential bias of naive estimator}\label{sec:example}
@@ -204,19 +204,7 @@ The derivation for the overall treatment effect $\tau$, the estimator $\tau_{X}^
 
 \subsection{Setting~2: bias due to unmeasured confounders}
 
-In our second setting,
-\iffalse
-suppose that the covariates are jointly generated according to the distribution
-\[
-\P(X_{i1}=x_1,X_{i2}=x_2) =
-\begin{cases}
-\frac{3}{8} & \text{for }x_1=x_2 \\
-\frac{1}{8} & \text{for }x_1\neq x_2
-\end{cases} \;,
-\]
-i.e., a homophily situation where the units are more likely to be paired with another unit that has similar characteristics. Further
-\fi
-suppose that the treatment assignment mechanism follows
+In our second setting, suppose that the treatment assignment mechanism follows
 \[
 \P(Z_{ij}=1|X_{ij}) = \frac{1}{4} + \frac{1}{2}X_{ij} \;.
 \]
@@ -246,36 +234,11 @@ It then follows that the bias is $\tau_{X}^\text{obs} - \tau = \frac{1}{2}c_u$, 
 
 The derivation for the overall treatment effect $\tau$, the estimator $\tau_{X}^\text{obs}$ and the bias $\tau_{X}^\text{obs}$ can be found in Appendix~\ref{apx:setting2}.
 
-\iffalse
-The overall treatment effect $\tau$ in this setting is given by
-\[
-\tau = \frac{1}{4}\sum_{g,x\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,G_{ij}=g,X_{ij}=x\right] - \E\left[Y_{ij}|Z_{ij}=0,G_{ij}=g,X_{ij}=x\right]\right) \;.
-\]
-Using Theorem~2.A, it can be shown that the naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA estimates the same quantity
-\[
-\tau_{X}^\text{obs} = \frac{1}{4}\sum_{x,g\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=g\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=g\right]\right) \;.
-\]
-It then follows from the above that $\tau_{X}^\text{obs}-\tau = 0$.
-\fi
-\iffalse
-and Assumptions~1 and 3 that
-\begin{align*}
-&\tau_{X}^\text{obs}-\tau \\
-&= \tau_{X}^\text{obs} - \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \\
-&= \tau_{X}^\text{obs} - \frac{1}{2}\sum_{x\in\{0,1\}}\left(\E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=0\right] + \E\left[Y_{ij}|Z_{ij}=1,X_{ij}=x,G_{ij}=1\right]\right. \\
-&\quad - \left.\E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=0\right] - \E\left[Y_{ij}|Z_{ij}=0,X_{ij}=x,G_{ij}=1\right]\right)\P(X_{ij}=x) \\
-&= 0 \;.
-\end{align*}
-\fi
-\iffalse
-Therefore, an unbiased estimator of the naive effect estimator is also unbiased for the treatment effect when the individual and neighbourhood treatments are conditionally independent given the set of covariates.
-\\
-\fi
 
 
 \section{Reproducing simulation study findings} \label{sec:simulation}
 
-In this section, we aim to reproduce the general findings of the simulation study conducted by \textcite{Forastiere:2021}. Note that the complete Add Health dataset that \citeauthor{Forastiere:2021} work with is publicly inaccessible, and so we instead work with the Twitch Social Network dataset \parencite{Rozemberczki:2021} that is comparable in size. Twitch is an American live streaming website that focuses on video game streaming. The full dataset contains several networks of streamers and their mutual friendship relationships that were collected in May~2018. We consider a hypothetical study where we are interested in understanding the effect of streamer self-promotions and advertising (the individual treatment) on the number of subscribers (users who follow a particular streamer; the outcome). It is reasonable to assume that there is interference at play where promoting one's self would inadvertently promote the streamer's network due to the site's recommendation algorithms that suggest similar streams to a viewer.
+In this section, we aim to reproduce the general findings of the simulation study conducted by \textcite{Forastiere:2021}. Note that the complete Add Health dataset that \citeauthor{Forastiere:2021} work with is publicly inaccessible, and so we instead work with the Twitch Social Networks dataset \parencite{Rozemberczki:2021} that is comparable in size. Twitch is an American live streaming website that focuses on video game streaming. The full dataset contains several networks of streamers and their mutual friendship relationships that were collected in May~2018. We consider a hypothetical study where we are interested in understanding the effect of streamer self-promotions and advertising (the individual treatment) on the number of subscribers (users who follow a particular streamer; the outcome). It is reasonable to assume that there is interference at play where promoting one's self would inadvertently promote the streamer's network due to the site's recommendation algorithms that suggest similar streams to a viewer.
 \\
 
 We consider only the EN subnetwork of the full Twitch dataset, which includes a sample of streamers who stream in English. The network consists of 7126 streamers and 35,324 mutual friendships. A total of 3169 binary features (e.g., games liked and played, location, streaming habits, etc.) are collected from each streamer. However, the individual features are unnamed. For the purposes of this study, we consider only feature \verb|224| and feature \verb|569| due to their distribution (the second and third most represented features in the dataset, respectively). We pretend these features are covariates representing whether a streamer plays a particular \verb|game1| and \verb|game2|. We note that one major difference between the Twitch dataset and the Add Health dataset is that the degree of each unit is limited to at most ten in the Add Health dataset while there is no contextual limit in the Twitch dataset. More details about the Twitch dataset are provided in Appendix~\ref{apx:twitch}.
@@ -347,7 +310,7 @@ game1 & game2 & Ngame1 & Ngame2 & $N_i$ & $n_{Z=1}$ & $n_{Z=0}$ & bias contrib. 
 0 & 0 & 0 & 1 & 1 & 6 & 222 & 0.0231 \\
 1 & 1 & 0.333 & 1 & 3 & 26 & 0 & 0.0228 \\
 1 & 1 & 0.667 & 0.667 & 3 & 27 & 0 & 0.0228 \\[0.5em]
-\multicolumn{8}{@{}l}{Largest (in absolute) negative contributors} \\[0.25em]
+\multicolumn{8}{@{}l}{Largest (in magnitude) negative contributors} \\[0.25em]
 0 & 0 & 0.5 & 1 & 2 & 0 & 21 & -0.0202 \\
 0 & 0 & 1 & 0 & 2 & 0 & 26 & -0.0168 \\
 0 & 0 & 0 & 1 & 3 & 0 & 20 & -0.0157 \\
@@ -372,28 +335,6 @@ where $\bar{Y}_{\argdot}$ is the mean outcome across units with $\argdot$. The r
 \]
 where $\beta_j$ are the other parameters in the model. The observed bias is computed as the differences between estimates $\hat{\tau}_\text{naive}$ and $\hat{\tau}_\text{reg}$ and the expected value $\tau$, which is computed using the formula provided in Section~$\ref{sec:models}$. Table~\ref{tab:table2} (estimators 1--2) reports the mean computed biases and RMSE for the two estimators over 500 simulated datasets. The individual and neighbourhood treatments are re-generated for each simulated dataset, and the same 500 simulated datasets are used for all estimators. The same generated treatments are also used across interference levels, though the outcomes are re-generated between levels.
 \\
-
-\iffalse
-\begin{table}[ht]
-\centering
-\begin{tabular}{@{}rrrrrr@{}}
-\toprule
-& & \multicolumn{2}{c}{$\tau_\text{naive}$} & \multicolumn{2}{c}{$\tau_\text{reg}$} \\
-\cmidrule(r){3-4} \cmidrule(l){5-6}
-$G_i$ exposure type & Interference $(\gamma)$ & Bias & RMSE & Bias & RMSE \\
-\midrule
-\multirow{3}{*}{Proportion} & Low (4) & 2.915 & 2.916 & 0.414 & 0.418 \\
-& Medium (6) & 2.958 & 2.958 & 0.411 & 0.418 \\
-& High (8) & 3.004 & 3.005 & 0.411 & 0.422 \\[1em]
-\multirow{3}{*}{Sum} & Low (0.4) & 3.553 & 3.556 & 0.448 & 0.504 \\
-& Medium (0.6) & 3.915 & 3.921 & 0.462 & 0.579 \\
-& High (0.8) & 4.280 & 4.289 & 0.479 & 0.664 \\
-\bottomrule
-\end{tabular}
-\caption{Mean bias and RMSE of estimators of $\tau$ when the unconfoundedness assumption holds given $\Xind_i$ (i.e., $Z_i\condind G_i|\Xind_i$) over 500 simulated datasets.}
-\label{tab:table2}
-\end{table}
-\fi
 
 \begin{table}[ht]
 \centering
@@ -430,52 +371,52 @@ In this section, we extend our simulation study from Section~\ref{sec:observedbi
 \begin{enumerate}
 
 \item
-a second regression estimator $\tau_\text{reg}(Z_i,\bfX_i^z)$ that is adjusted for all covariates rather than only the individual covariates, i.e.,
+a second regression estimator $\tau_\text{reg}(Z_i,\bfX_i^z)$ that adjusts for all covariates, i.e.,
 \[
 \E[Y|Z_i,\bfX_i^z] = \beta_0 + \tau_\text{reg}Z_i + \beta_1X_i^\text{game1} + \beta_2X_i^\text{game2} + \beta_3X_i^\text{Ngame1} + \beta_4X_i^\text{Ngame2} + \beta_5N_i\;;
 \]
 \item
-an estimator $\tau_\text{sub}(\Xind_i)$ based on taking averages within subclasses \parencite{Imbens:2015}, which are defined based on a propensity score that adjusts for individual covariates. The procedure to compute the estimate is as follows:
+an estimator $\tau_\text{sub}(\Xind_i)$ that takes averages within subclasses \parencite{Imbens:2015}, which are defined according to a propensity score that adjusts for individual covariates. The procedure to compute the estimate is as follows:
 \begin{enumerate}
 \item
 Fit a logistic regression model on the individual treatment $Z_i$ with covariates $\Xind_i$.
 \item
-Estimate an individual propensity score $\hat{\phi}(1;\Xind_i)$ for each unit.
+Estimate the individual propensity score $\hat{\phi}(1;\Xind_i)$ for each unit.
 \item
 Partition the units into $J$ roughly equal-sized subclasses based on $\hat{\phi}(1;\Xind_i)$. In our context, $J=4$ is the maximum number of subclasses possible given the two binary covariates. We take $J=4$ in our simulations.
 \item
-Let $\bar{Y}^{(j)}$ denote an average computed over subclass $B_j$. Compute the estimate given by
+Let $\bar{Y}^{(j)}$ denote the average outcome over subclass $B_j$. The estimate is computed as
 \[
-\tau_\text{sub} = \frac{1}{N}\sum_{j=1}^J\left(\bar{Y}_{Z=1}^{(j)}-\bar{Y}_{Z=0}^{(j)}\right)|B_j| \;;
+\hat{\tau}_\text{sub} = \frac{1}{N}\sum_{j=1}^J\left(\bar{Y}_{Z=1}^{(j)}-\bar{Y}_{Z=0}^{(j)}\right)|B_j| \;;
 \]
 \end{enumerate}
 
 \item
-a second subclassification estimator $\tau_\text{sub}(\bfX^z_i)$ where the subclasses are defined based on a propensity score that adjusts for all covariates. The estimation procedure is the same as the first subclassification estimator, except that $\bfX^z_i$ is used instead of $\Xind_i$ and that we take $J=5$ in our simulations following the recommendations of \textcite{Rosenbaum:1984} (also see our investigation in Appendix~\ref{apx:subclass}); and
+a second subclassification estimator $\tau_\text{sub}(\bfX^z_i)$ where the subclasses are defined according to a propensity score that adjusts for all covariates. The estimation procedure is the same as the first subclassification estimator, except that $\bfX^z_i$ is used instead of $\Xind_i$ and that we take $J=5$ in our simulations following the recommendations of \textcite{Rosenbaum:1984} (also see our investigation in Appendix~\ref{apx:subclass}); and
 
 \item
 the estimator $\tau_\text{GPS}$ proposed by \textcite{Forastiere:2021} with the estimation procedure outline in Section~\ref{sec:method}. For proportion neighbourhood treatments, logistic regression models are used for both the individual and neighbourhood propensity scores (the latter in which $N_i$ are used as weights). For sum neighbourhood treatments, a negative binomial model is used to estimate the neighbourhood propensity scores\footnote{In some instances, a particular subclass would end up with very few units and the model would fail to be fit. The units in this subclass would generally be the ones with the largest degrees in the network. In these cases, we took the estimated neighbourhood propensity scores to be 0.}. We again take $J=5$ for the number of subclasses.
 
 \end{enumerate}
-Note that where applicable, we take $V_g=\calN$ in the case of proportion neighbourhood treatment for convenience of computation. Table~\ref{tab:table2} (estimators 3--6) shows the bias and RMSE of the above estimators. In the case of proportion neighbourhood treatments, our obtained biases and RMSEs are consistent with that reported by \textcite{Forastiere:2021}. The regression estimators have relatively larger biases and RMSE due to misspecification. The subclassification estimators based on individual propensity scores have smaller biases that are comparable to the analytical bias of an unbiased SUTVA estimator that adjusts for $\Xind_i$ reported in Table~\ref{tab:table1}. The estimator proposed by \citeauthor{Forastiere:2021} based on individual and neighbourhood propensity scores achieves the smallest RMSE compared to the other estimators that ignore the effect of interference.
+Note that where applicable, we take $V_g=\calN$ in the case of proportion neighbourhood treatment for convenience of computation. Table~\ref{tab:table2} (estimators 3--6) shows the observed bias and RMSE of the above estimators. In the case of proportion neighbourhood treatments, our obtained biases and RMSEs are consistent with that reported by \textcite{Forastiere:2021}. The regression estimators have relatively larger biases and RMSE due to misspecification. The subclassification estimators based on individual propensity scores have smaller biases that are comparable to the analytical bias of an unbiased SUTVA estimator that adjusts for $\Xind_i$ reported in Table~\ref{tab:table1}. The estimator proposed by \citeauthor{Forastiere:2021} based on individual and neighbourhood propensity scores achieves the smallest RMSE compared to the other estimators that ignore the effect of interference.
 \\
 
-In the case of sum neighbourhood treatments, the results are similar to the proportion case except for the subclassification estimators based on individual propensity scores. The RMSE of these estimators are relatively larger compared to the other estimators in this case. Note that the propensity score models and estimates are unchanged from the proportion neighbourhood treatment case, and so these larger RMSEs are a direct result of interference effects. Specifically, the outlier units with relatively large degrees are likely the main contributors to the bias. It is also worth noting that the estimator proposed by \citeauthor{Forastiere:2021} still achieves the smallest RMSE out of all the compared estimators.
+In the case of sum neighbourhood treatments, the results are similar to the proportion case except for the subclassification estimators based on individual propensity scores. The RMSE of these estimators are relatively large compared to the other estimators in this case. Note that the propensity score models and estimates are unchanged from the proportion neighbourhood treatment case, and so these larger RMSEs are a direct result of the sum interference effects which are unbounded. Specifically, the outlier units with relatively large degrees are likely the main contributors to the bias. It is also worth noting that the estimator proposed by \citeauthor{Forastiere:2021} still achieves the smallest RMSE out of all the compared estimators.
 
 
 
 \section{Critical appraisal and concluding remarks} \label{sec:critique}
 
-We conclude this report with a critical appraisal of the paper and proposed method by \textcite{Forastiere:2021}. The main contributions of the paper include a potential outcome formulation of the causal interference problem and a propensity score-based estimator for observational data that adjusts for possible interference. The formulation is useful as it provides a framework under which properties (e.g., bias) of estimators that ignore interference can be derived and quantified. Based on our simulation study, the proposed estimator appears to fulfill its purpose in being able to adjust for interference effects (when assumptions hold) as evident by the results in Table~\ref{tab:table2}. We note that our results were obtained with minimal tuning of our logistic and negative binomial models (due to the nature of the simulation study), and so we expect that this estimator would perform even better in practice with proper diagnostics and tuning of model fit.
+We conclude this report with a critical appraisal of the paper and proposed method by \textcite{Forastiere:2021}. The main contributions of the paper include a potential outcome formulation of the causal interference problem and a propensity score-based estimator for the treatment effect that adjusts for possible interference. The formulation is useful as it provides a framework under which properties (e.g., bias) of estimators that ignore interference can be derived and quantified. The proposed estimator appears to successfully achieve its purpose in adjusting for interference effects (at least when assumptions hold) based on our simulation results in Table~\ref{tab:table2}. Note that due to the nature of the simulation study, our results were obtained with minimal tuning of the logistic and negative binomial models, and so we expect that this estimator would perform even better in practice with proper diagnostics and tuning of model fit.
 \\
 
-One practical consideration that seems to be missing in the paper by \textcite{Forastiere:2021} is the computational performance of the procedure to compute the estimator. The complexity notably scales with both the number of units and the number of distinct values of the neighbourhood treatment in the network. For the Add Health dataset that \citeauthor{Forastiere:2021} worked with, the latter was less of an issue as every unit was limited to having at most ten neighbours. For the Twitch dataset considered in this report, units could have many neighbours and so the number of distinct neighbourhood treatments was not trivial. With such datasets, it may be reasonable to expect that the max degree in the network scales with the total number of units, and so the computational complexity of the procedure is overall closer to quadratic in the number of units in the network. For large networks with millions of units, the procedure would likely be infeasible without further modifications.
+One practical consideration that seems to be missing in the paper by \textcite{Forastiere:2021} is the computational performance of the procedure to compute the estimator. The complexity scales at least linearly with both the number of units and the number of distinct values of the neighbourhood treatment in the network. For the Add Health dataset that \citeauthor{Forastiere:2021} worked with, the latter was less of an issue as every unit was limited to having at most ten neighbours. For the Twitch dataset considered in this project, units could have many neighbours and so the number of distinct neighbourhood treatments was not trivial. With such datasets, it may be reasonable to expect that the max degree in the network is increases proportional to the total number of units, and so the computational complexity of the procedure is overall closer to quadratic in the number of units in the network. For large networks with millions of units, the procedure would likely be infeasible without further modifications.
 \\
 
-As discussed by \textcite{Forastiere:2021}, other limitations of their proposed method include its reliance on fully knowing the network structure and assuming it is fixed, and its dependence on models for the propensity scores that are likely to be misspecified. \textcite{Sanchez:2021} also questions the unconfoundedness assumption with respect to the propensity score. In practice, the unconfoundedness assumption holding with respect to a set of covariates may already be challenging to verify. Further assuming that unconfoundedness holds with respect to a (factorized) propensity score constructed on top of that set of covariates adds another layer of assumption that is difficult to justify.
+As discussed by \textcite{Forastiere:2021}, other limitations of their proposed method include its reliance on fully knowing the network structure and assuming it is fixed, and its dependence on models for the propensity scores that are likely to be misspecified. \textcite{Sanchez:2021} also questions the unconfoundedness assumption with respect to the propensity score. In practice, the unconfoundedness assumption holding with respect to a set of covariates may already be challenging to verify. Further assuming that unconfoundedness holds with respect to a (factorized) propensity score constructed on top of that set of covariates adds another layer of complexity that is difficult to justify.
 \\
 
-In conclusion, \textcite{Forastiere:2021} present a formulation of the interference problem in observational data under which the properties of various estimators can be derived. Their proposed effect estimator shows promising results when the assumed conditions hold. The assumptions the estimator makes are also relatively weaker compared to that of other methods in the literature. However, there are practical concerns such as computational performance in large datasets that are not fully addressed in the original paper.
+In conclusion, \textcite{Forastiere:2021} present a formulation of the interference problem with observational data under which the properties of effect estimators can be derived. We discussed simple network examples that illustrate the relevance of their theoretical results where the bias of naive estimators can be assessed under their framework. When the assumed conditions hold, their proposed effect estimator shows promising results based on the results of our simulation study of the Twitch Social Networks dataset. The assumptions the estimator makes are also relatively weaker compared to that of other methods in the literature. However, there are practical concerns such as computational performance on large datasets that are not fully addressed in the original paper.
 
 
 \newpage
@@ -494,7 +435,7 @@ In conclusion, \textcite{Forastiere:2021} present a formulation of the interfere
 
 \section{Technical derivations from example} \label{apx:example}
 
-This appendix section contains derivations of the overall treatment effects, estimators and their biases discussed in Section~\ref{sec:example}.
+This appendix section contains derivations of the overall treatment effects, estimators and their biases presented in Section~\ref{sec:example}.
 
 \subsection{Setting~1} \label{apx:setting1}
 
@@ -511,7 +452,7 @@ In Setting~1, the overall treatment effect $\tau$ is given by
 %&= \tau(0)\P(G_{ij}=0) + \tau(1)\P(G_{ij}=1) \\
 %&= \frac{1}{2}\left(\mu(1,0) + \mu(1,1) - \mu(0,0) - \mu(0,1)\right) \;.
 \end{align*}
-where the first equality follows from Theorem~1 and the second equality follows from the model assumptions.
+where the first equality follows from Theorem~1 and the second from the model assumptions.
 \\
 
 The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA is given by
@@ -603,7 +544,7 @@ In Setting~2, the overall treatment effect $\tau$ is given by
 &= \frac{1}{2}\sum_{u\in\{0,1\}} \left(\E\left[Y_{ij}|Z_{ij}=1,U_{ij}=u\right] - \E\left[Y_{ij}|Z_{ij}=0,U_{ij}=u\right]\right) \\
 &= c_z
 \end{align*}
-the second equality follows from independence of $X_{i1}$ and $X_{i2}$.
+where the first equality follows from definition (Equation~3) and the second from the fact that $X_{ij},U_{ij}\condind G_{ij}$.
 \\
 
 The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA is given by
@@ -614,7 +555,7 @@ The naive estimator $\tau_{X}^\text{obs}$ that assumes SUTVA is given by
 &= \frac{1}{4}c_z - 0 + \cdot\frac{3}{4}(c_z+c_u) - \frac{1}{4}c_u \\
 &= c_z + \frac{1}{2}c_u
 \end{align*}
-where the second equality follows from model assumptions.
+where the first equality follows from definition (Equation~8) and the second from model assumptions.
 \\
 
 The bias of the naive estimator can be verified using Equation~14 from Corollary~3, which gives
@@ -680,7 +621,7 @@ where the second equality follows from the model assumptions where $G_{ij}\condi
 
 This appendix section contains additional details from the simulation study in Sections~\ref{sec:simulation} and \ref{sec:extension}.
 
-\subsection{Twitch dataset details} \label{apx:twitch}
+\subsection{Twitch dataset} \label{apx:twitch}
 
 Table~\ref{tab:features} shows the distribution of features \verb|224| (game1) and \verb|569| (game2) in the Twitch dataset.
 \\
@@ -702,7 +643,7 @@ Total & 3416 (48\%) & 3710 (52\%) & 7216 \\
 \label{tab:features}
 \end{table}
 
-Figure~\ref{fig:degree} shows the distribution of the log degree in the Twitch dataset. The degrees range from 1 to 720 with a median of 5, a mean of 9.9 and a standard deviation of 22.2. The first and third quartiles are 2 and 11, respectively.
+Figure~\ref{fig:degree} shows the distribution of the log degree in the Twitch dataset. The (untransformed) degrees range from 1 to 720 with a median of 5, a mean of 9.9 and a standard deviation of 22.2. The first and third quartiles are 2 and 11, respectively.
 
 \begin{figure}[H]
 \centering
@@ -711,15 +652,15 @@ Figure~\ref{fig:degree} shows the distribution of the log degree in the Twitch d
 \label{fig:degree}
 \end{figure}
 
-\subsection{Simulated treatment details} \label{apx:covbal}
+\subsection{Simulated treatment} \label{apx:covbal}
 
-Figure~\ref{fig:neighbourhood} shows the distribution of proportion and log sum neighbourhood treatments in one simulated dataset. For proportion $G_i$, the mean and median are 0.59 and 0.63, respectively. The standard deviation is 0.30, and the first and third quartiles are 0.44 and 0.80, respectively. For sum $G_i$, the values range from 0 to 489 with a median of 3, a mean of 6.3, and a standard deviation of 14.7. The first and third quartiles are 1 and 7, respectively.
+Figure~\ref{fig:neighbourhood} shows the distribution of proportion and log sum neighbourhood treatments in one simulated dataset. For proportion $G_i$, the mean and median are 0.59 and 0.63, respectively. The standard deviation is 0.30, and the first and third quartiles are 0.44 and 0.80, respectively. For (untransformed) sum $G_i$, the values range from 0 to 489 with a median of 3, a mean of 6.3, and a standard deviation of 14.7. The first and third quartiles are 1 and 7, respectively.
 
 \begin{figure}[H]
 \centering
 \includegraphics{Images/prop_g_dist.png}
 \includegraphics[trim={0.6cm 0 0 0},clip]{Images/sum_g_dist.png}
-\caption{Distribution of proportion and log sum neighbourhood treatments in one simulated dataset. Note that for the sum plot, 1 was added to every $G_i$ before taking the log due to the presence of zeros.}
+\caption{Distribution of proportion and log sum neighbourhood treatments in one simulated dataset. Note that for the sum plot, 1 is added to every $G_i$ before taking the log due to the presence of zeros.}
 \label{fig:neighbourhood}
 \end{figure}
 
@@ -766,19 +707,19 @@ Degree & 11.694 & 4.897 & 0.371 & 16.905 & 2.432 & 0.701 \\
 $Z_i$ & 0.608 & 0.526 & 0.167 & 0.677 & 0.490 & 0.385 \\
 \bottomrule
 \end{tabular}
-\caption{Covariate balance across dichotomized neighbourhood treatment arms. For sum $G_i$, the median 3 was taken as the threshold.}
+\caption{Covariate balance across dichotomized neighbourhood treatment arms. For sum $G_i$, the median 3 is taken as the threshold.}
 \label{tab:nbrcovbal}
 \end{table}
 
 \subsection{Number of subclasses investigation} \label{apx:subclass}
 
-We conducted a small investigation into the effect of the number of subclasses on the RMSE of the individual and all covariate-adjusted estimators and of the GPS estimator \parencite{Forastiere:2021}. Figure~\ref{fig:subclass} shows the effect of the number of subclasses on the mean RMSE over 25 datasets simulated with high interference and either proportion neighbourhood treatments (left) and sum neighbourhood treatments (right). The same 25 datasets were used across numbers of subclasses in each plot. Our results suggest that while the five subclass recommendation by \textcite{Rosenbaum:1984} does not necessarily lead to the smallest RMSE, the RMSE of most estimators do not change significantly with more than five subclasses (the one exception being the estimator that adjusts for all covariates in the sum neighbourhood treatment case). It is also interesting that increasing the number of subclasses does not necessarily reduce the RMSE, notably with the all-covariates and the GPS estimators where the RMSE spikes at four subclasses.
+We briefly examine the effect of the number of subclasses on the RMSE of the $\Xind_i$ and $\bfX_i^z$-adjusted estimators and of the GPS estimator \parencite{Forastiere:2021}. Figure~\ref{fig:subclass} shows the effect of the number of subclasses on the mean RMSE over 25 datasets simulated with high interference and either proportion neighbourhood treatments (left) and sum neighbourhood treatments (right). The same 25 datasets were used to compute the RMSE across numbers of subclasses in each plot. Our results suggest that while the five subclass recommendation by \textcite{Rosenbaum:1984} does not necessarily lead to the smallest RMSE, the RMSE of most estimators do not change significantly with more than five subclasses (the one exception being the estimator that adjusts for $\bfX_i^z$ in the sum neighbourhood treatment case, for which the RMSE continues to decrease up to nine subclasses). It is also interesting that increasing the number of subclasses does not necessarily reduce the RMSE, notably with the $\bfX_i^z$-adjusted and the GPS estimators where the RMSE spikes at four subclasses. The reason for this is unclear. Given more time, possible reasons to look into include poor simulation setup (25 simulations may be too few), quirks of the Twitch dataset (does this also occur with more data or other datasets?), and incorrect code and/or numerical instabilities.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[trim={0.2cm 0 2.5cm 0},clip]{Images/subclasses_prop.png}
 \includegraphics[trim={0.55cm 0 0.2cm 0},clip]{Images/subclasses_sum.png}
-\caption{RMSE as the number of subclasses changed for three treatment effect estimators. The left plot shows the mean RMSE over 25 datasets simulated with proportion neighbourhood treatment and the right for those with sum neighbourhood treatments. The RMSE of the all-covariates and the GPS estimators follow similar trajectories in the left plot.}
+\caption{RMSE as the number of subclasses changes for three treatment effect estimators. The left plot shows the mean RMSE over 25 datasets simulated with proportion neighbourhood treatment and the right for those with sum neighbourhood treatments. The RMSE of the all-covariates and the GPS estimators follow similar trajectories in the left plot.}
 \label{fig:subclass}
 \end{figure}
 
